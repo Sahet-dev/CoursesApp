@@ -19,4 +19,8 @@ class Lessons extends Model
     {
         return $this->hasMany(Question::class, 'lesson_id');
     }
+    public function comments()
+    {
+        return $this->hasMany(Comment::class, 'lesson_id');
+    }
 }

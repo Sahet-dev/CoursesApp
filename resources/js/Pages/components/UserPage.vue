@@ -75,6 +75,42 @@
                                         <p class="text-gray-500 text-lg">No activities found</p>
                                     </div>
                                 </div>
+
+
+                                    <!-- Popular Courses Section -->
+                                <section class="animated-element py-12 bg-gray-50">
+                                    <div class="container mx-auto px-4">
+                                        <h2 class="text-3xl font-bold text-center text-gray-800 mb-8">Popular Courses</h2>
+                                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                                            <!-- Replaced Link with a div and added @click -->
+                                            <div
+                                                v-for="course in popularCourses"
+                                                :key="course.id"
+                                                @click="getCourse(course.id)"
+                                                class="bg-white shadow-lg rounded-lg overflow-hidden cursor-pointer block hover:shadow-2xl transition-shadow duration-300"
+                                            >
+                                                <img :src="course.thumbnail" :alt="course.title" class="w-full h-48 object-cover">
+                                                <div class="p-6">
+                                                    <h3 class="text-xl font-semibold text-gray-800 mb-2">{{ course.title }}</h3>
+                                                    <p class="text-gray-600 mb-4">{{ course.description }}</p>
+                                                    <p class="text-lg font-medium text-gray-900">${{ course.price }}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="text-center mt-8">
+                                            <button class="px-6 py-2 bg-blue-600 text-white font-semibold rounded hover:bg-blue-700 transition duration-300">
+                                                See All Courses
+                                            </button>
+                                        </div>
+                                    </div>
+                                </section>
+
+
+
+
+
+
+
                             </TabPanel>
                         </transition>
 
@@ -217,6 +253,9 @@ import { UserIcon, BookmarkIcon, CheckBadgeIcon, PresentationChartLineIcon } fro
 import { UserIcon as UserIconSolid, BookmarkIcon as BookmarkIconSolid, CheckBadgeIcon as CheckBadgeIconSolid, PresentationChartLineIcon as PresentationChartLineIconSolid } from "@heroicons/vue/24/solid";
 import { TabGroup, TabList, Tab, TabPanels, TabPanel } from '@headlessui/vue';
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
+import { Link } from '@inertiajs/vue3';
+import {Inertia} from "@inertiajs/inertia";
+
 
 // Define the props
 const props = defineProps({
@@ -234,7 +273,12 @@ const props = defineProps({
 });
 
 
-
+const getCourse = (id) => {
+    Inertia.get(route('courseDetail', { id }), {
+        preserveState: true,
+        replace: true,
+    });
+};
 
 console.log(props.popularCourses)
 console.log(props.latestCourses)

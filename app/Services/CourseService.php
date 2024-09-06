@@ -8,11 +8,10 @@ use Illuminate\Support\Facades\Auth;
 
 class CourseService
 {
-
     public function getLatestCoursesWithAccessControl($limit = 4)
     {
-        // Fetch the latest courses
-        $courses = Course::with('lessons')->latest()->take($limit)->get();
+        // Fetch the latest courses and their lessons with questions
+        $courses = Course::with('lessons.questions')->latest()->take($limit)->get();
 
         // Check if the user is authenticated
         $user = Auth::user();
@@ -30,8 +29,6 @@ class CourseService
         });
     }
 
-
-    // Method to get the most popular courses
     public function getMostPopularCourses($limit = 4)
     {
         return Course::withCount('engagements') // Assuming engagements represent popularity
@@ -40,14 +37,135 @@ class CourseService
             ->get();
     }
 
-    // Method to get course lessons with access control
+    public function getCourseByIdWithAccessControl($id)
+    {
+        // Fetch the course by ID with its lessons and questions
+        $course = Course::with('lessons.questions')->findOrFail($id);
+
+        // Check if the user is authenticated
+        $user = Auth::user();
+
+        // Return course data with appropriate lesson data based on user access
+        return [
+            'id' => $course->id,
+            'title' => $course->title,
+            'description' => $course->description,
+            'price' => $course->price,
+            'thumbnail' => $course->thumbnail,
+            'lessons' => $this->getCourseLessonsWithAccessControl($course, $user),
+        ];
+    }
+
     public function getCourseLessonsWithAccessControl(Course $course, ?User $user)
     {
-        // Eager load lessons with questions
-        $course->load('lessons.questions');
+        // Eager load lessons with questions, comments, likes, and replies
+        $course->load([
+            'lessons.questions',
+            'lessons.comments.user', // Load comments with the user who made them
+            'lessons.comments.likes', // Load likes for comments
+            'lessons.comments.replies.user', // Load replies with the user who made them
+            'lessons.comments.replies.likes', // Load likes for replies
+        ]);
 
-        // Check if the user is authenticated and has access to the full course content
         if ($user && ($course->isAvailableToUser($user) || $course->isPurchasedBy($user))) {
+            // Authenticated user with access to full content
+            return $course->lessons->map(function ($lesson) {
+                return [
+                    'id' => $lesson->id,
+                    'title' => $lesson->title,
+                    'video_url' => $lesson->video_url,
+                    'markdown_text' => $lesson->markdown_text,
+                    'questions' => $lesson->questions->map(function ($question) {
+                        return [
+                            'id' => $question->id,
+                            'question_text' => $question->question_text,
+                        ];
+                    }),
+                    'comments' => $lesson->comments->map(function ($comment) {
+                        return [
+                            'id' => $comment->id,
+                            'user' => [
+                                'id' => $comment->user->id,
+                                'name' => $comment->user->name,
+                            ],
+                            'comment' => $comment->comment,
+                            'likes_count' => $comment->likes->count(),
+                            'replies' => $comment->replies->map(function ($reply) {
+                                return [
+                                    'id' => $reply->id,
+                                    'user' => [
+                                        'id' => $reply->user->id,
+                                        'name' => $reply->user->name,
+                                    ],
+                                    'comment' => $reply->comment,
+                                    'likes_count' => $reply->likes->count(),
+                                ];
+                            }),
+                        ];
+                    }),
+                ];
+            });
+        } else {
+            // Unauthenticated user or user without subscription
+            $lessons = $course->lessons->map(function ($lesson) {
+                return [
+                    'id' => $lesson->id,
+                    'title' => $lesson->title,
+                ];
+            });
+
+            $firstFourLessonsWithDetails = $course->lessons->take(4)->map(function ($lesson) {
+                return [
+                    'id' => $lesson->id,
+                    'title' => $lesson->title,
+                    'video_url' => $lesson->video_url,
+                    'markdown_text' => $lesson->markdown_text,
+                ];
+            });
+
+            // Merge full details of the first 4 lessons with title-only for the rest
+            return $lessons->map(function ($lesson) use ($firstFourLessonsWithDetails) {
+                $fullDetails = $firstFourLessonsWithDetails->firstWhere('id', $lesson['id']);
+                return array_merge($lesson, $fullDetails ?? []);
+            });
+        }
+    }
+
+
+
+    public function checkUserAccessStatus($user, $courseId): bool
+    {
+        if (!$user) {
+            return false; // User is not authenticated
+        }
+
+        // Check if the user has an active subscription or has purchased the course
+        $course = Course::find($courseId); // Fetch the course
+        if (!$course) {
+            return false; // Course not found
+        }
+
+        return $course->isAvailableToUser($user) || $course->isPurchasedBy($user);
+    }
+
+
+
+
+
+    public function getLessonsForCourseWithAccess($courseId)
+    {
+        // Fetch the course by ID with its lessons and questions
+        $course = Course::with('lessons.questions')->findOrFail($courseId);
+
+        // Get the authenticated user
+        $user = Auth::user();
+
+        // Check if the user has access
+        $userHasAccess = $this->checkUserAccessStatus($user, $courseId);
+
+        // Prepare the lessons data based on user access
+        if ($userHasAccess) {
+            // User has access: return all lessons with full details
             return $course->lessons->map(function ($lesson) {
                 return [
                     'id' => $lesson->id,
@@ -62,17 +180,29 @@ class CourseService
                     }),
                 ];
             });
-        }
+        } else {
+            // User does not have access: limit to first 4 lessons with limited details
+            $lessonsWithLimitedDetails = $course->lessons->take(4)->map(function ($lesson) {
+                return [
+                    'id' => $lesson->id,
+                    'title' => $lesson->title,
+                    'video_url' => $lesson->video_url,
+                    'markdown_text' => $lesson->markdown_text,
+                ];
+            });
 
-        // For unauthenticated users or users without a subscription or purchase, return only lesson titles
-        return $course->lessons->map(function ($lesson) {
-            return [
-                'id' => $lesson->id,
-                'title' => $lesson->title,
-                // Do not include 'video_url', 'markdown_text', or 'questions'
-            ];
-        });
+            // Include only titles for the rest of the lessons
+            $lessonTitlesOnly = $course->lessons->skip(4)->map(function ($lesson) {
+                return [
+                    'id' => $lesson->id,
+                    'title' => $lesson->title,
+                ];
+            });
+
+            return $lessonsWithLimitedDetails->merge($lessonTitlesOnly);
+        }
     }
 
-}
 
+
+}

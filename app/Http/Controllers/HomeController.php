@@ -8,6 +8,7 @@ use App\Services\CourseService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
+use Inertia\Response;
 
 class HomeController extends Controller
 {
@@ -111,6 +112,32 @@ class HomeController extends Controller
         ]);
     }
 
+
+
+    public function show(int $id): Response
+    {
+        // Fetch the course with access control using the existing service
+        $course = $this->courseService->getCourseByIdWithAccessControl($id); // This remains unchanged
+
+        // Get the authenticated user
+
+        $user = Auth::check() ? Auth::user() : null;
+
+
+        // Determine if the user has access to all course content
+        $userHasAccess = $this->courseService->checkUserAccessStatus($user, $id);
+
+        // Fetch lessons based on access control without modifying the current method
+        $lessons = $this->courseService->getLessonsForCourseWithAccess($id);
+
+        // Pass the course data and access information to the Inertia component
+        return Inertia::render('CourseDetail', [
+            'course' => $course,
+            'user' => $user,
+            'userHasAccess' => $userHasAccess, // Pass the access status
+            'lessons' => $lessons,
+        ]);
+    }
 
 
 
