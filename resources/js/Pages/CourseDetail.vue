@@ -64,7 +64,7 @@
                                         <template v-else>
                                             <BookOpenIcon class="w-5 h-5 orange" />
                                         </template>
-                                        <span class="hidden md:block ml-2" :class="[selected ? 'selected-tab' : 'orange']">Guides</span>
+                                        <span   :class="[selected ? 'selected-tab' : 'orange']">Guides</span>
                                     </Tab>
                                     <Tab v-slot="{ selected }" as="button" class="flex items-center space-x-2 outline-none focus:outline-none
                     focus:ring-2 px-3">
@@ -75,7 +75,7 @@
                                         <template v-else>
                                             <ChatBubbleLeftRightIcon class="w-5 h-5 orange" />
                                         </template>
-                                        <span class="hidden md:block ml-2" :class="[selected ? 'selected-tab' : 'orange']">Comments</span>
+                                        <span class="  ml-2" :class="[selected ? 'selected-tab' : 'orange']">Comments</span>
                                     </Tab>
 
                                 </TabList>
@@ -92,65 +92,43 @@
                                     </transition>
 
                                     <transition name="tab" @before-enter="beforeEnter" @enter="enter" @leave="leave">
-                                        <TabPanel key="account" class="  ">
-                                            <div class="max-w-full lg:max-w-4xl mx-auto p-4 sm:p-6 bg-white shadow-md rounded-lg">
+                                        <TabPanel key="account" class="p-3  ">
+                                            <div class="max-w-4xl mx-auto p-6 bg-white shadow-md rounded-lg">
                                                 <!-- Check if there are any comments -->
-                                                <div v-if="selectedLesson.comments && selectedLesson.comments.length > 0">
+                                                <div v-if="comments.length > 0">
                                                     <h2 class="text-xl sm:text-2xl font-semibold mb-4">Comments</h2>
-
-                                                    <!-- Loop through each comment -->
-                                                    <div
-                                                        v-for="comment in selectedLesson.comments"
-                                                        :key="comment.id"
-                                                        class="mb-4 sm:mb-6 p-3 sm:p-4 bg-gray-100 rounded-md"
-                                                    >
-                                                        <!-- User Information -->
+                                                    <div v-for="comment in comments" :key="comment.id" class="mb-4 sm:mb-6 p-3 sm:p-4 bg-gray-100 rounded-md">
                                                         <div class="flex items-center mb-2">
                                                             <div class="font-bold text-base sm:text-lg">{{ comment.user.name }}</div>
                                                         </div>
-
-                                                        <!-- Comment Text -->
                                                         <p class="text-gray-800 mb-2 break-words text-sm sm:text-base">{{ comment.comment }}</p>
-
-                                                        <!-- Likes Count -->
                                                         <div class="text-xs sm:text-sm text-gray-500">Likes: {{ comment.likes_count }}</div>
-
-                                                        <!-- Conditionally Render Reply and Like Buttons for Authenticated Users -->
                                                         <div v-if="user" class="mt-2 flex space-x-2 sm:space-x-4">
-                                                            <button
-                                                                @click="replyToComment(comment.id)"
-                                                                class="text-blue-500 text-xs sm:text-sm hover:underline"
-                                                            >
-                                                                Reply
-                                                            </button>
-                                                            <button
-                                                                @click="likeComment(comment.id)"
-                                                                class="text-blue-500 text-xs sm:text-sm hover:underline"
-                                                            >
-                                                                Like
-                                                            </button>
-                                                        </div>
 
-                                                        <!-- Replies Section -->
-                                                        <div v-if="comment.replies && comment.replies.length > 0" class="mt-4">
-                                                            <h3 class="font-semibold mb-2 text-sm sm:text-base">Replies</h3>
-                                                            <!-- Loop through each reply -->
-                                                            <div
-                                                                v-for="reply in comment.replies"
-                                                                :key="reply.id"
-                                                                class="ml-2 sm:ml-4 p-2 bg-white rounded-md border border-gray-300 mb-2"
-                                                            >
-                                                                <div class="text-sm sm:text-base font-bold">{{ reply.user.name }}</div>
-                                                                <p class="text-xs sm:text-sm text-gray-700">{{ reply.comment }}</p>
-                                                                <div class="text-xs text-gray-700">Likes: {{ reply.likes_count }}</div>
+                                                            <pre>{{course.id}}!</pre>
+                                                            <button @click="likeComment(course.id, selectedLesson.id, comment.id)" class="text-blue-500 text-xs sm:text-sm hover:underline">
+                                                                {{ comment.liked_by_user ? 'Unlike' : 'Like' }}
+                                                            </button>
+
                                                             </div>
-                                                        </div>
                                                     </div>
                                                 </div>
+
                                                 <!-- If there are no comments -->
                                                 <div v-else>
                                                     <p class="text-gray-500 text-sm sm:text-base">No comments available for this lesson.</p>
                                                 </div>
+
+                                                <div class="mt-6">
+                                                    <h2 class="text-xl sm:text-2xl font-semibold mb-4">Add a Comment</h2>
+                                                    <form @submit.prevent="submitComment" class="flex flex-col space-y-4">
+                                                        <textarea v-model="newComment" rows="3" placeholder="Type your comment here..." class="p-2 border border-gray-300 rounded-md"></textarea>
+                                                        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
+                                                            Submit Comment
+                                                        </button>
+                                                    </form>
+                                                </div>
+
                                             </div>
                                         </TabPanel>
 
@@ -182,13 +160,16 @@
 </template>
 
 <script setup>
-import {ref, computed, watchEffect} from 'vue';
+import {ref, computed, watchEffect, onMounted} from 'vue';
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import {BookOpenIcon, ChatBubbleLeftRightIcon, HandThumbUpIcon} from "@heroicons/vue/24/outline/index.js";
 import { HandThumbUpIcon as HandThumbUpIconSolid, BookOpenIcon as BookOpenIconSolid,
     ChatBubbleLeftRightIcon as ChatBubbleLeftRightIconSolid} from "@heroicons/vue/24/solid";
-
+import axios from 'axios';
 import {Tab, TabGroup, TabList, TabPanel, TabPanels} from "@headlessui/vue";
+import {Inertia} from "@inertiajs/inertia";
+import axiosService from "@/axiosService.js";
+import axiosInstance from "@/axiosService.js";
 
 const props = defineProps({
     course: Object,
@@ -204,6 +185,9 @@ const detailedLessons = ref(props.detailedLessons || []);
 const titleOnlyLessons = ref(props.titleOnlyLessons || []);
 const userHasAccess = ref(props.userHasAccess);
 const selectedLesson = ref(detailedLessons.value[0] || null);
+const additionalData = ref(null);
+const comments = ref([]);
+
 
 watchEffect(() => {
     if (detailedLessons.value.length > 0) {
@@ -232,9 +216,34 @@ const completionPercentage = computed(() => {
     return totalLessons.value > 0 ? Math.round((completedLessons / totalLessons.value) * 100) : 0;
 });
 
-function selectLesson(lesson) {
+
+const likeComment = (courseId, lessonId, commentId) => {
+    Inertia.post(`/courses/${courseId}/lessons/${lessonId}/comments/${commentId}/toggle-like`, {}, {
+        onSuccess: (page) => {
+            // Update the local state with the new lesson data if necessary
+            console.log(page.props.message); // "Liked" or "Unliked"
+            // Optionally update component state here if you need
+        },
+        onError: (errors) => {
+            // Handle errors
+            console.error('Error toggling like:', errors);
+        },
+        preserveState: true, // Keep current page state
+    });
+};
+
+async function selectLesson(lesson) {
     selectedLesson.value = lesson;
     visible.value = false;
+
+
+    try {
+        const response = await axios.get(`/api/lessons/${lesson.id}/comments`);
+        comments.value = response.data;
+    } catch (error) {
+        console.error("Failed to fetch comments:", error);
+    }
+
 }
 
 const lessonVideoUrl = videoUrl => `/storage/${videoUrl}`;
@@ -243,6 +252,42 @@ const thumbnailUrl = computed(() => `/storage/${course.value.thumbnail}`);
 function redirectToPurchase() {
     window.location.href = '/subscribe-or-purchase';
 }
+
+
+
+
+const newComment = ref('');
+
+const submitComment = () => {
+    if (!course.value.id || !selectedLesson.value.id || !newComment.value.trim()) {
+        console.error('Course ID, Lesson ID or Comment is missing');
+        return;
+    }
+
+    Inertia.post(`/courses/${course.value.id}/lessons/${selectedLesson.value.id}/comments`, {
+        comment: newComment.value.trim()
+    }, {
+        onSuccess: (page) => {
+            // Handle success (e.g., update the comments list)
+            console.log('Comment submitted successfully');
+            newComment.value = ''; // Clear the input field
+            // Optionally fetch updated comments
+            selectLesson(selectedLesson.value);
+        },
+        onError: (errors) => {
+            // Handle errors
+            console.error('Error submitting comment:', errors);
+        },
+        preserveState: true, // Keep current page state
+    });
+};
+
+
+
+
+
+
+
 
 
 
@@ -265,6 +310,9 @@ const leave = (el, done) => {
     el.style.transform = 'translateX(-100px)';
     done();
 };
+
+
+
 </script>
 
 <style>

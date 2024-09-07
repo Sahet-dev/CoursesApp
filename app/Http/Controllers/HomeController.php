@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Comment;
 use App\Models\Course;
+use App\Models\Lessons;
 use App\Models\User;
 use App\Services\CourseService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -117,9 +120,8 @@ class HomeController extends Controller
     public function show(int $id): Response
     {
         // Fetch the course with access control using the existing service
-        $course = $this->courseService->getCourseByIdWithAccessControl($id); // This remains unchanged
+        $course = $this->courseService->getCourseByIdWithAccessControl($id);
 
-        // Get the authenticated user
 
         $user = Auth::check() ? Auth::user() : null;
 
@@ -141,6 +143,98 @@ class HomeController extends Controller
 
 
 
+
+    public function toggleLike(int $courseId, int $lessonId, int $commentId)
+    {
+        $user = Auth::user();
+
+        // Ensure user is authenticated
+        if (!$user) {
+            return Inertia::render('Error', ['message' => 'User not authenticated'])->with('error', 'User not authenticated');
+        }
+
+        $comment = Comment::find($commentId);
+
+        if (!$comment) {
+            return Inertia::render('Error', ['message' => 'Comment not found'])->with('error', 'Comment not found');
+        }
+
+        $like = $comment->likes()->where('user_id', $user->id)->first();
+
+        if ($like) {
+            // Unlike the comment
+            $like->delete();
+            $message = 'Unliked';
+        } else {
+            // Like the comment
+            $comment->likes()->create(['user_id' => $user->id]);
+            $message = 'Liked';
+        }
+
+        // Fetch the updated lesson and comments (only necessary data)
+        $lesson = Lessons::with(['comments' => function ($query) {
+            $query->withCount('likes'); // Only fetch the like count
+        }])->find($lessonId);
+
+        return Inertia::render('CourseDetail', [
+            'selectedLesson' => $lesson,
+            'message' => $message,
+        ]);
+    }
+
+
+
+    public function getCommentsForLesson($lessonId)
+    {
+        $comments = Comment::with(['user', 'likes', 'replies.user', 'replies.likes'])
+            ->where('lesson_id', $lessonId)
+            ->get();
+
+        // Map comments to include required information
+        return $comments->map(function ($comment) {
+            return [
+                'id' => $comment->id,
+                'user' => [
+                    'id' => $comment->user->id,
+                    'name' => $comment->user->name,
+                ],
+                'comment' => $comment->comment,
+                'likes_count' => $comment->likes->count(),
+                'liked_by_user' => $comment->likes->contains('user_id', Auth::id()),
+                'replies' => $comment->replies->map(function ($reply) {
+                    return [
+                        'id' => $reply->id,
+                        'user' => [
+                            'id' => $reply->user->id,
+                            'name' => $reply->user->name,
+                        ],
+                        'comment' => $reply->comment,
+                        'likes_count' => $reply->likes->count(),
+                        'liked_by_user' => $reply->likes->contains('user_id', Auth::id()),
+                    ];
+                }),
+            ];
+        });
+    }
+
+
+    public function createComment(Request $request, Course $course, Lessons $lesson)
+    {
+        Log::info('Comment added successfully!');
+        $request->validate([
+            'comment' => 'required|string|max:955',
+        ]);
+
+        $comment = new Comment();
+        $comment->user_id = auth()->id();
+        $comment->lesson_id = $lesson->id;
+        $comment->comment = $request->input('comment');
+        $comment->save();
+        Log::info($comment);
+
+        return redirect()->back()->with('message', 'Comment added successfully!');
+
+    }
 
 
 

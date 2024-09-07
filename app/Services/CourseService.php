@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Comment;
 use App\Models\Course;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
@@ -163,10 +164,13 @@ class CourseService
         // Check if the user has access
         $userHasAccess = $this->checkUserAccessStatus($user, $courseId);
 
+        // Load comments, likes, and replies for all lessons in the course
+        $commentsWithLikes = $course->lessons->load(['comments.user', 'comments.likes', 'comments.replies.user', 'comments.replies.likes'])
+            ->pluck('comments', 'id');
+
         // Prepare the lessons data based on user access
         if ($userHasAccess) {
-            // User has access: return all lessons with full details
-            return $course->lessons->map(function ($lesson) {
+            return $course->lessons->map(function ($lesson) use ($user, $commentsWithLikes) {
                 return [
                     'id' => $lesson->id,
                     'title' => $lesson->title,
@@ -176,6 +180,30 @@ class CourseService
                         return [
                             'id' => $question->id,
                             'question_text' => $question->question_text,
+                        ];
+                    }),
+                    'comments' => $commentsWithLikes->get($lesson->id)->map(function ($comment) use ($user) {
+                        return [
+                            'id' => $comment->id,
+                            'user' => [
+                                'id' => $comment->user->id,
+                                'name' => $comment->user->name,
+                            ],
+                            'comment' => $comment->comment,
+                            'likes_count' => $comment->likes->count(),
+                            'liked_by_user' => $comment->likes->contains('user_id', $user ? $user->id : null),
+                            'replies' => $comment->replies->map(function ($reply) use ($user) {
+                                return [
+                                    'id' => $reply->id,
+                                    'user' => [
+                                        'id' => $reply->user->id,
+                                        'name' => $reply->user->name,
+                                    ],
+                                    'comment' => $reply->comment,
+                                    'likes_count' => $reply->likes->count(),
+                                    'liked_by_user' => $reply->likes->contains('user_id', $user ? $user->id : null),
+                                ];
+                            }),
                         ];
                     }),
                 ];
@@ -201,6 +229,43 @@ class CourseService
 
             return $lessonsWithLimitedDetails->merge($lessonTitlesOnly);
         }
+    }
+
+
+
+
+
+    public function getCommentsForLesson($lessonId)
+    {
+        $comments = Comment::with(['user', 'likes', 'replies.user', 'replies.likes'])
+            ->where('lesson_id', $lessonId)
+            ->get();
+
+        // Map comments to include required information
+        return $comments->map(function ($comment) {
+            return [
+                'id' => $comment->id,
+                'user' => [
+                    'id' => $comment->user->id,
+                    'name' => $comment->user->name,
+                ],
+                'comment' => $comment->comment,
+                'likes_count' => $comment->likes->count(),
+                'liked_by_user' => $comment->likes->contains('user_id', Auth::id()),
+                'replies' => $comment->replies->map(function ($reply) {
+                    return [
+                        'id' => $reply->id,
+                        'user' => [
+                            'id' => $reply->user->id,
+                            'name' => $reply->user->name,
+                        ],
+                        'comment' => $reply->comment,
+                        'likes_count' => $reply->likes->count(),
+                        'liked_by_user' => $reply->likes->contains('user_id', Auth::id()),
+                    ];
+                }),
+            ];
+        });
     }
 
 

@@ -30,11 +30,10 @@ class AuthController extends Controller
         /** @var User $user */
         $user = Auth::user();
 
-//        if(!$user->is_admin){
-//            Auth::logout();
-//            return response(['message' => 'You must be an admin to login'], 403);
-//        }
+
         $token = $user->createToken('main')->plainTextToken;
+
+
         return response([
             'user' => new UserResource($user),
             'token' => $token]);

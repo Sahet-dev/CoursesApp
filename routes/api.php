@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Route;
 
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
+route::get('/lessons/{lessonId}/comments', [HomeController::class, 'getCommentsForLesson']);
 
 
 
@@ -31,6 +32,7 @@ Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
 });
 Route::middleware('auth:sanctum')->group(function () {
 
+    Route::post('/courses/{courseId}/lessons/{lessonId}/comments/{commentId}/toggle-like', [HomeController::class, 'toggleLike']);
 
 
     Route::put('/courses/{id}', [CourseController::class, 'update']);
@@ -56,7 +58,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/tests/{id}', [LessonController::class, 'showTest'])->name('tests.showTest');
     Route::put('/tests/{id}', [LessonController::class, 'updateTest']);
     Route::get('/lessons/{lessonId}/questions', [LessonController::class, 'getQuestionsByLesson']);
-
 
 
 // Route for creating questions and responses
