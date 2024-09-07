@@ -268,10 +268,8 @@ const submitComment = () => {
         comment: newComment.value.trim()
     }, {
         onSuccess: (page) => {
-            // Handle success (e.g., update the comments list)
             console.log('Comment submitted successfully');
             newComment.value = ''; // Clear the input field
-            // Optionally fetch updated comments
             selectLesson(selectedLesson.value);
         },
         onError: (errors) => {
