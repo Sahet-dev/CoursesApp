@@ -20,7 +20,7 @@
                                 {{ totalLessons }} Lessons | {{ formattedTotalDuration }} | {{ completionPercentage }}% Completed
                             </p>
                         </div>
-                        <h2 class="text-lg font-bold mb-4">Lessons</h2>
+                        <h2 class="text-lg font-bold mb-4">Lessons </h2>
                         <ul>
                             <li v-for="lesson in course.lessons" :key="lesson.id">
                                 <button
@@ -34,8 +34,42 @@
                         </ul>
                     </div>
 
+
+
+<!--                    Mobile  -->
+
+                    <div>
+                        <!-- Mobile Lessons Dropdown (Visible only on mobile) -->
+                        <div class="block md:hidden mb-4">
+                            <!-- Course Info Indicator -->
+                            <div class="mb-4">
+                                <p class="text-gray-600 text-sm">
+                                    {{ totalLessons }} Lessons | {{ formattedTotalDuration }} | {{ completionPercentage }}% Completed
+                                </p>
+                            </div>
+                            <label for="mobile-lesson-select" class="block text-gray-700 font-bold mb-2">Select a Lesson:</label>
+                            <select
+                                id="mobile-lesson-select"
+                                v-model="selectedLesson"
+                                @change="selectLesson(selectedLesson)"
+                                class="block w-full p-2 border border-gray-300 rounded"
+                            >
+                                <option v-for="lesson in course.lessons" :key="lesson.id" :value="lesson">
+                                    {{ lesson.title }}
+                                </option>
+                            </select>
+                        </div>
+
+
+
+                    </div>
+
+
+
+
+
                     <!-- Content Area -->
-                    <div class="bg-white p-4 rounded  w-full shadow md:flex-1 ml-2">
+                    <div v-if="visible===false" class="bg-white p-4 rounded  w-full shadow md:flex-1  ">
                         <div v-if="selectedLesson" class=" ">
                             <h4 class="text-lg font-semibold mb-2">{{ selectedLesson.title }}</h4>
                             <div class="video-container">
@@ -52,6 +86,29 @@
                                     </button>
                                 </div>
                             </div>
+
+
+
+<!--                            Navigation Buttons-->
+                            <div v-if="selectedLesson" class="flex justify-between items-center p-6 lg:p-8 max-w-screen-xl mx-auto">
+                                <button
+                                    @click="goToPreviousLesson"
+                                    :disabled="isFirstLesson"
+                                    class="flex items-center justify-center bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 disabled:opacity-50 transition duration-200"
+                                >
+                                    <ChevronDoubleLeftIcon class="w-5 h-5"/>
+                                    <span class="hidden lg:inline-block ml-3 text-sm lg:text-base">Previous Lesson</span>
+                                </button>
+                                <button
+                                    @click="goToNextLesson"
+                                    :disabled="isLastLesson"
+                                    class="flex items-center justify-center bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 disabled:opacity-50 transition duration-200"
+                                >
+                                    <span class="hidden lg:inline-block mr-3 text-sm lg:text-base">Next Lesson</span>
+                                    <ChevronDoubleRightIcon class="w-5 h-5"/>
+                                </button>
+                            </div>
+
 
                             <TabGroup>
                                 <TabList class="flex items-center max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8 bg-gradient-to-r outline-none font-bold
@@ -105,7 +162,7 @@
                                                         <div class="text-xs sm:text-sm text-gray-500">Likes: {{ comment.likes_count }}</div>
                                                         <div v-if="user" class="mt-2 flex space-x-2 sm:space-x-4">
 
-                                                            <pre>{{course.id}}!</pre>
+
                                                             <button @click="likeComment(course.id, selectedLesson.id, comment.id)" class="text-blue-500 text-xs sm:text-sm hover:underline">
                                                                 {{ comment.liked_by_user ? 'Unlike' : 'Like' }}
                                                             </button>
@@ -164,7 +221,7 @@ import {ref, computed, watchEffect, onMounted} from 'vue';
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import {BookOpenIcon, ChatBubbleLeftRightIcon, HandThumbUpIcon} from "@heroicons/vue/24/outline/index.js";
 import { HandThumbUpIcon as HandThumbUpIconSolid, BookOpenIcon as BookOpenIconSolid,
-    ChatBubbleLeftRightIcon as ChatBubbleLeftRightIconSolid} from "@heroicons/vue/24/solid";
+    ChatBubbleLeftRightIcon as ChatBubbleLeftRightIconSolid, ChevronDoubleRightIcon, ChevronDoubleLeftIcon} from "@heroicons/vue/24/solid";
 import axios from 'axios';
 import {Tab, TabGroup, TabList, TabPanel, TabPanels} from "@headlessui/vue";
 import {Inertia} from "@inertiajs/inertia";
@@ -195,7 +252,90 @@ watchEffect(() => {
     }
 });
 
+
+
+
 const totalLessons = computed(() => course.value.lessons?.length || 0);
+const isFirstLesson = computed(() => {
+    const currentIndex = course.value.lessons.indexOf(selectedLesson.value);
+    return currentIndex === 0;
+});
+
+const isLastLesson = computed(() => {
+    const currentIndex = course.value.lessons.indexOf(selectedLesson.value);
+    return currentIndex === course.value.lessons.length - 1;
+});
+
+
+
+
+const goToNextLesson = () => {
+    // Find the index of the current lesson
+    const currentIndex = course.value.lessons.indexOf(selectedLesson.value);
+
+    if (currentIndex !== -1) {
+        // Calculate the index of the next lesson
+        const nextIndex = currentIndex + 1;
+
+        if (nextIndex < course.value.lessons.length) {
+            // Update selectedLesson to the next lesson
+            selectedLesson.value = course.value.lessons[nextIndex];
+        } else {
+            console.log('No more lessons.');
+        }
+    } else {
+        console.log('Current lesson not found.');
+
+    }
+};
+
+const goToPreviousLesson = () => {
+    // Find the index of the current lesson
+    const currentIndex = course.value.lessons.indexOf(selectedLesson.value);
+
+    if (currentIndex !== -1) {
+        // Calculate the index of the next lesson
+        const nextIndex = currentIndex - 1;
+
+        if (nextIndex < course.value.lessons.length) {
+            // Update selectedLesson to the next lesson
+            selectedLesson.value = course.value.lessons[nextIndex];
+        } else {
+            console.log('No more lessons.');
+        }
+    } else {
+        console.log('Current lesson not found.');
+
+    }
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 const totalDuration = computed(() => {
     return course.value.lessons?.reduce((total, lesson) => {
         if (!lesson.duration) return total;
@@ -279,6 +419,14 @@ const submitComment = () => {
         preserveState: true, // Keep current page state
     });
 };
+
+
+
+
+
+
+
+
 
 
 
