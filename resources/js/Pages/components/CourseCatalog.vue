@@ -1,7 +1,7 @@
 <template>
     <div>
-        <Navbar />
-        <div class="container mx-auto p-4">
+        <Navbar/>
+        <div class="container mx-auto p-4  bg-gradient-to-r from-gray-100 via-pink-50 to-blue-50">
             <h1 class="text-2xl font-bold mb-6">Course Catalog</h1>
                 <h5 class="text-2xl mb-6 p-2">Results were found: {{ totalOccurrences }}</h5>
                 <h5 class="text-2xl mb-6 p-2">For search term: "{{ props.filters.search }}"</h5>

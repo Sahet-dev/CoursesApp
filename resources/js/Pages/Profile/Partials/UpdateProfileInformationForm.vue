@@ -73,16 +73,7 @@ function submitAvatarImg() {
     });
 }
 
-// function submitAvatarImg(){
-//     imagesForm.post(route('profile.updateImages'),{
-//         preserveScroll: true,
-//         onSuccess: (user)=>{
-//             showNotification.value = true;
-//             cancelAvatarImg();
-//             setTimeout(()=>{showNotification.value=false}, 5000)
-//         }
-//     });
-// }
+
 
 
 const avatarPreview = ref(null);
@@ -259,6 +250,10 @@ async function handleAvatarChange(event) {
 
             <!-- Age Field -->
             <div>
+
+
+
+
                 <InputLabel for="age" value="Age" />
                 <TextInput
                     id="age"

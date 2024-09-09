@@ -3,6 +3,7 @@
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ReviewController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -12,6 +13,7 @@ use Inertia\Inertia;
 
 Route::get('/', [HomeController::class, 'main'])->name('main-page');
 Route::get('/courses', [HomeController::class, 'search'])->name('courses.search');
+Route::get('/user/{id}', [ProfileController::class, 'profilePage'])->name('profilePage');
 Route::get('/courses/{id}', [HomeController::class, 'show'])->name('courseDetail');
 Route::get('/dashboard', [DashboardController::class, 'index'])
     ->middleware(['auth', 'verified'])
@@ -28,8 +30,8 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     Route::post('/profile/update-images', [ProfileController::class, 'uploadAvatar'])->name('profile.updateImages');
-
-
+    Route::get('/reviews', [ReviewController::class, 'index']);
+    Route::post('/reviews', [ReviewController::class, 'store']);
 
 });
 

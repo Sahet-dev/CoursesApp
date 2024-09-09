@@ -65,6 +65,7 @@ class HomeController extends Controller
 
     public function index(Request $request)
     {
+        $user = auth()->user();
         $search = $request->input('search', '');
 
         // Fields to select
@@ -86,6 +87,8 @@ class HomeController extends Controller
 
         // Render the view with the courses
         return Inertia::render('components/CourseCatalog', [
+            'authenticated' => (bool)$user,
+            'user' => $user ?: null,
             'courses' => $courses,
             'filters' => [
                 'search' => $search,
@@ -97,6 +100,9 @@ class HomeController extends Controller
 
     public function search(Request $request)
     {
+
+        $user = auth()->user();
+
         // Get the search term from the request
         $search = $request->input('search');
 
@@ -108,6 +114,8 @@ class HomeController extends Controller
 
         // Pass the courses and search term to the frontend via Inertia
         return Inertia::render('components/CourseCatalog', [
+            'authenticated' => (bool)$user,
+            'user' => $user ?: null,
             'courses' => $courses,
             'filters' => [
                 'search' => $search,
@@ -134,6 +142,8 @@ class HomeController extends Controller
 
         // Pass the course data and access information to the Inertia component
         return Inertia::render('CourseDetail', [
+            'authenticated' => (bool)$user,
+
             'course' => $course,
             'user' => $user,
             'userHasAccess' => $userHasAccess, // Pass the access status
