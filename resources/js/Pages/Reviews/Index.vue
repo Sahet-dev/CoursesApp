@@ -38,12 +38,12 @@
             <li v-for="review in reviews" :key="review.id" class="border rounded-lg p-4 bg-gray-50 shadow-sm">
                 <strong class="block text-lg font-medium">{{ review.user.name }}</strong>
                 <div class="flex items-center space-x-1">
+                    <!-- Display only the stars corresponding to the review rating -->
                     <svg
-                        v-for="n in 5"
+                        v-for="n in review.rating"
                         :key="n"
-                        :class="{'text-yellow-500': n <= review.rating, 'text-gray-300': n > review.rating}"
+                        class="text-yellow-500 w-6 h-6"
                         xmlns="http://www.w3.org/2000/svg"
-                        class="w-6 h-6"
                         viewBox="0 0 24 24"
                         fill="none"
                         stroke="currentColor"
@@ -54,6 +54,8 @@
                         <path d="M12 17.27L18.18 21l-1.45-6.3L22 9.24l-6.36-.54L12 2 8.36 8.7 2 9.24l5.27 5.46L5.82 21z"></path>
                     </svg>
                     <span class="text-gray-600">Rating: {{ review.rating }} stars</span>
+                    <!-- Display empty stars if needed -->
+
                 </div>
                 <p class="mt-2 text-gray-800">{{ review.comment }}</p>
             </li>
