@@ -6,8 +6,10 @@ use App\Http\Requests\ProfileUpdateRequest;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -59,5 +61,68 @@ class ProfileController extends Controller
         $request->session()->regenerateToken();
 
         return Redirect::to('/');
+    }
+
+
+
+
+
+    public function uploadAvatar(Request $request)
+    {
+        $request->validate([
+            'avatar' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ]);
+
+        $user = $request->user();
+
+        if ($request->hasFile('avatar')) {
+            $avatar = $request->file('avatar');
+            $path = $avatar->store('avatars', 'public');
+
+            // Update user's avatar path in the database
+            $user->avatar = $path;
+            $user->save();
+        }
+
+        return Inertia::render('Profile/Edit', [
+            'message' => $request->hasFile('avatar') ? 'Avatar uploaded successfully!' : 'No file uploaded.',
+            'auth' => [
+                'user' => $user->only(['id', 'name', 'email', 'avatar']), // Ensure avatar is passed
+            ],
+        ]);
+    }
+    public function updateImage(Request $request)
+    {
+        $data = $request->validate([
+            'cover'=> ['nullable', 'image'],
+            'avatar'=> ['nullable', 'image']
+        ]);
+        $user = $request->user();
+        $avatar = $data['avatar'] ?? null;
+        /**@var UploadedFile $cover*/
+        $cover = $data['cover'] ?? null;
+
+        $success = '';
+        if ($cover){
+            if ($user->cover_path){
+                Storage::disk('public')->delete($user->cover_path);
+            }
+            $path = $cover->store('user-'.$user->id, 'public');
+            $user->update(['cover_path'=> $path]);
+            $success = 'Your new Cover Image has been saved.';
+        }
+
+        if ($avatar){
+            if ($user->avatar_path){
+                Storage::disk('public')->delete($user->avatar_path);
+            }
+            $path = $avatar->store('user-'.$user->id, 'public');
+            $user->update(['avatar_path'=> $path]);
+            $success = 'Your new Avatar Image has been saved.';
+        }
+
+
+        session('success', 'Cover Image saved');
+        return back()->with('success', $success);
     }
 }
