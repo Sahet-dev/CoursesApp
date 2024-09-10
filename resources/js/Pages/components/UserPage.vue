@@ -275,8 +275,7 @@ const props = defineProps({
 
 const getCourse = (id) => {
     Inertia.get(route('courseDetail', { id }), {
-        preserveState: true,
-        replace: true,
+
     });
 };
 

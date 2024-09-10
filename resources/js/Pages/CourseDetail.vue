@@ -91,21 +91,21 @@
 
 
                                 <!--                            Navigation Buttons-->
-                                <div v-if="selectedLesson" class="flex justify-between items-center p-6 lg:p-8 max-w-screen-xl mx-auto">
+                                <div v-if="selectedLesson" class="flex justify-between items-center p-2 max-w-screen-xl mx-auto">
                                     <button
                                         @click="goToPreviousLesson"
                                         :disabled="isFirstLesson"
                                         class="flex items-center justify-center bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 disabled:opacity-50 transition duration-200"
                                     >
                                         <ChevronDoubleLeftIcon class="w-5 h-5"/>
-                                        <span class="hidden lg:inline-block ml-3 text-sm lg:text-base">Previous Lesson</span>
+                                        <span class="hidden lg:inline-block ml-3 text-sm lg:text-base">Previous  </span>
                                     </button>
                                     <button
                                         @click="goToNextLesson"
                                         :disabled="isLastLesson"
                                         class="flex items-center justify-center bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 disabled:opacity-50 transition duration-200"
                                     >
-                                        <span class="hidden lg:inline-block mr-3 text-sm lg:text-base">Next Lesson</span>
+                                        <span class="hidden lg:inline-block mr-3 text-sm lg:text-base">Next  </span>
                                         <ChevronDoubleRightIcon class="w-5 h-5"/>
                                     </button>
                                 </div>
@@ -224,6 +224,7 @@
                         </div>
                     </div>
                 </div>
+            <Footer/>
 
         </div>
 
@@ -318,21 +319,21 @@
 
 
                                 <!--                            Navigation Buttons-->
-                                <div v-if="selectedLesson" class="flex justify-between items-center p-6 lg:p-8 max-w-screen-xl mx-auto">
+                                <div v-if="selectedLesson" class="flex justify-between items-center    p-2 max-w-screen-xl mx-auto">
                                     <button
                                         @click="goToPreviousLesson"
                                         :disabled="isFirstLesson"
                                         class="flex items-center justify-center bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 disabled:opacity-50 transition duration-200"
                                     >
                                         <ChevronDoubleLeftIcon class="w-5 h-5"/>
-                                        <span class="hidden lg:inline-block ml-3 text-sm lg:text-base">Previous Lesson</span>
+                                        <span class="hidden lg:inline-block ml-3 text-sm lg:text-base">Previous</span>
                                     </button>
                                     <button
                                         @click="goToNextLesson"
                                         :disabled="isLastLesson"
                                         class="flex items-center justify-center bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 disabled:opacity-50 transition duration-200"
                                     >
-                                        <span class="hidden lg:inline-block mr-3 text-sm lg:text-base">Next Lesson</span>
+                                        <span class="hidden lg:inline-block mr-3 text-sm lg:text-base">Next  </span>
                                         <ChevronDoubleRightIcon class="w-5 h-5"/>
                                     </button>
                                 </div>
@@ -383,8 +384,20 @@
                                                     <div v-if="comments.length > 0">
                                                         <h2 class="text-xl sm:text-2xl font-semibold mb-4">Comments</h2>
                                                         <div v-for="comment in comments" :key="comment.id" class="mb-4 sm:mb-6 p-3 sm:p-4 bg-gray-100 rounded-md">
-                                                            <div class="flex items-center mb-2">
-                                                                <div class="font-bold text-base sm:text-lg">{{ comment.user.name }}</div>
+                                                            <div class="flex items-center mb-2 cursor-pointer hover:underline" @click="goToUser(comment.user.id)">
+                                                                <div class="flex items-center space-x-4">
+                                                                    <!-- Avatar Image -->
+                                                                    <img
+                                                                        :src="(comment.user.avatar ? `/storage/${comment.user.avatar}` : '/storage/avatar_default.png')"
+                                                                        alt="User Avatar"
+                                                                        class="w-12 h-12 sm:w-16 sm:h-16 rounded-full object-cover shadow-lg"
+                                                                    >
+                                                                    <!-- User Name -->
+                                                                    <div class="font-bold text-base sm:text-lg">
+                                                                        {{ comment.user.name }}
+                                                                    </div>
+                                                                </div>
+
                                                             </div>
                                                             <p class="text-gray-800 mb-2 break-words text-sm sm:text-base">{{ comment.comment }}</p>
                                                             <div class="text-xs sm:text-sm text-gray-500">Likes: {{ comment.likes_count }}</div>
@@ -459,6 +472,7 @@ import axiosService from "@/axiosService.js";
 import axiosInstance from "@/axiosService.js";
 import GuestLayout from "@/Layouts/GuestLayout.vue";
 import Navbar from "@/Pages/components/Navbar.vue";
+import Footer from "../../../adminside/src/views/components/Footer.vue";
 
 const props = defineProps({
     course: Object,
@@ -498,6 +512,19 @@ const isLastLesson = computed(() => {
     const currentIndex = course.value.lessons.indexOf(selectedLesson.value);
     return currentIndex === course.value.lessons.length - 1;
 });
+
+
+function goToUser(id){
+
+    Inertia.get(route('profilePage', id), {
+
+    });
+}
+
+
+
+
+
 
 
 

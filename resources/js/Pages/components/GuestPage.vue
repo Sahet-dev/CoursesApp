@@ -65,7 +65,9 @@
                     <div class="container">
                         <h2 class="section-title">Popular Courses</h2>
                         <div class="courses-grid">
-                            <div v-for="course in popularCourses" :key="course.id" class="course-card">
+                            <div
+                                @click="getCourse(course.id)"
+                                v-for="course in popularCourses" :key="course.id" class="course-card">
                                 <img :src="course.thumbnail" :alt="course.title" class="course-image">
                                 <h3 class="course-title">{{ course.title }}</h3>
                                 <p class="course-description">{{ course.description }}</p>
@@ -89,7 +91,9 @@
                     <div class="container-4d5e6f">
                         <h2 class="title-7g8h9i text-center">New Courses</h2>
                         <div class="grid-0a1b2c">
-                            <div v-for="lcourse in latestCourses" :key="lcourse.id" class="card-3d4e5f">
+                            <div
+                                @click="getCourse(lcourse.id)"
+                                v-for="lcourse in latestCourses" :key="lcourse.id" class="card-3d4e5f">
                                 <img :src="lcourse.thumbnail" :alt="lcourse.title" class="image-6f7g8h">
                                 <h3 class="name-9i0j1k">{{ lcourse.title }}</h3>
                                 <p class="description-2l3m4n">{{ lcourse.description }}</p>
@@ -169,6 +173,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Icons from "@/Components/Icons.vue";
 import GuestLayout from "@/Layouts/GuestLayout.vue";
 import Navbar from "@/Pages/components/Navbar.vue";
+import {Inertia} from "@inertiajs/inertia";
 
 
 
@@ -334,7 +339,12 @@ watch(transitionsCompleted, (newVal) => {
         ScrollTrigger.refresh();
     }
 });
-
+const getCourse = (id) => {
+    Inertia.get(route('courseDetail', { id }), {
+        preserveState: true,
+        replace: true,
+    });
+};
 
 
 // Show elements sequentially after mounting

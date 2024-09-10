@@ -207,6 +207,7 @@ class HomeController extends Controller
                 'user' => [
                     'id' => $comment->user->id,
                     'name' => $comment->user->name,
+                    'avatar' => $comment->user->avatar,
                 ],
                 'comment' => $comment->comment,
                 'likes_count' => $comment->likes->count(),

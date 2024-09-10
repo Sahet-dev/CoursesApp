@@ -1,6 +1,6 @@
 <template>
     <div class=" bg-gradient-to-r from-gray-200 via-pink-200 to-blue-200">
-        <div class="max-w-4xl mx-auto p-6 bg-white shadow-lg rounded-lg ">
+        <div class="max-w-4xl mx-auto p-6 bg-white shadow-lg rounded-lg grid">
             <div class="group  relative bg-white">
                 <img :src="imageSrc"
                      class="w-full h-[200px] object-cover">
@@ -26,11 +26,23 @@
                              class="w-full h-full object-cover">
 
 
-                    </div>
 
+
+                        <img :src="(user.avatar ? `/storage/${user.avatar}` : '/images/avatar_default.png')"
+                             class="w-full h-full object-cover">
+
+
+                    </div>
                 </div>
             </div>
             <h1 class="text-2xl font-bold mb-4">{{ user.name }}'s Profile</h1>
+
+
+<!--                                <pre>{{ user.comments }}</pre>-->
+
+
+
+
 
             <!-- Basic Information -->
             <div class="basic-info mb-8">
@@ -85,18 +97,20 @@
                     </li>
                 </ul>
             </div>
-
+<pre>{{ user.comments }}</pre>
             <!-- Comments -->
-            <div class="comments mb-8">
+            <div class="comments mb-8 overflow-hidden">
                 <h2 class="text-xl font-semibold mb-4">Comments</h2>
                 <ul class="space-y-4">
                     <li v-for="comment in user.comments" :key="comment.id" class="p-4 bg-gray-50 border rounded-lg">
-                        <p><strong>Lesson:</strong> {{ comment.lesson.title }}</p>
-                        <p><strong>Comment:</strong> {{ comment.comment }}</p>
+
+                        <p><strong>Lesson:</strong> {{ comment.lesson }}</p>
+                        <p class="break-words"><strong>Comment:</strong> {{ comment.comment }}</p>
                         <p><strong>Likes:</strong> {{ comment.likes.length }}</p>
                     </li>
                 </ul>
             </div>
+
 
             <!-- Engagements -->
             <div class="engagements">

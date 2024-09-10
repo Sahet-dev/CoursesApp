@@ -85,9 +85,11 @@ class CourseService
                     'comments' => $lesson->comments->map(function ($comment) {
                         return [
                             'id' => $comment->id,
+                            'avatar' => $comment->avatar,
                             'user' => [
                                 'id' => $comment->user->id,
                                 'name' => $comment->user->name,
+                                'avatar' => $comment->user->avatar,
                             ],
                             'comment' => $comment->comment,
                             'likes_count' => $comment->likes->count(),
@@ -97,6 +99,8 @@ class CourseService
                                     'user' => [
                                         'id' => $reply->user->id,
                                         'name' => $reply->user->name,
+                                        'avatar' => $reply->user->avatar,
+
                                     ],
                                     'comment' => $reply->comment,
                                     'likes_count' => $reply->likes->count(),
@@ -188,6 +192,7 @@ class CourseService
                             'user' => [
                                 'id' => $comment->user->id,
                                 'name' => $comment->user->name,
+                                'avatar' => $comment->user->avatar,
                             ],
                             'comment' => $comment->comment,
                             'likes_count' => $comment->likes->count(),
@@ -198,6 +203,7 @@ class CourseService
                                     'user' => [
                                         'id' => $reply->user->id,
                                         'name' => $reply->user->name,
+                                        'avatar' => $reply->user->avatar,
                                     ],
                                     'comment' => $reply->comment,
                                     'likes_count' => $reply->likes->count(),

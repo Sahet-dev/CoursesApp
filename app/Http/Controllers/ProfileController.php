@@ -35,10 +35,12 @@ class ProfileController extends Controller
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
-        $data = $request->validated();
-        if (is_null($data['lastname'])) {
-            unset($data['lastname']);
-        }
+//        $data = $request->validated();
+//        if (is_null($data['lastname'])) {
+//            unset($data['lastname']);
+//        }
+//
+
         $request->user()->fill($request->validated());
 
         if ($request->user()->isDirty('email')) {
@@ -149,45 +151,29 @@ class ProfileController extends Controller
             'engagements' => function ($query) {
                 $query->with('course'); // Eager load course data for engagements
             },
-            'comments' => function ($query) {
-                $query->with('lesson', 'likes') // Eager load lesson data and likes for comments
-                ->latest() // Order by latest comments
-                ->take(5);
+            'comments' => function ($query) use ($id) { // Filter comments by user ID
+                $query->where('user_id', $id) // Only fetch comments that belong to this user
+                ->with(['lesson' => function ($lessonQuery) {
+                    $lessonQuery->latest()->take(5);
+                }, 'likes']); // Eager load lesson data and likes for comments
             },
-
         ])->findOrFail($id);
 
+        // Hide `video_url` and `markdown_text` from the lesson relationship after fetching
+        foreach ($user->comments as $comment) {
+            if ($comment->lesson) {
+                $comment->lesson->setHidden(['video_url', 'markdown_text']);
+            }
+        }
 
         $commentCount = $user->comments()->count();
         $purchasedCoursesCount = $user->purchasedCourses()->count();
 
-
-
-
-
-
-
-
         $registrationDate = $user->created_at->timezone('UTC');
         $currentDate = Carbon::now('UTC');
 
-// Calculate the difference in days and ensure it's positive
+        // Calculate the difference in days and ensure it's positive
         $daysSinceRegistration = abs($currentDate->diffInDays($registrationDate));
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
         // For users with the "teacher" role, count the number of created courses
         $createdCoursesCount = 0;
@@ -196,9 +182,9 @@ class ProfileController extends Controller
         }
 
         $statistics = [
-            'commentCount' => $user->comments()->count(),
+            'commentCount' => $commentCount,
             'completedLessonsCount' => $user->courses()->wherePivot('completed', true)->count(),
-            'purchasedCoursesCount' => $user->purchasedCourses()->count(),
+            'purchasedCoursesCount' => $purchasedCoursesCount,
             'registrationDate' => $registrationDate->format('Y-m-d'),
             'daysSinceRegistration' => $daysSinceRegistration, // This should be an integer
             'createdCoursesCount' => $user->courses()->count(),
@@ -211,4 +197,6 @@ class ProfileController extends Controller
             'statistics' => $statistics,
         ]);
     }
+
+
 }
