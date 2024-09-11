@@ -19,7 +19,7 @@
             </main>
         </div>
 
-        <Footer />
+
     </div>
 </template>
 

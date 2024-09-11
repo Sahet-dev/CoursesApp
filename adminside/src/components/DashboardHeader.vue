@@ -21,6 +21,7 @@
 import { ref, onMounted } from 'vue';
 import apiClient from '../api/axios';
 import { useRouter } from 'vue-router';
+import Lenis from "lenis";
 
 const user = ref({});
 const errorMessage = ref('');
@@ -42,9 +43,25 @@ const fetchUser = async () => {
     }
 };
 
+const lenis = new Lenis()
 
+lenis.on('scroll', (e) => {
+    // console.log(e)
+})
 
-onMounted(fetchUser);
+function raf(time) {
+    lenis.raf(time)
+    requestAnimationFrame(raf)
+}
+
+requestAnimationFrame(raf)
+
+onMounted(() => {
+
+    fetchUser()
+
+});
+
 
 </script>
 

@@ -22,11 +22,18 @@ class CourseController extends Controller
 {
     public function index()
     {
-
         if (!Auth::user()->hasRole(['admin', 'moderator', 'teacher'])) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
-        $courses = Course::all();
+
+        $user = Auth::user();
+
+        if ($user->hasRole('teacher')) {
+            $courses = Course::where('teacher_id', $user->id)->get();
+        } else {
+            $courses = Course::all();
+        }
+
         return CourseResource::collection($courses);
     }
 
@@ -95,11 +102,32 @@ class CourseController extends Controller
 
 
 
-    public function update(Request $request, $id)
+    public function update(Request $request, $id): JsonResponse
     {
+        // Check if the user has the 'admin', 'moderator', or 'teacher' role
         if (!Auth::user()->hasRole(['admin', 'moderator', 'teacher'])) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
+
+        $user = Auth::user();
+
+        // Find the course by ID
+        if ($user->hasRole('teacher')) {
+            // Ensure teachers can only update courses they own
+            $course = Course::where('id', $id)
+                ->where('teacher_id', $user->id)
+                ->first();
+            if (!$course) {
+                return response()->json(['message' => 'Course not found or you are not authorized to update this course.'], 404);
+            }
+        } else {
+            // Admins and moderators can update any course
+            $course = Course::find($id);
+            if (!$course) {
+                return response()->json(['message' => 'Course not found.'], 404);
+            }
+        }
+
         // Validate the input fields
         $request->validate([
             'title' => 'required|string|max:255',
@@ -107,12 +135,6 @@ class CourseController extends Controller
             'price' => 'required|numeric',
             'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg,gif',
         ]);
-
-        // Find the course by ID
-        $course = Course::find($id);
-        if (!$course) {
-            return response()->json(['message' => 'Course not found.'], 404);
-        }
 
         // Update course fields
         $course->title = $request->input('title');

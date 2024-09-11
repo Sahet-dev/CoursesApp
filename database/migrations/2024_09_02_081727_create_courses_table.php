@@ -17,6 +17,7 @@ return new class extends Migration
             $table->text('description');
             $table->string('thumbnail');
             $table->decimal('price', 8, 2);
+            $table->string('type')->default('purchase');
             $table->unsignedBigInteger('teacher_id'); // Add the teacher_id column
             $table->timestamps();
 

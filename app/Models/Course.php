@@ -20,8 +20,9 @@ class Course extends Model
 
     public function teacher()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'teacher_id');
     }
+
 
     public function lessons()
     {

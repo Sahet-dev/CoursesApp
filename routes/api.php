@@ -1,10 +1,12 @@
 <?php
 
 use App\Http\Controllers\AnalyticsController;
+use App\Http\Controllers\Moderator\CourseModerationController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LessonController;
+use App\Http\Controllers\TeacherControlle;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -17,9 +19,9 @@ route::get('/lessons/{lessonId}/comments', [HomeController::class, 'getCommentsF
 
 
 Route::post('/login', [AuthController::class, 'login']);
-Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
+Route::middleware(['auth:sanctum'])->group(function () {
 
-    route::put('/users/rol/{id}', [UserController::class, 'updateRole']);
+    route::put('/users/change-role/{id}', [UserController::class, 'updateRole']);
     Route::get('/analytics/course-engagement', [AnalyticsController::class, 'index']);
     Route::get('/analytics/active-users', [AnalyticsController::class, 'activeUsers']);
     Route::get('/analytics/new-subscriptions', [AnalyticsController::class, 'newSubscriptions']);
@@ -40,6 +42,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/courses/{id}', [CourseController::class, 'show']);
     Route::post('/courses', [CourseController::class, 'store']);
     Route::delete('/courses/{id}', [CourseController::class, 'destroy']);
+    Route::get('/teacher-courses', [TeacherControlle::class, 'getOwnCourses'])->middleware('auth:sanctum');
+    Route::get('/course-enrollments/{courseId}', [TeacherControlle::class, 'getCourseEnrollments']);
+    Route::get('/subscriptions', [TeacherControlle::class, 'getSubscriptions']);
 
 
     Route::get('/courses/{id}/lessons', [LessonController::class, 'fetchLessons']);
@@ -82,6 +87,42 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/user', [AuthController::class, 'getUser']);
     Route::post('/logout', [AuthController::class, 'logout']);
+
+
+
+    Route::put('/moderate/course/{id}', [CourseModerationController::class, 'editCourse']);
+    Route::delete('/moderate/course/{id}', [CourseModerationController::class, 'deleteCourse']);
+
+    // Lesson routes for moderator
+    Route::put('/moderate/lesson/{id}', [CourseModerationController::class, 'editLesson']);
+    Route::delete('/moderate/lesson/{id}', [CourseModerationController::class, 'deleteLesson']);
+
+    // Comment routes for moderator
+    Route::put('/moderate/comment/{id}', [CourseModerationController::class, 'editComment']);
+    Route::delete('/moderate/comment/{id}', [CourseModerationController::class, 'deleteComment']);
+
+    // User routes for moderator
+    Route::put('/moderate/user/{id}', [CourseModerationController::class, 'editUser']);
+    Route::delete('/moderate/user/{id}', [CourseModerationController::class, 'deleteUser']);
+
+
+
+
+
+//    TEACHER ROUTES
+
+    Route::get('/courses/{id}/preview', [TeacherControlle::class, 'teacherPreview'])->name('teacherPreview');
+
+    // Route to update a course
+    Route::put('/courses/{id}', [TeacherControlle::class, 'teacherUpdate'])->name('teacherUpdate');
+
+    // Route to delete a course
+    Route::delete('/courses/{id}', [TeacherControlle::class, 'teacherDestroy'])->name('teacherDestroy');
+    Route::get('/teacher/dashboard-data', [TeacherControlle::class, 'getDashboardData']);
+    Route::get('/student-performance', [TeacherControlle::class, 'showStudentPerformance']);
+
+
+
 
 
 

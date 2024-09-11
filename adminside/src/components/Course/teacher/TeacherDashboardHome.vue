@@ -10,7 +10,7 @@
             >
                 <h2 class="text-xl font-semibold mb-2">{{ course.title }}</h2>
                 <p class="text-gray-700 mb-2">{{ course.description }}</p>
-                <p class="text-sm text-gray-500 mb-4">Created on: {{ formatDate(course.createdAt) }}</p>
+                <p class="text-sm text-gray-500 mb-4">Created on: {{ formatDate(course.created_at) }}</p>
                 <router-link
                     :to="`/teacher-dashboard/edit-course/${course.id}`"
                     class="text-blue-500 hover:underline"
@@ -22,7 +22,7 @@
 
         <div v-else class="text-center">
             <p class="text-gray-700">You have no courses yet.</p>
-            <router-link to="/teacher-dashboard/create-new-course" class="text-blue-500 hover:underline">
+            <router-link to="/teacher-dashboard/new-course" class="text-blue-500 hover:underline">
                 Create your first course
             </router-link>
         </div>
@@ -38,7 +38,7 @@ const courses = ref([]);
 const fetchCourses = async () => {
     try {
         const response = await apiClient.get('/teacher/courses'); // Ensure this matches your backend route
-        courses.value = response.data;
+        courses.value = response.data.data;
     } catch (error) {
         console.error('Failed to fetch courses:', error);
     }

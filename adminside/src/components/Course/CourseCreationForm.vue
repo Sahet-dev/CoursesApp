@@ -1,6 +1,6 @@
 <template>
-    <div class="mx-auto p-6 bg-white rounded-md shadow-md">
-        <h2 class="text-2xl font-bold text-gray-800 mb-6">Create Course and Add Lessons</h2>
+    <div class="mx-auto p-6 bg-white rounded-md shadow-md mb-4 pb-6">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6">Create Course and Add Lessons </h2>
         <form @submit.prevent="createCourseAndAddLesson" enctype="multipart/form-data">
             <!-- Course Form -->
             <div class="mb-4">
@@ -19,6 +19,14 @@
             <div class="mb-4">
                 <label for="price" class="block text-lg font-medium text-gray-700">Price</label>
                 <input v-model="course.price" id="price" type="number" step="0.01" class="w-full px-3 py-2 border rounded-md" required />
+            </div>
+
+            <div class="mb-4">
+                <label for="courseType" class="block text-lg font-medium text-gray-700">Course Type</label>
+                <select v-model="course.type" id="courseType" class="w-full px-3 py-2 border rounded-md" required>
+                    <option value="purchase">Purchasable</option>
+                    <option value="subscription">Included in Subscription</option>
+                </select>
             </div>
 
             <!-- Lesson Form -->
@@ -65,6 +73,10 @@
             {{ error }}
         </div>
     </div>
+
+
+
+
 </template>
 
 <script setup>
@@ -75,6 +87,7 @@ import { ClassicEditor, Bold, Essentials, Italic, Mention, Paragraph,
     Undo, Link, Code,  Strikethrough, Subscript, Superscript,
     Underline, Font,CodeBlock, Indent, IndentBlock   } from 'ckeditor5';
 import 'ckeditor5/ckeditor5.css';
+import Footer from "../../views/components/Footer.vue";
 
 const editor = ClassicEditor;
 const editorConfig = {
@@ -135,6 +148,7 @@ const createCourseAndAddLesson = async () => {
     formData.append('description', course.value.description);
     formData.append('price', course.value.price);
     formData.append('thumbnail', course.value.thumbnail); // Append the file
+    formData.append('type', course.value.type);
 
     // Append lesson data
     lessons.value.forEach((lesson, index) => {

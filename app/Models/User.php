@@ -58,6 +58,10 @@ class User extends Authenticatable
         ];
     }
 
+    public function ownedCourses()
+    {
+        return $this->hasMany(Course::class, 'teacher_id');
+    }
 
 
     public function comments()

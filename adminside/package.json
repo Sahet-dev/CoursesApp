@@ -13,6 +13,7 @@
     "axios": "^1.7.2",
     "ckeditor5": "^43.0.0",
     "ckeditor5-premium-features": "^43.0.0",
+    "lenis": "^1.1.13",
     "vue": "^3.4.31",
     "vue-router": "^4.0.13",
     "vuex": "^4.0.2"

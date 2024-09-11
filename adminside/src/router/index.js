@@ -10,7 +10,7 @@ import DeleteCourse from '../components/Course/teacher/DeleteCourse.vue';
 import EnrollmentList from '../components/Course/teacher/EnrollmentList.vue';
 import StudentPerformance from '../components/Course/teacher/StudentPerformance.vue';
 import Notifications from '../components/Course/teacher/Notifications.vue';
-import ProfileManagement from '../components/Course/teacher/ProfileManagement.vue';
+import ProfileManagement from '../components/Course/teacher/FinanceReports.vue';
 import CourseSettings from '../components/Course/teacher/CourseSettings.vue';
 import Support from '../components/Support.vue';
 import apiClient from "../api/axios.js";
@@ -41,6 +41,7 @@ import NotFoundPage from "../components/NotFoundPage.vue";
 import Unauthorized from "../components/Unauthorized.vue";
 import ViewCreateTest from "../components/Course/ViewCreateTest.vue";
 import LessonTestUpdate from "../components/Course/LessonTestUpdate.vue";
+import TeacherContentManagement from "../components/Course/teacher/TeacherContentManagement.vue";
 
 const routes = [
     // Teacher routes
@@ -49,8 +50,8 @@ const routes = [
         component: Dashboard,
         children: [
             { path: '', component: TeacherDashboardHome },
-            { path: 'course-overview', component: CourseOverview },
-            { path: 'create-new-course', component: CreateNewCourse },
+            { path: 'courses', component: TeacherContentManagement },
+            { path: 'new-course', component: CourseCreationForm },
             { path: 'edit-course/:courseId', component: EditCourse, props: true },
             { path: 'delete-course/:courseId', component: DeleteCourse, props: true },
             { path: 'enrollment-list', component: EnrollmentList },
@@ -103,6 +104,10 @@ const routes = [
         component: Dashboard,
         children: [
             { path: '', component: ContentModeration },
+            { path: 'user-management', component: UserManagement },
+            { path: 'content-management', component: ContentManagement },
+
+
             { path: 'content-moderation', component: ContentModeration },
             { path: 'user-reviews', component: UserReviews },
             { path: 'reports', component: Reports },
@@ -129,7 +134,7 @@ const routes = [
     },
 
     {
-        path: '/:pathMatch(.*)*', // This will match any route that is not defined
+        path: '/:pathMatch(.*)*',
         name: 'NotFound',
         component: NotFoundPage
     },

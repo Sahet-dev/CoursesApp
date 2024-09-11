@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Auth\Access\Gate;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -12,9 +13,11 @@ use Illuminate\Support\Facades\Log;
 
 class UserController extends Controller
 {
+    use AuthorizesRequests;
+
     public function updateRole(Request $request, $id)
     {
-        if (!Auth::user()->hasRole(['admin', 'moderator', 'teacher'])) {
+        if (!Auth::user()->hasRole(['admin', 'moderator'])) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
         $user = User::find($id);
@@ -23,8 +26,11 @@ class UserController extends Controller
             return response()->json(['message' => 'User not found'], 404);
         }
 
-        // Authorization check
-        $this->authorize('update', $user);
+        if (Auth::id() === $user->id) {
+            return response()->json(['message' => 'Cannot update your own role'], 403);
+        }
+
+
 
         $user->role = $request->input('role');
         $user->save();

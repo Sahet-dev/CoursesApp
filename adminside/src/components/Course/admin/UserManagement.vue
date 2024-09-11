@@ -26,7 +26,6 @@
                         <option value="student">Student</option>
                         <option value="teacher">Teacher</option>
                         <option value="moderator">Moderator</option>
-                        <option value="admin">Admin</option>
                     </select>
                 </td>
                 <td class="border border-gray-300 p-2 flex space-x-2">
@@ -53,7 +52,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import apiClient from '../../../api/axios.js';
-import router from '../../../router'; // Import router if using Vue Router
+import router from '../../../router';
 import axios from 'axios';
 import Loader from "../Loader.vue";
 
@@ -112,16 +111,17 @@ const updateUser = async () => {
 
 
 const updateUserRole = async (user) => {
-    console.log('Updating user role:', user);
     if (!user.id) {
         console.error('User ID is missing:', user);
         return;
     }
     try {
-        await apiClient.put(`/users/rol/${user.id}`, { role: user.role });
+        await apiClient.put(`/users/change-role/${user.id}`, { role: user.role });
         await fetchUsers();
     } catch (error) {
         console.error('Failed to update user role:', error);
+        const errorMessage = error.response?.data?.message || 'An unexpected error occurred';
+        alert(errorMessage);
     }
 };
 
@@ -134,6 +134,9 @@ const deleteUser = async (id) => {
         await fetchUsers();
     } catch (error) {
         console.error('Failed to delete user:', error);
+        const errorMessage = error.response?.data?.message || 'An unexpected error occurred';
+        console.log(errorMessage)
+        alert(errorMessage);
     }
 };
 
