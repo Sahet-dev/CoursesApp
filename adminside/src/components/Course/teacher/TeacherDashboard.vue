@@ -1,7 +1,7 @@
 <template>
     <div class="flex h-screen">
         <!-- Sidebar -->
-        <aside class="w-54 h-full bg-blue-50 border-r border-gray-200 p-4 overflow-y-auto">
+        <aside class="w-54 h-full bg-blue-50 border-r border-gray-200 p-4  ">
             <TeacherSidebarList role="teacher"/>
         </aside>
 

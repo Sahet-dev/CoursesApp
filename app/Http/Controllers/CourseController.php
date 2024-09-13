@@ -31,10 +31,10 @@ class CourseController extends Controller
         if ($user->hasRole('teacher')) {
             $courses = Course::where('teacher_id', $user->id)->get();
         } else {
-            $courses = Course::all();
+            $courses = Course::paginate(20);
         }
 
-        return CourseResource::collection($courses);
+        return response()->json($courses);
     }
 
     public function show($id): JsonResponse

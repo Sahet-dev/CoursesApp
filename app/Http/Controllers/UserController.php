@@ -15,7 +15,7 @@ class UserController extends Controller
 {
     use AuthorizesRequests;
 
-    public function updateRole(Request $request, $id)
+    public function updateRole(Request $request, $id): JsonResponse
     {
         if (!Auth::user()->hasRole(['admin', 'moderator'])) {
             return response()->json(['message' => 'Unauthorized'], 403);
@@ -43,8 +43,8 @@ class UserController extends Controller
 
     public function index()
     {
-        $users = User::all();
-        return UserResource::collection($users);
+        $users = User::paginate(20);
+        return response()->json($users);
     }
 
     public function store(Request $request): JsonResponse

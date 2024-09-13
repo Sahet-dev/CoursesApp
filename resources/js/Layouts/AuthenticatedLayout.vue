@@ -154,6 +154,7 @@ onMounted(() => {
 
                                     <template #content>
                                         <DropdownLink :href="route('profile.edit')"> Profile </DropdownLink>
+                                        <DropdownLink :href="route('feedback')"> Feedback </DropdownLink>
                                         <DropdownLink :href="route('logout')" method="post" as="button">
                                             Log Out
                                         </DropdownLink>
@@ -228,6 +229,7 @@ onMounted(() => {
                             </ResponsiveNavLink>
 
                             <ResponsiveNavLink :href="route('profile.edit')"> Profile </ResponsiveNavLink>
+                            <ResponsiveNavLink :href="route('feedback')"> Feedback </ResponsiveNavLink>
 
                             <ResponsiveNavLink :href="route('logout')" method="post" as="button">
                                 Log Out

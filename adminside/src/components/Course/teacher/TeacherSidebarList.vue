@@ -39,10 +39,19 @@
 
             <li>
                 <router-link
-                    to="/teacher-dashboard/profile-management"
+                    to="/teacher-dashboard/financial-reports"
                     class="block p-3 rounded-md border border-transparent text-gray-700 hover:bg-gray-200 hover:border-gray-300 hover:text-gray-900 transition-all duration-300"
                 >
                     Financial Reports
+                </router-link>
+            </li>
+            <li>
+                <router-link
+                    to="/teacher-dashboard/reviews"
+                    class="block p-3 rounded-md border border-transparent text-gray-700 hover:bg-gray-200 hover:border-gray-300 hover:text-gray-900 transition-all duration-300"
+                >
+                    Reviews
+
                 </router-link>
             </li>
 

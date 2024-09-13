@@ -30,25 +30,9 @@
                     Analytics
                 </router-link>
             </li>
-            <li>
-                <router-link
-                    to="/admin-dashboard/support"
-                    class="block p-3 rounded-md border border-transparent text-gray-700
-          hover:bg-blue-100 hover:border-blue-300 hover:text-blue-900 transition-all duration-300"
-                >
-                    Support
-                </router-link>
-            </li>
 
-            <li>
-                <router-link
-                    to="/admin-dashboard/customization"
-                    class="block p-3 rounded-md border border-transparent text-gray-700
-          hover:bg-blue-100 hover:border-blue-300 hover:text-blue-900 transition-all duration-300"
-                >
-                    Customization
-                </router-link>
-            </li>
+
+
             <li>
                 <router-link
                     to="/admin-dashboard/new-course"
@@ -58,6 +42,71 @@
                     Create Course
                 </router-link>
             </li>
+
+            <li>
+                <router-link
+                    to="/admin-dashboard/feedbacks"
+                    class="block p-3 rounded-md border border-transparent text-gray-700
+          hover:bg-blue-100 hover:border-blue-300 hover:text-blue-900 transition-all duration-300"
+                >
+                    Feedback
+                </router-link>
+            </li>
+            <li>
+                <router-link
+                    to="/admin-dashboard/course-engagement"
+                    class="block p-3 rounded-md border border-transparent text-gray-700
+          hover:bg-blue-100 hover:border-blue-300 hover:text-blue-900 transition-all duration-300"
+                >
+                    Engagement Metrics
+                </router-link>
+            </li>
+            <li>
+                <router-link
+                    to="/admin-dashboard/active-users"
+                    class="block p-3 rounded-md border border-transparent text-gray-700
+          hover:bg-blue-100 hover:border-blue-300 hover:text-blue-900 transition-all duration-300"
+                >
+                    Active Users
+                </router-link>
+            </li>
+            <li>
+                <router-link
+                    to="/admin-dashboard/new-subscriptions"
+                    class="block p-3 rounded-md border border-transparent text-gray-700
+          hover:bg-blue-100 hover:border-blue-300 hover:text-blue-900 transition-all duration-300"
+                >
+                    New Subscriptions
+                </router-link>
+            </li>
+            <li>
+                <router-link
+                    to="/admin-dashboard/churn-rate"
+                    class="block p-3 rounded-md border border-transparent text-gray-700
+          hover:bg-blue-100 hover:border-blue-300 hover:text-blue-900 transition-all duration-300"
+                >
+                    Churn Rate
+                </router-link>
+            </li>
+            <li>
+                <router-link
+                    to="/admin-dashboard/retention-rate"
+                    class="block p-3 rounded-md border border-transparent text-gray-700
+          hover:bg-blue-100 hover:border-blue-300 hover:text-blue-900 transition-all duration-300"
+                >
+                    Retention Rates
+                </router-link>
+            </li>
+            <li>
+                <router-link
+                    to="/admin-dashboard/financial-metrics"
+                    class="block p-3 rounded-md border border-transparent text-gray-700
+          hover:bg-blue-100 hover:border-blue-300 hover:text-blue-900 transition-all duration-300"
+                >
+                    Financial Metrics
+                </router-link>
+            </li>
+
         </ul>
     </div>
 </template>
