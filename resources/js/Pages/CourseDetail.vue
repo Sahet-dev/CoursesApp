@@ -35,10 +35,7 @@
                             </ul>
                         </div>
 
-
-
                         <!--                    Mobile  -->
-
                         <div>
                             <!-- Mobile Lessons Dropdown (Visible only on mobile) -->
                             <div class="block md:hidden mb-4">
@@ -65,16 +62,14 @@
 
                         </div>
 
-
-
-
-
                         <!-- Content Area -->
                         <div v-if="visible===false" class="bg-white p-4 rounded  w-full shadow md:flex-1  ">
                             <div v-if="selectedLesson" class=" ">
                                 <h4 class="text-lg font-semibold mb-2">{{ selectedLesson.title }}</h4>
                                 <div class="video-container">
-                                    <video v-if="selectedLesson.video_url" :src="lessonVideoUrl(selectedLesson.video_url)" controls class="video">
+                                    <video v-if="selectedLesson.video_url" :src="lessonVideoUrl(selectedLesson.video_url)"
+                                           controls class="video"
+                                          >
                                     </video>
                                     <div
                                         v-if="userHasAccess === false && !selectedLesson.video_url"
@@ -87,8 +82,6 @@
                                         </button>
                                     </div>
                                 </div>
-
-
 
                                 <!--                            Navigation Buttons-->
                                 <div v-if="selectedLesson" class="flex justify-between items-center p-2 max-w-screen-xl mx-auto">
@@ -113,9 +106,9 @@
 
                                 <TabGroup>
                                     <TabList class="flex items-center max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8 bg-gradient-to-r outline-none font-bold
-                from-blue-200 via-purple-100 to-pink-200 shadow-md orange">
+                                                    from-blue-200 via-purple-100 to-pink-200 shadow-md orange">
                                         <Tab v-slot="{ selected }" as="button" class="flex items-center space-x-2 outline-none focus:outline-none
-                    focus:ring-2 px-3">
+                                                focus:ring-2 px-3">
                                             <template v-if="selected">
                                                 <BookOpenIconSolid class="w-5 h-5 selected-tab outline-none" />
                                             </template>
@@ -302,7 +295,13 @@
                             <div v-if="selectedLesson" class=" ">
                                 <h4 class="text-lg font-semibold mb-2">{{ selectedLesson.title }}</h4>
                                 <div class="video-container">
-                                    <video v-if="selectedLesson.video_url" :src="lessonVideoUrl(selectedLesson.video_url)" controls class="video">
+                                    <video v-if="selectedLesson.video_url" :src="lessonVideoUrl(selectedLesson.video_url)"
+                                           controls class="video"
+                                           @play="startLessonTimer"
+                                           @pause="stopLessonTimer"
+                                           @ended="stopLessonTimer"
+                                           @loadedmetadata="resetTimer"
+                                    >
                                     </video>
                                     <div
                                         v-if="userHasAccess === false && !selectedLesson.video_url"
@@ -460,7 +459,7 @@
 </template>
 
 <script setup>
-import {ref, computed, watchEffect, onMounted} from 'vue';
+import {ref, computed, watchEffect, onMounted, onUnmounted} from 'vue';
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import {BookOpenIcon, ChatBubbleLeftRightIcon, HandThumbUpIcon} from "@heroicons/vue/24/outline/index.js";
 import { HandThumbUpIcon as HandThumbUpIconSolid, BookOpenIcon as BookOpenIconSolid,
@@ -489,20 +488,107 @@ const detailedLessons = ref(props.detailedLessons || []);
 const titleOnlyLessons = ref(props.titleOnlyLessons || []);
 const userHasAccess = ref(props.userHasAccess);
 const selectedLesson = ref(detailedLessons.value[0] || null);
-const additionalData = ref(null);
 const comments = ref([]);
-
-
-watchEffect(() => {
-    if (detailedLessons.value.length > 0) {
-        selectedLesson.value = detailedLessons.value[0];
-    }
-});
-
-
-
-
+const lessonStartTime = ref(null);  // Tracks when the lesson starts
+const timeSpent = ref(0);           // Tracks the total time spent on the current lesson
+const timerInterval = ref(null);
 const totalLessons = computed(() => course.value.lessons?.length || 0);
+const courseId = ref(null);
+const lessonId = ref(null);
+
+// Start tracking time when the lesson is loaded or the video is played
+function startLessonTimer() {
+    if (!lessonStartTime.value) {
+        lessonStartTime.value = new Date();
+
+        console.log('startLessonTimer() called :', lessonStartTime)
+
+    }
+
+    // Start an interval that increments timeSpent every second
+    timerInterval.value = setInterval(() => {
+        const now = new Date();
+        const elapsedTime = Math.floor((now - lessonStartTime.value) / 1000); // Calculate elapsed time in seconds
+        timeSpent.value = elapsedTime;
+    }, 1000);
+}
+
+// Stop the timer and accumulate time when the lesson is paused or the user leaves the lesson
+function stopLessonTimer() {
+    console.log('stopLessonTimer() called')
+
+    if (timerInterval.value) {
+        console.log('stopLessonTimer() called :', timerInterval)
+
+        clearInterval(timerInterval.value); // Stop the timer
+        timerInterval.value = null;
+
+        // Here you can send the accumulated timeSpent to the backend
+        saveTimeSpent(courseId.value, lessonId.value);
+    }
+
+    lessonStartTime.value = null; // Reset start time
+}
+
+// Reset the timer when the user switches lessons
+function resetTimer() {
+    timeSpent.value = 0;          // Reset the time spent
+    lessonStartTime.value = null; // Reset the start time
+    if (timerInterval.value) {
+        clearInterval(timerInterval.value); // Clear any existing interval
+        timerInterval.value = null;
+    }
+}
+
+// Function to save the accumulated time spent on the lesson
+function saveTimeSpent() {
+    const timeInSeconds = timeSpent.value;
+
+    Inertia.post(route('saveLessonTime', { courseId: course.value.id, lessonId: selectedLesson.value.id }), {
+        method: 'post',
+        data: {
+            time_spent: timeInSeconds,
+        },
+        preserveState: true, // Preserve the state of the page
+        preserveScroll: true, // Preserve the scroll position
+        onSuccess: () => {
+            console.log("Time spent saved successfully!");
+        },
+        onError: (errors) => {
+            console.error('Failed to save time spent:', errors);
+        },
+    });
+}
+
+
+// function trackInteraction(interactionType) {
+//     Inertia.post(route('storeInteractions', { courseId: course.value.id }), {
+//         interaction_type: interactionType,
+//         course_id: course.value.id,
+//         lesson_id: selectedLesson.value?.id || null,
+//     }, {
+//         onSuccess: () => {
+//             console.log("Interaction tracked successfully!");
+//         },
+//         onError: (errors) => {
+//             console.error('Failed to track interaction:', errors);
+//         },
+//         preserveState: true, // Preserve the state of the page
+//         preserveScroll: true, // Preserve the scroll position
+//     });
+// }
+
+
+
+
+
+
+
+
+
+
+
+
 const isFirstLesson = computed(() => {
     const currentIndex = course.value.lessons.indexOf(selectedLesson.value);
     return currentIndex === 0;
@@ -515,9 +601,7 @@ const isLastLesson = computed(() => {
 
 
 function goToUser(id){
-
     Inertia.get(route('profilePage', id), {
-
     });
 }
 
@@ -540,6 +624,7 @@ const goToNextLesson = () => {
         if (nextIndex < course.value.lessons.length) {
             // Update selectedLesson to the next lesson
             selectedLesson.value = course.value.lessons[nextIndex];
+            trackInteraction('next_lesson');
         } else {
             console.log('No more lessons.');
         }
@@ -560,6 +645,7 @@ const goToPreviousLesson = () => {
         if (nextIndex < course.value.lessons.length) {
             // Update selectedLesson to the next lesson
             selectedLesson.value = course.value.lessons[nextIndex];
+            trackInteraction('previous_lesson');
         } else {
             console.log('No more lessons.');
         }
@@ -633,9 +719,12 @@ const likeComment = (courseId, lessonId, commentId) => {
 };
 
 async function selectLesson(lesson) {
-    selectedLesson.value = lesson;
-    visible.value = false;
 
+    stopLessonTimer();
+    selectedLesson.value = lesson;
+    resetTimer();
+    visible.value = false;
+    trackInteraction('select_lesson');
 
     try {
         const response = await axios.get(`/api/lessons/${lesson.id}/comments`);
@@ -643,7 +732,6 @@ async function selectLesson(lesson) {
     } catch (error) {
         console.error("Failed to fetch comments:", error);
     }
-
 }
 
 const lessonVideoUrl = videoUrl => `/storage/${videoUrl}`;
@@ -680,7 +768,11 @@ const submitComment = () => {
     });
 };
 
-
+watchEffect(() => {
+    if (detailedLessons.value.length > 0) {
+        selectedLesson.value = detailedLessons.value[0];
+    }
+});
 
 
 
@@ -717,6 +809,9 @@ const leave = (el, done) => {
     done();
 };
 
+onUnmounted(() => {
+    stopLessonTimer();
+});
 
 
 </script>

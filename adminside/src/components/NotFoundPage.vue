@@ -9,7 +9,7 @@
         <p class="text-md md:text-lg text-gray-600 mb-8">
             Redirecting to the home page in <span class="font-bold">{{ countdown }}</span> seconds...
         </p>
-        <router-link to="/admin-dashboard" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-6 rounded-md transition">
+        <router-link to="/where-am-i" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-6 rounded-md transition">
             Go Back Home
         </router-link>
     </div>

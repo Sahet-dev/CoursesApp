@@ -3,7 +3,7 @@
         <div class="container mx-auto flex justify-between items-center">
 
             <router-link
-                to="/admin-dashboard"
+                to="/where-am-i"
                  >
                 <h1 class="text-lg font-semibold">Dashboard</h1>
 

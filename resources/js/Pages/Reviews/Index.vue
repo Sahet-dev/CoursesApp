@@ -15,7 +15,7 @@
                         xmlns="http://www.w3.org/2000/svg"
                         class="w-6 h-6 cursor-pointer"
                         viewBox="0 0 24 24"
-                        fill="none"
+                        fill="currentColor"
                         stroke="currentColor"
                         stroke-width="2"
                         stroke-linecap="round"
@@ -27,7 +27,7 @@
             </div>
             <div>
                 <label for="comment" class="block text-gray-700 font-medium">Comment:</label>
-                <textarea v-model="comment" id="comment" rows="4" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500"></textarea>
+                <textarea v-model="comment" id="comment" rows="4" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500" required></textarea>
             </div>
             <button type="submit" class="px-4 py-2 bg-blue-500 text-white font-semibold rounded-md shadow-sm hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-indigo-500">
                 Submit Review
@@ -45,7 +45,7 @@
                         class="text-yellow-500 w-6 h-6"
                         xmlns="http://www.w3.org/2000/svg"
                         viewBox="0 0 24 24"
-                        fill="none"
+                        fill="currentColor"
                         stroke="currentColor"
                         stroke-width="2"
                         stroke-linecap="round"

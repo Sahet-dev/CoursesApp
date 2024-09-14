@@ -1,0 +1,8 @@
+{
+  "ignoreUnresolved": [],
+  "ignoreUnused": [
+    "ckeditor5-premium-features",
+    "vue"
+  ],
+  "ignoreUnimported": []
+}

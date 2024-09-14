@@ -11,8 +11,10 @@
                     <AdminDashboard v-if="user.role === 'admin'" />
                     <TeacherDashboard v-else-if="user.role === 'teacher'" />
                     <ModeratorDashboard v-else-if="user.role === 'moderator'" />
+
                     <div v-else class="text-red-500">Unauthorized access</div>
                 </div>
+
 
                 <!-- Show error message if present -->
                 <div class="text-red-500" v-if="errorMessage">{{ errorMessage }}</div>
@@ -77,5 +79,8 @@ const handleLogout = async () => {
 onMounted(fetchUser); // Fetch user data when the component is mounted
 </script>
 
+<style>
+
+</style>
 
 

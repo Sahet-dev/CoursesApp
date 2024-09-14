@@ -4,11 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Models\Comment;
 use App\Models\Course;
+use App\Models\Engagement;
 use App\Models\Lessons;
 use App\Models\User;
 use App\Services\CourseService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -62,6 +64,16 @@ class HomeController extends Controller
             ]);
         }
     }
+
+
+
+
+
+
+
+
+
+
 
     public function index(Request $request)
     {
@@ -248,10 +260,35 @@ class HomeController extends Controller
     }
 
 
+    public function saveLessonTime(Request $request, $courseId, $lessonId)
+    {
+        $user = Auth::user();
+        $timeSpent = $request->input('time_spent');
+
+        // Ensure the course and lesson exist
+        $course = Course::findOrFail($courseId);
+        $lesson = Lessons::where('id', $lessonId)->where('course_id', $courseId)->firstOrFail();
+
+        // Update or create an engagement entry for the user, course, and lesson
+        $engagement = Engagement::updateOrCreate(
+            [
+                'user_id' => $user->id,
+                'course_id' => $course->id,
+                'lesson_id' => $lesson->id, // Include lesson_id
+            ],
+            [
+                'time_spent' => DB::raw('time_spent + ' . (int) $timeSpent), // Accumulate time spent
+            ]
+        );
+
+        return back()->with('success', 'Time spent on lesson saved successfully.');
+    }
 
 
+    public function storeInteractions()
+    {
 
-
+}
 
 
 

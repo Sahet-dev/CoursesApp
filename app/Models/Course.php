@@ -32,6 +32,20 @@ class Course extends Model
     {
         return $this->belongsToMany(User::class)->withPivot('completed')->withTimestamps();
     }
+
+
+    public function markUserAsCompleted(User $user): void
+    {
+        $this->users()->updateExistingPivot($user->id, ['completed' => true]);
+    }
+
+    public function isCompletedByUser(User $user): bool
+    {
+        return $this->users()->wherePivot('completed', true)->where('user_id', $user->id)->exists();
+    }
+
+
+
     public function purchases()
     {
         return $this->hasMany(Purchase::class);

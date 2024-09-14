@@ -3,58 +3,50 @@
         <ul class="space-y-2" id="list">
             <li>
                 <router-link
-                    to="/moderator-dashboard"
+                    to="/moderator-dashboard/feedbacks"
                     class="block p-3 rounded-md border border-transparent text-gray-700
           hover:bg-green-100 hover:border-green-300 hover:text-green-900 transition-all duration-300"
                 >
-                    Moderator Dashboard Home
+                    Feedbacks
                 </router-link>
             </li>
             <li>
                 <router-link
-                    to="/moderator-dashboard/content-moderation"
+                    to="/moderator-dashboard/user-management"
                     class="block p-3 rounded-md border border-transparent text-gray-700
           hover:bg-green-100 hover:border-green-300 hover:text-green-900 transition-all duration-300"
                 >
-                    Content Moderation
+                    User Management
                 </router-link>
             </li>
             <li>
                 <router-link
-                    to="/moderator-dashboard/user-reviews"
+                    to="/moderator-dashboard/content-management"
                     class="block p-3 rounded-md border border-transparent text-gray-700
           hover:bg-green-100 hover:border-green-300 hover:text-green-900 transition-all duration-300"
                 >
-                    User Reviews
+                    Content-management
                 </router-link>
             </li>
             <li>
                 <router-link
-                    to="/moderator-dashboard/reports"
+                    to="/moderator-dashboard/comments"
                     class="block p-3 rounded-md border border-transparent text-gray-700
           hover:bg-green-100 hover:border-green-300 hover:text-green-900 transition-all duration-300"
                 >
-                    Reports
+                    Comments
                 </router-link>
             </li>
             <li>
                 <router-link
-                    to="/moderator-dashboard/notifications"
+                    to="/moderator-dashboard/reviews"
                     class="block p-3 rounded-md border border-transparent text-gray-700
           hover:bg-green-100 hover:border-green-300 hover:text-green-900 transition-all duration-300"
                 >
-                    Notifications
+                    Reviews
                 </router-link>
             </li>
-            <li>
-                <router-link
-                    to="/moderator-dashboard/support"
-                    class="block p-3 rounded-md border border-transparent text-gray-700
-          hover:bg-green-100 hover:border-green-300 hover:text-green-900 transition-all duration-300"
-                >
-                    Support
-                </router-link>
-            </li>
+
         </ul>
     </div>
 </template>

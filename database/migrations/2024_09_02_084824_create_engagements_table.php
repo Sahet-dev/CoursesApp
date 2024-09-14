@@ -14,11 +14,13 @@ return new class extends Migration
         Schema::create('engagements', function (Blueprint $table) {
             $table->id();
             $table->foreignId('course_id')->constrained()->onDelete('cascade');
+            $table->foreignId('lesson_id')->constrained('lessons')->onDelete('cascade');
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->boolean('completed')->default(false);
             $table->integer('time_spent')->default(0); // in minutes
             $table->integer('interactions')->default(0); // number of interactions
             $table->integer('assignments_completed')->default(0); // assignments completed
-            $table->timestamps(0);
+            $table->timestamps();
         });
     }
 

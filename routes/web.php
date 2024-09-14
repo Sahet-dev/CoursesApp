@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReviewController;
@@ -24,6 +25,11 @@ Route::middleware('auth')->group(function () {
         ->name('comments.toggleLike')
         ->middleware('auth');
 
+    Route::post('/courses/{courseId}/lessons/{lessonId}/save-time', [HomeController::class, 'saveLessonTime'])->name('saveLessonTime');
+
+    Route::post('/store-interactions/{courseId}', [HomeController::class, 'storeInteractions'])->name('storeInteractions');
+
+
     Route::post('/courses/{course}/lessons/{lesson}/comments', [HomeController::class, 'createComment'])->name('createComment');
     Route::get('/notifications', [HomeController::class, 'notificationsPage'])->name('notifications');
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -32,6 +38,11 @@ Route::middleware('auth')->group(function () {
     Route::post('/profile/update-images', [ProfileController::class, 'uploadAvatar'])->name('profile.updateImages');
     Route::get('/reviews', [ReviewController::class, 'index']);
     Route::post('/reviews', [ReviewController::class, 'store']);
+    Route::post('/feedback', [FeedbackController::class, 'store']);
+
+    Route::get('/feedback', function () {
+        return Inertia::render('components/FeedbackForm');
+    })->name('feedback');
 
 });
 

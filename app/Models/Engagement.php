@@ -11,6 +11,7 @@ class Engagement extends Model
     protected $fillable = [
         'course_id',
         'user_id',
+        'lesson_id',
         'time_spent',
         'interactions',
         'assignments_completed',

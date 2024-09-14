@@ -151,38 +151,11 @@ class LessonController extends Controller
 
 
 
-    public function createQuestionsForLesson(Request $request)
-    {
-        $validated = $request->validate([
-            'lesson_id' => 'required|integer|exists:lessons,id',  // Ensure lesson_id is valid
-            'questions' => 'required|array',
-            'questions.*.question_text' => 'required|string',
-            'questions.*.responses' => 'required|array',
-            'questions.*.responses.*.response_text' => 'required|string',
-            'questions.*.responses.*.is_correct' => 'required|boolean',
-        ]);
 
-        $lessonId = $validated['lesson_id'];
-        $questions = $validated['questions'];
 
-        foreach ($questions as $questionData) {
-            // Create a question associated with the lesson
-            $question = Question::create([
-                'lesson_id' => $lessonId,
-                'question_text' => $questionData['question_text'],
-            ]);
 
-            // Create responses for the question
-            foreach ($questionData['responses'] as $responseData) {
-                $question->responses()->create([
-                    'response_text' => $responseData['response_text'],
-                    'is_correct' => $responseData['is_correct'],
-                ]);
-            }
-        }
 
-        return response()->json(['message' => 'Questions and responses added successfully!'], 201);
-    }
+
     public function updateQuestionsForLesson(Request $request, $lessonId)
     {
         // Check if the user has the 'admin', 'moderator', or 'teacher' role
@@ -192,20 +165,21 @@ class LessonController extends Controller
 
         $user = Auth::user();
 
-        // Fetch the lesson based on the user role
+        // Fetch the lesson
+        $lesson = Lessons::findOrFail($lessonId);
+
+        // Check if the user is allowed to update the lesson
         if ($user->hasRole('teacher')) {
-            // Ensure teachers can only update questions for their own lessons
-            $lesson = Lessons::where('id', $lessonId)
-                ->where('teacher_id', $user->id)
-                ->firstOrFail();
-        } else {
-            // Admins and moderators can update any lesson
-            $lesson = Lessons::findOrFail($lessonId);
+            // Ensure the lesson belongs to a course where the authenticated teacher is the teacher
+            $course = $lesson->course()->firstOrFail();
+
+            if ($course->teacher_id !== $user->id) {
+                return response()->json(['message' => 'Unauthorized'], 403);
+            }
         }
 
         // Validate request data
         $validated = $request->validate([
-            'lesson_id' => 'required|integer|exists:lessons,id',  // Ensure lesson_id is valid
             'questions' => 'required|array',
             'questions.*.id' => 'nullable|integer|exists:questions,id',  // Allow for both creating new and updating existing questions
             'questions.*.question_text' => 'required|string',
@@ -307,20 +281,16 @@ class LessonController extends Controller
 
         $user = Auth::user();
 
-        // Determine the lesson query based on user role
-        if ($user->hasRole('teacher')) {
-            // For teachers, ensure they only access their own lessons
-            $lesson = Lessons::with('questions.responses')
-                ->where('id', $lessonId)
-                ->where('teacher_id', $user->id) // Ensure the lesson belongs to the authenticated teacher
-                ->first();
-        } else {
-            // For admins and moderators, load any lesson by its ID
-            $lesson = Lessons::with('questions.responses')->find($lessonId);
-        }
+        // Retrieve the lesson with its course information
+        $lesson = Lessons::with('questions.responses', 'course')->find($lessonId);
 
         if (!$lesson) {
             return response()->json(['message' => 'Lesson not found.'], 404);
+        }
+
+        // Check if the user is a teacher and if they own the lesson's course
+        if ($user->hasRole('teacher') && $lesson->course->teacher_id !== $user->id) {
+            return response()->json(['message' => 'Unauthorized'], 403);
         }
 
         // Extract questions and responses directly from the lesson
@@ -340,6 +310,7 @@ class LessonController extends Controller
 
         return response()->json(['questions' => $questions]);
     }
+
 
 
 

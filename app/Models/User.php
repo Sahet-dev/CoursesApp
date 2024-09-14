@@ -69,6 +69,20 @@ class User extends Authenticatable
         return $this->hasMany(Comment::class);
     }
 
+
+    public function markCourseAsCompleted(Course $course): void
+    {
+        $this->courses()->updateExistingPivot($course->id, ['completed' => true]);
+    }
+
+    public function isCourseCompleted(Course $course): bool
+    {
+        return $this->courses()->wherePivot('completed', true)->where('course_id', $course->id)->exists();
+    }
+
+
+
+
     public function hasRole($roles)
     {
         if (is_array($roles)) {

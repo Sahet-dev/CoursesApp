@@ -13,11 +13,12 @@ return new class extends Migration
     {
         Schema::create('feedback', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->foreignId('course_id')->constrained()->onDelete('cascade');
-            $table->integer('rating')->nullable(); // E.g., 1 to 5 stars
-            $table->text('feedback_text')->nullable();
+            $table->unsignedBigInteger('user_id');
+            $table->text('message');
+            $table->enum('type', ['support', 'feedback']);
             $table->timestamps();
+
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
         });
     }
 

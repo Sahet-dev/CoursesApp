@@ -1,6 +1,8 @@
 <template>
     <div>
-        <div class="container mx-auto   overflow-y-auto">
+
+<Navbar/>
+        <div class="container mx-auto   ">
             <!-- Course Header -->
             <div v-if="visible" class="container mx-auto p-4 lg:p-12">
                 <h1 class="text-2xl lg:text-4xl font-bold mb-4 lg:mb-6">{{ course.title }}</h1>
@@ -72,7 +74,13 @@
                     <div v-if="selectedLesson" class=" ">
                         <h4 class="text-lg font-semibold mb-2">{{ selectedLesson.title }}</h4>
                         <div class="video-container">
-                            <video v-if="selectedLesson.video_url" :src="lessonVideoUrl(selectedLesson.video_url)" controls class="video">
+                            <video v-if="selectedLesson.video_url" :src="lessonVideoUrl(selectedLesson.video_url)"
+                                   controls class="video"
+                                   @play="startLessonTimer"
+                                   @pause="stopLessonTimer"
+                                   @ended="stopLessonTimer"
+                                   @loadedmetadata="resetTimer"
+                            >
                             </video>
                             <div
                                 v-if="userHasAccess === false && !selectedLesson.video_url"
@@ -89,14 +97,14 @@
 
 
                         <!--                            Navigation Buttons-->
-                        <div v-if="selectedLesson" class="flex justify-between items-center p-2 max-w-screen-xl mx-auto">
+                        <div v-if="selectedLesson" class="flex justify-between items-center    p-2 max-w-screen-xl mx-auto">
                             <button
                                 @click="goToPreviousLesson"
                                 :disabled="isFirstLesson"
                                 class="flex items-center justify-center bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 disabled:opacity-50 transition duration-200"
                             >
                                 <ChevronDoubleLeftIcon class="w-5 h-5"/>
-                                <span class="hidden lg:inline-block ml-3 text-sm lg:text-base">Previous  </span>
+                                <span class="hidden lg:inline-block ml-3 text-sm lg:text-base">Previous</span>
                             </button>
                             <button
                                 @click="goToNextLesson"
@@ -112,7 +120,7 @@
                         <TabGroup>
                             <TabList class="flex items-center max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8 bg-gradient-to-r outline-none font-bold
                 from-blue-200 via-purple-100 to-pink-200 shadow-md orange">
-                                <Tab v-slot="{ selected }" as="button" class="flex items-center space-x-2 outline-none focus:outline-none
+                                <Tab  v-slot="{ selected }" as="button"  class="flex items-center space-x-2 outline-none focus:outline-none
                     focus:ring-2 px-3">
                                     <template v-if="selected">
                                         <BookOpenIconSolid class="w-5 h-5 selected-tab outline-none" />
@@ -140,24 +148,12 @@
 
                                 <transition name="tab" @before-enter="beforeEnter" @enter="enter" @leave="leave">
                                     <TabPanel key="activity" class="p-3  ">
-
-                                        <div
-                                            v-if="userHasAccess === false && !selectedLesson.markdown_text"
-                                            class="video w-full h-64 flex flex-col items-center justify-center bg-pink-50 text-gray-600 rounded mb-4 p-4"
-                                        >
-                                            <h2 class="text-xl font-semibold mb-4 text-center">Access Restricted</h2>
-                                            <p class="mb-6 text-center">Please subscribe or purchase to access this course's lessons.</p>
-                                            <button class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
-                                                Subscribe or Purchase
-                                            </button>
-                                        </div>
-                                        <div v-else class="max-w-4xl mx-auto p-6 bg-white shadow-md rounded-lg">
+                                        <div class="max-w-4xl mx-auto p-6 bg-white shadow-md rounded-lg">
                                             <div v-html="selectedLesson.markdown_text"></div>
 
                                         </div>
                                     </TabPanel>
                                 </transition>
-
                                 <transition name="tab" @before-enter="beforeEnter" @enter="enter" @leave="leave">
                                     <TabPanel key="account" class="p-3  ">
                                         <div class="max-w-4xl mx-auto p-6 bg-white shadow-md rounded-lg">
@@ -165,8 +161,20 @@
                                             <div v-if="comments.length > 0">
                                                 <h2 class="text-xl sm:text-2xl font-semibold mb-4">Comments</h2>
                                                 <div v-for="comment in comments" :key="comment.id" class="mb-4 sm:mb-6 p-3 sm:p-4 bg-gray-100 rounded-md">
-                                                    <div class="flex items-center mb-2">
-                                                        <div class="font-bold text-base sm:text-lg">{{ comment.user.name }}</div>
+                                                    <div class="flex items-center mb-2 cursor-pointer hover:underline" @click="goToUser(comment.user.id)">
+                                                        <div class="flex items-center space-x-4">
+                                                            <!-- Avatar Image -->
+                                                            <img
+                                                                :src="(comment.user.avatar ? `/storage/${comment.user.avatar}` : defaultAvatar)"
+                                                                alt="User Avatar"
+                                                                class="w-12 h-12 sm:w-16 sm:h-16 rounded-full object-cover shadow-lg"
+                                                            >
+                                                            <!-- User Name -->
+                                                            <div class="font-bold text-base sm:text-lg">
+                                                                {{ comment.user.name }}
+                                                            </div>
+                                                        </div>
+
                                                     </div>
                                                     <p class="text-gray-800 mb-2 break-words text-sm sm:text-base">{{ comment.comment }}</p>
                                                     <div class="text-xs sm:text-sm text-gray-500">Likes: {{ comment.likes_count }}</div>
@@ -222,43 +230,145 @@
                 </div>
             </div>
         </div>
-    </div>
 
+
+    </div>
 </template>
 
 <script setup>
-import {ref, computed, watchEffect, onMounted} from 'vue';
-import {BookOpenIcon, ChatBubbleLeftRightIcon, HandThumbUpIcon} from "@heroicons/vue/24/outline/index.js";
-import { HandThumbUpIcon as HandThumbUpIconSolid, BookOpenIcon as BookOpenIconSolid,
-    ChatBubbleLeftRightIcon as ChatBubbleLeftRightIconSolid, ChevronDoubleRightIcon, ChevronDoubleLeftIcon} from "@heroicons/vue/24/solid";
-import axios from 'axios';
+import { ref, computed, watchEffect, onMounted, onUnmounted } from 'vue';
+import apiClient from "../../axios/index.js";
+import {useRoute} from "vue-router";
+import {BookOpenIcon, ChatBubbleLeftRightIcon} from "@heroicons/vue/24/outline/index.js";
+import {BookOpenIcon as BookOpenIconSolid,
+    ChatBubbleLeftRightIcon as ChatBubbleLeftRightIconSolid,
+    ChevronDoubleRightIcon, ChevronDoubleLeftIcon
+} from "@heroicons/vue/24/solid";
+import defaultAvatar   from "../../assets/avatar_default.png";
 import {Tab, TabGroup, TabList, TabPanel, TabPanels} from "@headlessui/vue";
-import {Inertia} from "@inertiajs/inertia";
-import apiClient from "../../api/axios.js";
+import Navbar from "../Navbar.vue";
 
 
 
-
-const courses = ref([]);
-const visible = ref(true);
-const detailedLessons = ref(props.detailedLessons || []);
-const titleOnlyLessons = ref(props.titleOnlyLessons || []);
-const userHasAccess = ref(props.userHasAccess);
-const selectedLesson = ref(detailedLessons.value[0] || null);
-const additionalData = ref(null);
+const courseData = ref({});
+// const selectedLesson = ref(null);
+const showSidebar = ref(true);
 const comments = ref([]);
-
-
-watchEffect(() => {
-    if (detailedLessons.value.length > 0) {
-        selectedLesson.value = detailedLessons.value[0];
-    }
-});
-
-
-
-
+const lessonStartTime = ref(null);
+const timeSpent = ref(0);
+const timerInterval = ref(null);
+const courseId = ref(null);
+const lessonId = ref(null);
+const user = ref(null);
+const lessons = ref([]);
+const course = ref({ lessons: [] });
+const userHasAccess = ref(false);
+const authenticated = ref(false);
+const route = useRoute();
+const visible = ref(true);
+const detailedLessons = ref(  []);
+const titleOnlyLessons = ref(  []);
+const selectedLesson = ref( null);
 const totalLessons = computed(() => course.value.lessons?.length || 0);
+
+
+
+
+
+// Fetch data on component mount
+const fetchCoursesData = async () => {
+    const courseId = route.params.id;
+    try {
+        const response = await apiClient.get(`/api-courses/${courseId}`);
+        const data = response.data;
+        console.log(data)
+        // Assign the response data to the refs
+        course.value = data.course;
+        lessons.value = data.lessons;
+        userHasAccess.value = data.userHasAccess;
+        authenticated.value = data.authenticated;
+        user.value = data.user;
+
+    } catch (error) {
+        console.error('Failed to fetch course data:', error);
+        // Handle the error (e.g., show a notification or redirect)
+    }
+};
+
+
+
+
+
+
+
+
+
+
+
+function startLessonTimer() {
+    if (!lessonStartTime.value) {
+        lessonStartTime.value = new Date();
+
+        console.log('startLessonTimer() called :', lessonStartTime)
+
+    }
+
+    // Start an interval that increments timeSpent every second
+    timerInterval.value = setInterval(() => {
+        const now = new Date();
+        const elapsedTime = Math.floor((now - lessonStartTime.value) / 1000); // Calculate elapsed time in seconds
+        timeSpent.value = elapsedTime;
+    }, 1000);
+}
+
+// Stop the timer and accumulate time when the lesson is paused or the user leaves the lesson
+function stopLessonTimer() {
+    console.log('stopLessonTimer() called')
+
+    if (timerInterval.value) {
+        console.log('stopLessonTimer() called :', timerInterval)
+
+        clearInterval(timerInterval.value); // Stop the timer
+        timerInterval.value = null;
+
+        // Here you can send the accumulated timeSpent to the backend
+        saveTimeSpent(courseId.value, lessonId.value);
+    }
+
+    lessonStartTime.value = null; // Reset start time
+}
+
+// Reset the timer when the user switches lessons
+function resetTimer() {
+    timeSpent.value = 0;          // Reset the time spent
+    lessonStartTime.value = null; // Reset the start time
+    if (timerInterval.value) {
+        clearInterval(timerInterval.value); // Clear any existing interval
+        timerInterval.value = null;
+    }
+}
+
+// Function to save the accumulated time spent on the lesson
+function saveTimeSpent() {
+    const timeInSeconds = timeSpent.value;
+
+    Inertia.visit(route('saveLessonTime', {courseId: course.value.id, lessonId: selectedLesson.value.id}), {
+        method: 'post', // Use the POST method
+        data: {
+            time_spent: timeInSeconds,
+        },
+        preserveState: true, // Preserve the state of the page
+        preserveScroll: true, // Preserve the scroll position
+        onSuccess: () => {
+            console.log("Time spent saved successfully!");
+        },
+        onError: (errors) => {
+            console.error('Failed to save time spent:', errors);
+        },
+    });
+}
+
+
 const isFirstLesson = computed(() => {
     const currentIndex = course.value.lessons.indexOf(selectedLesson.value);
     return currentIndex === 0;
@@ -270,27 +380,9 @@ const isLastLesson = computed(() => {
 });
 
 
-function goToUser(id){
-
-    Inertia.get(route('profilePage', id), {
-
-    });
+function goToUser(id) {
+    Inertia.get(route('profilePage', id), {});
 }
-
-
-const fetchCourses = async () => {
-    try {
-        const response = await apiClient.get('/teacher/courses');
-        courses.value = response.data.data;
-        console.log(courses.value)
-    } catch (error) {
-        console.error('Failed to fetch courses:', error);
-    }
-};
-
-
-
-
 
 
 const goToNextLesson = () => {
@@ -334,32 +426,6 @@ const goToPreviousLesson = () => {
 };
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 const totalDuration = computed(() => {
     return course.value.lessons?.reduce((total, lesson) => {
         if (!lesson.duration) return total;
@@ -381,84 +447,36 @@ const completionPercentage = computed(() => {
 });
 
 
-const likeComment = (courseId, lessonId, commentId) => {
-    Inertia.post(`/courses/${courseId}/lessons/${lessonId}/comments/${commentId}/toggle-like`, {}, {
-        onSuccess: (page) => {
-            // Update the local state with the new lesson data if necessary
-            console.log(page.props.message); // "Liked" or "Unliked"
-            // Optionally update component state here if you need
-        },
-        onError: (errors) => {
-            // Handle errors
-            console.error('Error toggling like:', errors);
-        },
-        preserveState: true, // Keep current page state
-    });
-};
-
 async function selectLesson(lesson) {
+
+    stopLessonTimer();
     selectedLesson.value = lesson;
+    resetTimer();
     visible.value = false;
 
-
     try {
-        const response = await axios.get(`/api/lessons/${lesson.id}/comments`);
+        const response = await apiClient.get(`/lessons/${lesson.id}/comments`);
         comments.value = response.data;
     } catch (error) {
         console.error("Failed to fetch comments:", error);
     }
-
 }
 
-const lessonVideoUrl = videoUrl => `/storage/${videoUrl}`;
-const thumbnailUrl = computed(() => `/storage/${course.value.thumbnail}`);
 
-function redirectToPurchase() {
-    window.location.href = '/subscribe-or-purchase';
-}
 
 
 
 
 const newComment = ref('');
 
-const submitComment = () => {
-    if (!course.value.id || !selectedLesson.value.id || !newComment.value.trim()) {
-        console.error('Course ID, Lesson ID or Comment is missing');
-        return;
+
+
+
+watchEffect(() => {
+    if (detailedLessons.value.length > 0) {
+        selectedLesson.value = detailedLessons.value[0];
     }
-
-    Inertia.post(`/courses/${course.value.id}/lessons/${selectedLesson.value.id}/comments`, {
-        comment: newComment.value.trim()
-    }, {
-        onSuccess: (page) => {
-            console.log('Comment submitted successfully');
-            newComment.value = ''; // Clear the input field
-            selectLesson(selectedLesson.value);
-        },
-        onError: (errors) => {
-            // Handle errors
-            console.error('Error submitting comment:', errors);
-        },
-        preserveState: true, // Keep current page state
-    });
-};
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+});
 
 
 const beforeEnter = (el) => {
@@ -481,10 +499,76 @@ const leave = (el, done) => {
     done();
 };
 
+onUnmounted(() => {
+    stopLessonTimer();
+});
 
-fetchCourses();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+const likeComment = (courseId, lessonId, commentId) => {
+    apiClient.post(`/courses/${courseId}/lessons/${lessonId}/comments/${commentId}/toggle-like`)
+        .then(response => {
+            console.log(response.data.message);
+        })
+        .catch(error => {
+            console.error('Error toggling like:', error);
+        });
+};
+
+const submitComment = () => {
+    if (!courseData.value.id || !selectedLesson.value.id || !newComment.value.trim()) {
+        console.error('Course ID, Lesson ID or Comment is missing');
+        return;
+    }
+
+    apiClient.post(`/courses/${courseData.value.id}/lessons/${selectedLesson.value.id}/comments`, {
+        comment: newComment.value.trim()
+    })
+        .then(() => {
+            console.log('Comment submitted successfully');
+            newComment.value = ''; // Clear the input field
+            selectLesson(selectedLesson.value);
+        })
+        .catch(error => {
+            console.error('Error submitting comment:', error);
+        });
+};
+
+const lessonVideoUrl = videoUrl => `/storage/${videoUrl}`;
+const thumbnailUrl = computed(() => `/storage/${courseData.value.thumbnail}`);
+function redirectToPurchase() {
+    window.location.href = '/subscribe-or-purchase';
+}
+
+// Lifecycle hooks
+onUnmounted(() => {
+    stopLessonTimer();
+});
+
+
+
+fetchCoursesData();
+
+
+
 </script>
-
 <style>
 .orange {
     font-weight: bold;

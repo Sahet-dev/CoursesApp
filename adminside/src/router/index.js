@@ -1,47 +1,34 @@
 import { createRouter, createWebHistory } from 'vue-router';
 
-// Import components for teacher routes
 import Dashboard from "../views/Dashboard.vue";
-import TeacherDashboardHome from '../components/Course/teacher/TeacherDashboardHome.vue';
-import CourseOverview from '../components/Course/teacher/CourseOverview.vue';
-import CreateNewCourse from '../components/Course/teacher/CreateNewCourse.vue';
-import EditCourse from '../components/Course/teacher/EditCourse.vue';
-import DeleteCourse from '../components/Course/teacher/DeleteCourse.vue';
 import EnrollmentList from '../components/Course/teacher/EnrollmentList.vue';
 import StudentPerformance from '../components/Course/teacher/StudentPerformance.vue';
-import Notifications from '../components/Course/teacher/Notifications.vue';
+import Reviews from '../components/Course/teacher/Reviews.vue';
 import ProfileManagement from '../components/Course/teacher/FinanceReports.vue';
-import CourseSettings from '../components/Course/teacher/CourseSettings.vue';
-import Support from '../components/Support.vue';
 import apiClient from "../api/axios.js";
 import Login from "../components/Login.vue";
-import CreateTestForm from "../components/Course/LessonTestUpdate.vue";
-import UpdateTest from '../components/Course/ViewCreateTest.vue';
 
 // Import components for admin routes
-import AdminDashboard from '../components/Course/admin/AdminDashboard.vue';
 import UserManagement from '../components/Course/admin/UserManagement.vue';
 import ContentManagement from '../components/Course/admin/ContentManagement.vue';
-import SiteSettings from '../components/Course/admin/SiteSettings.vue';
 import Analytics from '../components/Course/admin/Analytics.vue';
-import SupportAdmin from '../components/Course/admin/SupportAdmin.vue';
-import Security from '../components/Course/admin/Security.vue';
-import Customization from '../components/Course/admin/Customization.vue';
 
-// Import components for moderator routes
-import ModeratorDashboard from '../components/Course/moderator/ModeratorDashboard.vue';
-import ContentModeration from '../components/Course/moderator/ContentModeration.vue';
-import UserReviews from '../components/Course/moderator/UserReviews.vue';
-import Reports from '../components/Course/moderator/Reports.vue';
-import Courses from "../views/CoursesLis.vue";
+import Comments from '../components/Course/moderator/Comments.vue';
 import CourseCreationForm from "../components/Course/CourseCreationForm.vue";
 import CourseUpdateForm from "../components/Course/CourseUpdateForm.vue";
 import CourseData from "../components/Course/CourseData.vue";
 import NotFoundPage from "../components/NotFoundPage.vue";
-import Unauthorized from "../components/Unauthorized.vue";
 import ViewCreateTest from "../components/Course/ViewCreateTest.vue";
 import LessonTestUpdate from "../components/Course/LessonTestUpdate.vue";
 import TeacherContentManagement from "../components/Course/teacher/TeacherContentManagement.vue";
+import FeedbackList from "../components/Course/teacher/FeedbackList.vue";
+import AdminMessage from "../components/Course/AdminMessage.vue";
+import ActiveUsersCard from "../components/Course/admin/analytics/ActiveUsersCard.vue";
+import EngagementMetricsTable from "../components/Course/admin/analytics/EngagementMetricsTable.vue";
+import NewSubscriptionsCard from "../components/Course/admin/analytics/NewSubscriptionsCard.vue";
+import ReatantionRatesTable from "../components/Course/admin/analytics/ReatantionRatesTable.vue";
+import RateCard from "../components/Course/admin/analytics/RateCard.vue";
+import FinancialMetrics from "../components/Course/admin/analytics/FinancialMetrics.vue";
 
 const routes = [
     // Teacher routes
@@ -49,17 +36,13 @@ const routes = [
         path: '/teacher-dashboard',
         component: Dashboard,
         children: [
-            { path: '', component: TeacherDashboardHome },
+            { path: '', component: AdminMessage },
             { path: 'courses', component: TeacherContentManagement },
             { path: 'new-course', component: CourseCreationForm },
-            { path: 'edit-course/:courseId', component: EditCourse, props: true },
-            { path: 'delete-course/:courseId', component: DeleteCourse, props: true },
             { path: 'enrollment-list', component: EnrollmentList },
             { path: 'student-performance', component: StudentPerformance },
-            { path: 'notifications', component: Notifications },
-            { path: 'profile-management', component: ProfileManagement },
-            { path: 'course-settings', component: CourseSettings },
-            { path: 'support', component: Support },
+            { path: 'reviews', component: Reviews },
+            { path: 'financial-reports', component: ProfileManagement },
         ]
     },
     {
@@ -83,18 +66,26 @@ const routes = [
             {
                 path: '/tests/:id/create',
                 name: 'ViewCreateTest',
-                component: ViewCreateTest, // Define UpdateTest route here
-                props: true, // Pass route params as props to the component
+                component: ViewCreateTest,
+                props: true,
             },
 
-            { path: '', component: Courses },
+            { path: '', component: AdminMessage },
             { path: 'user-management', component: UserManagement },
             { path: 'content-management', component: ContentManagement },
-            { path: 'site-settings', component: SiteSettings },
+            { path: 'feedbacks', component: FeedbackList },
             { path: 'analytics', component: Analytics },
-            { path: 'support', component: SupportAdmin },
-            { path: 'customization', component: Customization },
             { path: 'new-course', component: CourseCreationForm },
+
+            { path: 'course-engagement', component: EngagementMetricsTable },
+            { path: 'active-users', component: ActiveUsersCard },
+            { path: 'new-subscriptions', component: NewSubscriptionsCard },
+            { path: 'churn-rate', component: RateCard },
+            { path: 'retention-rate', component: ReatantionRatesTable },
+            { path: 'financial-metrics', component: FinancialMetrics },
+
+
+
         ]
     },
 
@@ -103,16 +94,13 @@ const routes = [
         path: '/moderator-dashboard',
         component: Dashboard,
         children: [
-            { path: '', component: ContentModeration },
+            { path: '', component: AdminMessage },
             { path: 'user-management', component: UserManagement },
+            { path: 'feedbacks', component: FeedbackList },
             { path: 'content-management', component: ContentManagement },
+            { path: 'comments', component: Comments },
+            { path: 'reviews', component: Reviews },
 
-
-            { path: 'content-moderation', component: ContentModeration },
-            { path: 'user-reviews', component: UserReviews },
-            { path: 'reports', component: Reports },
-            { path: 'notifications', component: Notifications },
-            { path: 'support', component: Support },
         ]
     },
     {
@@ -127,10 +115,11 @@ const routes = [
         component: CourseData,
         props: true,
     },
+
     {
-        path: '/unauthorized',
-        name: 'Unauthorized',
-        component: Unauthorized
+        path: '/where-am-i',
+        name: 'Dashboard',
+        component: Dashboard
     },
 
     {
@@ -139,11 +128,7 @@ const routes = [
         component: NotFoundPage
     },
 
-    // Redirect or catch-all route
-    // {
-    //     path: '/:catchAll(.*)',
-    //     redirect: '/teacher-dashboard'
-    // }
+
 ];
 
 const router = createRouter({
