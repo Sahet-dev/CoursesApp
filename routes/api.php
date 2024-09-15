@@ -10,8 +10,9 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LessonController;
 use App\Http\Controllers\TeacherControlle;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\UsersAuthController;
 use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
+
 
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -98,19 +99,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/teacher/dashboard-data', [TeacherControlle::class, 'getDashboardData']);
     Route::get('/student-performance', [TeacherControlle::class, 'showStudentPerformance']);
 
-
-
-
-
-
-
-
-
-
-
-
-
 });
+
+
 
 
 
@@ -123,8 +114,12 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
 Route::middleware(['auth:sanctum'])->group(function () {
-
+    Route::post('/save-comment', [FrontendCourseController::class, 'storeComment']);
+    Route::post('/courses/{course}/lessons/{lesson}/comments', [FrontendCourseController::class, 'storeComment'])->name('createComment');
 
 });
+Route::post('/login-user', [UsersAuthController::class, 'login']);
+Route::post('/user-api/register', [UsersAuthController::class, 'register']);
+
 Route::get('/api-course', [FrontendCourseController::class, 'getCourses']);
 Route::get('/api-courses/{courseId}', [FrontendCourseController::class, 'showCourse']);

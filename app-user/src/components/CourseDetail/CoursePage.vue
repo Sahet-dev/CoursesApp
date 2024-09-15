@@ -287,7 +287,7 @@ const fetchCoursesData = async () => {
         lessons.value = data.lessons;
         userHasAccess.value = data.userHasAccess;
         authenticated.value = data.authenticated;
-        user.value = data.user;
+        // user.value = data.user;
 
     } catch (error) {
         console.error('Failed to fetch course data:', error);

@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Comment;
+use App\Models\Lessons;
+use App\Models\Course;
 use App\Services\CourseService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -69,6 +72,8 @@ class FrontendCourseController extends Controller
         $course = $this->courseService->getCourseByIdWithAccessControl($id);
 
         $user = Auth::check() ? Auth::user() : null;
+        dd($user);
+//        $user = Auth::check() ? Auth::user() : null;
 
         // Determine if the user has access to all course content
         $userHasAccess = $this->courseService->checkUserAccessStatus($user, $id);
@@ -80,11 +85,43 @@ class FrontendCourseController extends Controller
         return response()->json([
             'authenticated' => (bool)$user,
             'course' => $course,
-            'user' => $user,
+//            'user' => $user,
             'userHasAccess' => $userHasAccess, // Pass the access status
             'lessons' => $lessons,
         ]);
     }
+
+
+
+
+
+
+
+
+    public function storeComment(Request $request, Course $course, Lessons $lesson): JsonResponse
+    {
+        // Validate the comment input
+        $validated = $request->validate([
+            'comment' => 'required|string|max:1000',
+        ]);
+
+        // Check if the user has access to the course
+        $user = Auth::user();
+
+        if (!$course->isAvailableToUser($user)) {
+            return response()->json(['error' => 'You do not have access to this course.'], 403);
+        }
+
+        // Create the comment
+        $comment = Comment::create([
+            'lesson_id' => $lesson->id,
+            'user_id' => $user->id,
+            'comment' => $validated['comment'],
+        ]);
+
+        return response()->json(['message' => 'Comment added successfully!', 'comment' => $comment], 201);
+    }
+
 
 
 }
