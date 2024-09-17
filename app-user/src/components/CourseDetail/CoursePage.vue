@@ -6,11 +6,13 @@
             <!-- Course Header -->
             <div v-if="visible" class="container mx-auto p-4 lg:p-12">
                 <h1 class="text-2xl lg:text-4xl font-bold mb-4 lg:mb-6">{{ course.title }}</h1>
-                <img :src="thumbnailUrl" :alt="course.title" class="w-full h-auto rounded-lg shadow-lg mb-4 lg:mb-6" />
+                <div class="aspect-ratio-box">
+                    <img :src="`http://localhost:8000/storage/${course.thumbnail}`" :alt="course.title" class="thumbnail" />
+                </div>
+
                 <p class="text-base lg:text-lg text-gray-700 mb-4">{{ course.description }}</p>
                 <p class="text-lg lg:text-xl font-bold text-gray-900 mb-4">${{ course.price }}</p>
             </div>
-
             <!-- Sidebar and Content Area -->
             <div class="flex flex-col md:flex-row p-4">
                 <!-- Sidebar -->
@@ -71,7 +73,7 @@
 
                 <!-- Content Area -->
                 <div v-if="visible===false" class="bg-white p-4 rounded  w-full shadow md:flex-1  ">
-                    <div v-if="selectedLesson" class=" ">
+                    <div v-if="selectedLesson" class=" ">aaa
                         <h4 class="text-lg font-semibold mb-2">{{ selectedLesson.title }}</h4>
                         <div class="video-container">
                             <video v-if="selectedLesson.video_url" :src="lessonVideoUrl(selectedLesson.video_url)"
@@ -119,9 +121,9 @@
 
                         <TabGroup>
                             <TabList class="flex items-center max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8 bg-gradient-to-r outline-none font-bold
-                from-blue-200 via-purple-100 to-pink-200 shadow-md orange">
+                                    from-blue-200 via-purple-100 to-pink-200 shadow-md orange">
                                 <Tab  v-slot="{ selected }" as="button"  class="flex items-center space-x-2 outline-none focus:outline-none
-                    focus:ring-2 px-3">
+                                        focus:ring-2 px-3">
                                     <template v-if="selected">
                                         <BookOpenIconSolid class="w-5 h-5 selected-tab outline-none" />
                                     </template>
@@ -131,7 +133,7 @@
                                     <span   :class="[selected ? 'selected-tab' : 'orange']">Guides</span>
                                 </Tab>
                                 <Tab v-slot="{ selected }" as="button" class="flex items-center space-x-2 outline-none focus:outline-none
-                    focus:ring-2 px-3">
+                                        focus:ring-2 px-3">
                                     <template v-if="selected">
                                         <ChatBubbleLeftRightIconSolid class="w-5 h-5 selected-tab outline-none" />
 
@@ -248,11 +250,7 @@ import defaultAvatar   from "../../assets/avatar_default.png";
 import {Tab, TabGroup, TabList, TabPanel, TabPanels} from "@headlessui/vue";
 import Navbar from "../Navbar.vue";
 
-
-
 const courseData = ref({});
-// const selectedLesson = ref(null);
-const showSidebar = ref(true);
 const comments = ref([]);
 const lessonStartTime = ref(null);
 const timeSpent = ref(0);
@@ -260,6 +258,7 @@ const timerInterval = ref(null);
 const courseId = ref(null);
 const lessonId = ref(null);
 const user = ref(null);
+const currentUser = ref(null);
 const lessons = ref([]);
 const course = ref({ lessons: [] });
 const userHasAccess = ref(false);
@@ -270,39 +269,44 @@ const detailedLessons = ref(  []);
 const titleOnlyLessons = ref(  []);
 const selectedLesson = ref( null);
 const totalLessons = computed(() => course.value.lessons?.length || 0);
+// const baseUrl = import.meta.env.VITE_APP_URL || 'http://localhost:8000';
 
+// const thumbnailUrl = computed(() => `${baseUrl}/storage/${courseData.value.thumbnail}`);
 
-
-
+const fetchUserData = async () => {
+    try {
+        const response = await apiClient.get('/user'); // Fetch user info
+        const userData = response.data;
+        currentUser.value = userData; // Assign user data
+        return userData;
+    } catch (error) {
+        console.error('Failed to fetch user data:', error);
+        return null; // Return null if there's an error (user not authenticated)
+    }
+};
 
 // Fetch data on component mount
 const fetchCoursesData = async () => {
     const courseId = route.params.id;
     try {
-        const response = await apiClient.get(`/api-courses/${courseId}`);
+        let response;
+        const userData = await fetchUserData();
+
+        if (userData) {
+            response = await apiClient.get(`/api-private-courses/${courseId}`);
+        } else {
+            response = await apiClient.get(`/api-courses/${courseId}`);
+        }
         const data = response.data;
-        console.log(data)
-        // Assign the response data to the refs
+
         course.value = data.course;
         lessons.value = data.lessons;
         userHasAccess.value = data.userHasAccess;
-        authenticated.value = data.authenticated;
-        // user.value = data.user;
-
+        authenticated.value = !!userData;
     } catch (error) {
         console.error('Failed to fetch course data:', error);
-        // Handle the error (e.g., show a notification or redirect)
     }
 };
-
-
-
-
-
-
-
-
-
 
 
 function startLessonTimer() {
@@ -331,7 +335,6 @@ function stopLessonTimer() {
         clearInterval(timerInterval.value); // Stop the timer
         timerInterval.value = null;
 
-        // Here you can send the accumulated timeSpent to the backend
         saveTimeSpent(courseId.value, lessonId.value);
     }
 
@@ -349,26 +352,19 @@ function resetTimer() {
 }
 
 // Function to save the accumulated time spent on the lesson
-function saveTimeSpent() {
+const saveTimeSpent = async () => {
     const timeInSeconds = timeSpent.value;
 
-    Inertia.visit(route('saveLessonTime', {courseId: course.value.id, lessonId: selectedLesson.value.id}), {
-        method: 'post', // Use the POST method
-        data: {
+    try {
+        // Make an API request to the backend
+        const response = await apiClient.post(`/courses/${course.value.id}/lessons/${selectedLesson.value.id}/save-time`, {
             time_spent: timeInSeconds,
-        },
-        preserveState: true, // Preserve the state of the page
-        preserveScroll: true, // Preserve the scroll position
-        onSuccess: () => {
-            console.log("Time spent saved successfully!");
-        },
-        onError: (errors) => {
-            console.error('Failed to save time spent:', errors);
-        },
-    });
-}
-
-
+        });
+    } catch (error) {
+        // Handle errors
+        console.error('Failed to save time spent:', error.response ? error.response.data : error);
+    }
+};
 const isFirstLesson = computed(() => {
     const currentIndex = course.value.lessons.indexOf(selectedLesson.value);
     return currentIndex === 0;
@@ -380,21 +376,40 @@ const isLastLesson = computed(() => {
 });
 
 
+
+async function trackInteraction(interactionType) {
+    try {
+        const response = await apiClient.post(`/api/interactions`, {
+            interaction_type: interactionType,
+            course_id: course.value.id,
+            lesson_id: selectedLesson.value?.id || null,
+        });
+
+        if (response.status === 200) {
+            console.log("Interaction tracked successfully!");
+        } else {
+            console.error('Failed to track interaction:', response);
+        }
+    } catch (error) {
+        console.error('Failed to track interaction:', error.response ? error.response.data : error.message);
+    }
+}
+
+
+
+
 function goToUser(id) {
     Inertia.get(route('profilePage', id), {});
 }
 
 
 const goToNextLesson = () => {
-    // Find the index of the current lesson
     const currentIndex = course.value.lessons.indexOf(selectedLesson.value);
 
     if (currentIndex !== -1) {
-        // Calculate the index of the next lesson
         const nextIndex = currentIndex + 1;
 
         if (nextIndex < course.value.lessons.length) {
-            // Update selectedLesson to the next lesson
             selectedLesson.value = course.value.lessons[nextIndex];
         } else {
             console.log('No more lessons.');
@@ -406,15 +421,12 @@ const goToNextLesson = () => {
 };
 
 const goToPreviousLesson = () => {
-    // Find the index of the current lesson
     const currentIndex = course.value.lessons.indexOf(selectedLesson.value);
 
     if (currentIndex !== -1) {
-        // Calculate the index of the next lesson
         const nextIndex = currentIndex - 1;
 
         if (nextIndex < course.value.lessons.length) {
-            // Update selectedLesson to the next lesson
             selectedLesson.value = course.value.lessons[nextIndex];
         } else {
             console.log('No more lessons.');
@@ -424,7 +436,6 @@ const goToPreviousLesson = () => {
 
     }
 };
-
 
 const totalDuration = computed(() => {
     return course.value.lessons?.reduce((total, lesson) => {
@@ -446,7 +457,6 @@ const completionPercentage = computed(() => {
     return totalLessons.value > 0 ? Math.round((completedLessons / totalLessons.value) * 100) : 0;
 });
 
-
 async function selectLesson(lesson) {
 
     stopLessonTimer();
@@ -462,22 +472,13 @@ async function selectLesson(lesson) {
     }
 }
 
-
-
-
-
-
 const newComment = ref('');
-
-
-
 
 watchEffect(() => {
     if (detailedLessons.value.length > 0) {
         selectedLesson.value = detailedLessons.value[0];
     }
 });
-
 
 const beforeEnter = (el) => {
     el.style.opacity = 0;
@@ -502,24 +503,6 @@ const leave = (el, done) => {
 onUnmounted(() => {
     stopLessonTimer();
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 const likeComment = (courseId, lessonId, commentId) => {
@@ -551,25 +534,39 @@ const submitComment = () => {
         });
 };
 
-const lessonVideoUrl = videoUrl => `/storage/${videoUrl}`;
-const thumbnailUrl = computed(() => `/storage/${courseData.value.thumbnail}`);
+const lessonVideoUrl = videoUrl => `http://localhost:8000/storage/${videoUrl}`;
+// const thumbnailUrl = computed(() => `http://localhost:8000/storage/${courseData.value.thumbnail}`);
+const thumbnailUrl = computed(() => `http://localhost:8000/storage/${courseData.value.thumbnail}`);
+console.log(thumbnailUrl, 'thumbnailUrl');
 function redirectToPurchase() {
     window.location.href = '/subscribe-or-purchase';
 }
 
-// Lifecycle hooks
 onUnmounted(() => {
     stopLessonTimer();
 });
 
-
-
-fetchCoursesData();
-
-
+onMounted(fetchCoursesData);
 
 </script>
 <style>
+.aspect-ratio-box {
+    position: relative;
+    width: 100%;           /* Full width */
+    padding-top: 56.25%;    /* 16:9 aspect ratio (9/16 * 100 = 56.25) */
+    overflow: hidden;       /* Hide anything that overflows the box */
+}
+
+.thumbnail {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;      /* Ensures the image covers the box without distortion */
+}
+
+
 .orange {
     font-weight: bold;
     color: #e49e58;

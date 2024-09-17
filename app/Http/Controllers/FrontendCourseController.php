@@ -71,9 +71,9 @@ class FrontendCourseController extends Controller
         // Fetch the course with access control using the existing service
         $course = $this->courseService->getCourseByIdWithAccessControl($id);
 
-        $user = Auth::check() ? Auth::user() : null;
-        dd($user);
 //        $user = Auth::check() ? Auth::user() : null;
+
+        $user = Auth::check() ? Auth::user() : null;
 
         // Determine if the user has access to all course content
         $userHasAccess = $this->courseService->checkUserAccessStatus($user, $id);
@@ -85,9 +85,10 @@ class FrontendCourseController extends Controller
         return response()->json([
             'authenticated' => (bool)$user,
             'course' => $course,
-//            'user' => $user,
+            'user' => $user,
             'userHasAccess' => $userHasAccess, // Pass the access status
             'lessons' => $lessons,
+            'currentUser' => Auth::user(),
         ]);
     }
 

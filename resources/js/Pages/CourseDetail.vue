@@ -561,22 +561,22 @@ function saveTimeSpent() {
 }
 
 
-// function trackInteraction(interactionType) {
-//     Inertia.post(route('storeInteractions', { courseId: course.value.id }), {
-//         interaction_type: interactionType,
-//         course_id: course.value.id,
-//         lesson_id: selectedLesson.value?.id || null,
-//     }, {
-//         onSuccess: () => {
-//             console.log("Interaction tracked successfully!");
-//         },
-//         onError: (errors) => {
-//             console.error('Failed to track interaction:', errors);
-//         },
-//         preserveState: true, // Preserve the state of the page
-//         preserveScroll: true, // Preserve the scroll position
-//     });
-// }
+function trackInteraction(interactionType) {
+    Inertia.post(route('storeInteractions', { courseId: course.value.id }), {
+        interaction_type: interactionType,
+        course_id: course.value.id,
+        lesson_id: selectedLesson.value?.id || null,
+    }, {
+        onSuccess: () => {
+            console.log("Interaction tracked successfully!");
+        },
+        onError: (errors) => {
+            console.error('Failed to track interaction:', errors);
+        },
+        preserveState: true, // Preserve the state of the page
+        preserveScroll: true, // Preserve the scroll position
+    });
+}
 
 
 

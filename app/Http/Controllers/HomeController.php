@@ -285,9 +285,25 @@ class HomeController extends Controller
     }
 
 
-    public function storeInteractions()
+    public function storeInteractions(Request $request)
     {
-        //
+        $engagement = Engagement::firstOrCreate([
+            'user_id' => auth()->id(),
+            'course_id' => $request->course_id,
+            'lesson_id' => $request->lesson_id,
+        ]);
+
+        // Get current interactions or start a new array if none exists
+        $currentInteractions = $engagement->interactions ?? [];
+
+        // Add the new interaction type to the interactions array
+        $currentInteractions[] = $request->interaction_type;
+
+        // Update the interactions column
+        $engagement->interactions = $currentInteractions;
+        $engagement->save();
+
+        return response()->json(['message' => 'Interaction tracked successfully!'], 200);
     }
 
 

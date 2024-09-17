@@ -18,6 +18,10 @@ class Engagement extends Model
         'completed',
     ];
 
+    protected $casts = [
+        'interactions' => 'array',
+    ];
+
     public function course()
     {
         return $this->belongsTo(Course::class);

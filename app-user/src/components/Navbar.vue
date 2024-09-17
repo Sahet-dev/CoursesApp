@@ -110,8 +110,8 @@
 
 <script setup>
 import { onMounted, ref } from 'vue';
-import axios from 'axios';
 import { useRouter } from 'vue-router';
+import apiClient from "../axios/index.js";
 
 const router = useRouter();
 const showingNavigationDropdown = ref(false);
@@ -121,7 +121,7 @@ const user = ref(null);
 // Fetch user info on mount
 const fetchUser = async () => {
     try {
-        const response = await axios.get('/api/user');
+        const response = await apiClientl.get('/user');
         user.value = response.data;
     } catch (error) {
         console.error('Error fetching user:', error);
@@ -131,7 +131,7 @@ const fetchUser = async () => {
 // Search function
 const searchCourses = async () => {
     try {
-        await axios.get('/api/courses/search', { params: { search: searchQuery.value } });
+        await apiClient.get('/courses/search', { params: { search: searchQuery.value } });
         // Handle search result, e.g., redirect or update state
     } catch (error) {
         console.error('Error searching courses:', error);

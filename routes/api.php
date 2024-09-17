@@ -116,6 +116,11 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/save-comment', [FrontendCourseController::class, 'storeComment']);
     Route::post('/courses/{course}/lessons/{lesson}/comments', [FrontendCourseController::class, 'storeComment'])->name('createComment');
+    Route::get('/api-private-courses/{courseId}', [FrontendCourseController::class, 'showCourse']);
+    Route::post('/courses/{courseId}/lessons/{lessonId}/save-time', [HomeController::class, 'saveLessonTime'])->name('saveLessonTime');
+    Route::post('/store-interactions/{courseId}', [HomeController::class, 'storeInteractions'])->name('storeInteractions');
+    Route::post('/courses/{courseId}/lessons/{lessonId}/comments/{commentId}/toggle-like', [HomeController::class, 'toggleLike'])
+        ->name('comments.toggleLike');
 
 });
 Route::post('/login-user', [UsersAuthController::class, 'login']);
