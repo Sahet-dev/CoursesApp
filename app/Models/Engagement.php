@@ -32,4 +32,36 @@ class Engagement extends Model
         return $this->belongsTo(User::class);
     }
 
+
+    /**
+     * Append a new interaction to the interactions array.
+     *
+     * @param string $interactionType
+     * @param int|null $lessonId
+     * @param string $timestamp
+     * @return void
+     */
+    public function addInteraction(string $interactionType, ?int $lessonId, string $timestamp)
+    {
+        // Structure of new interaction data
+        $newInteraction = [
+            'interaction_type' => $interactionType,
+            'lesson_id' => $lessonId,
+            'timestamp' => $timestamp,
+        ];
+
+        // Ensure interactions is treated as an array
+        $interactions = is_array($this->interactions) ? $this->interactions : [];
+
+        // Append the new interaction to the existing interactions array
+        $interactions[] = $newInteraction;
+
+        // Update the interactions field
+        $this->interactions = $interactions;
+
+        // Save the model
+        $this->save();
+    }
+
+
 }

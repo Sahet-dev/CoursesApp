@@ -172,36 +172,41 @@ class HomeController extends Controller
 
         // Ensure user is authenticated
         if (!$user) {
-            return Inertia::render('Error', ['message' => 'User not authenticated'])->with('error', 'User not authenticated');
+            return response()->json(['error' => 'User not authenticated'], 401);
         }
 
+        // Find the comment by ID
         $comment = Comment::find($commentId);
 
+        // If comment doesn't exist, return a 404 error
         if (!$comment) {
-            return Inertia::render('Error', ['message' => 'Comment not found'])->with('error', 'Comment not found');
+            return response()->json(['error' => 'Comment not found'], 404);
         }
 
+        // Check if the user has already liked the comment
         $like = $comment->likes()->where('user_id', $user->id)->first();
 
         if ($like) {
-            // Unlike the comment
+            // Unlike the comment if already liked
             $like->delete();
             $message = 'Unliked';
         } else {
-            // Like the comment
+            // Like the comment if not already liked
             $comment->likes()->create(['user_id' => $user->id]);
             $message = 'Liked';
         }
 
         // Fetch the updated lesson and comments (only necessary data)
         $lesson = Lessons::with(['comments' => function ($query) {
-            $query->withCount('likes'); // Only fetch the like count
+            $query->withCount('likes'); // Fetch like count for each comment
         }])->find($lessonId);
 
-        return Inertia::render('CourseDetail', [
-            'selectedLesson' => $lesson,
+        // Return JSON response with updated data
+        return response()->json([
             'message' => $message,
-        ]);
+            'selectedLesson' => $lesson,
+            'commentLikesCount' => $comment->likes()->count(), // Add the updated like count for the comment
+        ], 200);
     }
 
 
@@ -285,25 +290,24 @@ class HomeController extends Controller
     }
 
 
-    public function storeInteractions(Request $request)
+    public function storeInteractions(Request $request, $courseId)
     {
-        $engagement = Engagement::firstOrCreate([
-            'user_id' => auth()->id(),
-            'course_id' => $request->course_id,
-            'lesson_id' => $request->lesson_id,
-        ]);
+        $user = auth()->user();
 
-        // Get current interactions or start a new array if none exists
-        $currentInteractions = $engagement->interactions ?? [];
+        // Retrieve or create an engagement for the user and course
+        $engagement = Engagement::firstOrCreate(
+            ['course_id' => $courseId, 'user_id' => $user->id],
+            ['lesson_id' => $request->lesson_id]
+        );
 
-        // Add the new interaction type to the interactions array
-        $currentInteractions[] = $request->interaction_type;
+        // Add the interaction
+        $engagement->addInteraction(
+            $request->interaction_type,
+            $request->lesson_id,
+            now()->toDateTimeString()
+        );
 
-        // Update the interactions column
-        $engagement->interactions = $currentInteractions;
-        $engagement->save();
-
-        return response()->json(['message' => 'Interaction tracked successfully!'], 200);
+        return response()->json(['message' => 'Interaction stored successfully'], 200);
     }
 
 

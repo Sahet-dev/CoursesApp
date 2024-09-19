@@ -121,7 +121,7 @@ const user = ref(null);
 // Fetch user info on mount
 const fetchUser = async () => {
     try {
-        const response = await apiClientl.get('/user');
+        const response = await apiClient.get('/user');
         user.value = response.data;
     } catch (error) {
         console.error('Error fetching user:', error);

@@ -78,9 +78,9 @@
                         <div class="video-container">
                             <video v-if="selectedLesson.video_url" :src="lessonVideoUrl(selectedLesson.video_url)"
                                    controls class="video"
-                                   @play="startLessonTimer"
-                                   @pause="stopLessonTimer"
-                                   @ended="stopLessonTimer"
+                                   @play="handlePlay"
+                                   @pause="handlePause"
+                                   @ended="handleEnd"
                                    @loadedmetadata="resetTimer"
                             >
                             </video>
@@ -180,7 +180,7 @@
                                                     </div>
                                                     <p class="text-gray-800 mb-2 break-words text-sm sm:text-base">{{ comment.comment }}</p>
                                                     <div class="text-xs sm:text-sm text-gray-500">Likes: {{ comment.likes_count }}</div>
-                                                    <div v-if="user" class="mt-2 flex space-x-2 sm:space-x-4">
+                                                    <div v-if="currentUser" class="mt-2 flex space-x-2 sm:space-x-4">
 
 
                                                         <button @click="likeComment(course.id, selectedLesson.id, comment.id)" class="text-blue-500 text-xs sm:text-sm hover:underline">
@@ -379,7 +379,7 @@ const isLastLesson = computed(() => {
 
 async function trackInteraction(interactionType) {
     try {
-        const response = await apiClient.post(`/api/interactions`, {
+        const response = await apiClient.post(`/store-interactions/${course.value.id}`, {  // Pass courseId in the URL
             interaction_type: interactionType,
             course_id: course.value.id,
             lesson_id: selectedLesson.value?.id || null,
@@ -399,7 +399,7 @@ async function trackInteraction(interactionType) {
 
 
 function goToUser(id) {
-    Inertia.get(route('profilePage', id), {});
+    // Inertia.get(route('profilePage', id), {});
 }
 
 
@@ -411,6 +411,7 @@ const goToNextLesson = () => {
 
         if (nextIndex < course.value.lessons.length) {
             selectedLesson.value = course.value.lessons[nextIndex];
+            trackInteraction('next_lesson');
         } else {
             console.log('No more lessons.');
         }
@@ -428,6 +429,7 @@ const goToPreviousLesson = () => {
 
         if (nextIndex < course.value.lessons.length) {
             selectedLesson.value = course.value.lessons[nextIndex];
+            trackInteraction('previous_lesson');
         } else {
             console.log('No more lessons.');
         }
@@ -457,7 +459,7 @@ const completionPercentage = computed(() => {
     return totalLessons.value > 0 ? Math.round((completedLessons / totalLessons.value) * 100) : 0;
 });
 
-async function selectLesson(lesson) {
+async function selectLesson(lesson)     {
 
     stopLessonTimer();
     selectedLesson.value = lesson;
@@ -470,6 +472,7 @@ async function selectLesson(lesson) {
     } catch (error) {
         console.error("Failed to fetch comments:", error);
     }
+    await trackInteraction('select_lesson');
 }
 
 const newComment = ref('');
@@ -504,11 +507,28 @@ onUnmounted(() => {
     stopLessonTimer();
 });
 
+const handlePlay = () => {
+    startLessonTimer();
+    trackInteraction('start_video');
+};
+
+const handlePause = () => {
+    stopLessonTimer();
+    trackInteraction('pause_video');  // Track video pause
+};
+
+const handleEnd = () => {
+    stopLessonTimer();
+    trackInteraction('end_video');  // Track video end
+};
 
 const likeComment = (courseId, lessonId, commentId) => {
     apiClient.post(`/courses/${courseId}/lessons/${lessonId}/comments/${commentId}/toggle-like`)
         .then(response => {
             console.log(response.data.message);
+
+            const interactionType = response.data.liked ? 'like_comment' : 'unlike_comment';
+            trackInteraction(interactionType);
         })
         .catch(error => {
             console.error('Error toggling like:', error);
@@ -516,23 +536,26 @@ const likeComment = (courseId, lessonId, commentId) => {
 };
 
 const submitComment = () => {
-    if (!courseData.value.id || !selectedLesson.value.id || !newComment.value.trim()) {
+    // Make sure course, lesson, and comment exist before submitting
+    if (!course.value.id || !selectedLesson.value?.id || !newComment.value.trim()) {
         console.error('Course ID, Lesson ID or Comment is missing');
         return;
     }
 
-    apiClient.post(`/courses/${courseData.value.id}/lessons/${selectedLesson.value.id}/comments`, {
+    // Submit the comment
+    apiClient.post(`/courses/${course.value.id}/lessons/${selectedLesson.value.id}/comments`, {
         comment: newComment.value.trim()
     })
         .then(() => {
             console.log('Comment submitted successfully');
             newComment.value = ''; // Clear the input field
-            selectLesson(selectedLesson.value);
+            selectLesson(selectedLesson.value); // Refresh the lesson comments
         })
         .catch(error => {
             console.error('Error submitting comment:', error);
         });
 };
+
 
 const lessonVideoUrl = videoUrl => `http://localhost:8000/storage/${videoUrl}`;
 // const thumbnailUrl = computed(() => `http://localhost:8000/storage/${courseData.value.thumbnail}`);
