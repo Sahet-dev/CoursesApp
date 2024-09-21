@@ -23,6 +23,10 @@ class Course extends Model
         return $this->belongsTo(User::class, 'teacher_id');
     }
 
+    public function questions()
+    {
+        return $this->hasMany(Question::class, 'course_id');
+    }
 
     public function lessons()
     {

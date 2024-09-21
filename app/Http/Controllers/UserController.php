@@ -41,10 +41,14 @@ class UserController extends Controller
 
 
 
-    public function index()
+    public function index(Request $request)
     {
-        $users = User::paginate(20);
-        return response()->json($users);
+        $user = $request->user();
+        if (!$user) {
+            return response()->json(['message' => 'Unauthenticated'], 401);
+        }
+
+        return new UserResource($user);
     }
 
     public function store(Request $request): JsonResponse

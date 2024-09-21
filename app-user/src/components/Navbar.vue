@@ -54,7 +54,7 @@
                     <!-- Authentication Links -->
                     <template v-if="!user">
                         <router-link to="/login" class="text-gray-200 border-b border-gray-200 bg-blue-500 p-2 rounded hover:text-gray-100 hover:bg-blue-800 focus:outline-none transition ease-in-out duration-150">
-                            Login
+                            Login s
                         </router-link>
                         <router-link to="/register" class="ml-4 text-gray-500 hover:text-gray-700 focus:outline-none transition ease-in-out duration-150">
                             Register
@@ -99,9 +99,17 @@
             :class="{ 'dropdown-menu open': showingNavigationDropdown, 'dropdown-menu': !showingNavigationDropdown }"
             class="sm:hidden"
         >
-            <div class="pt-2 pb-3 space-y-1">
+            <div class="pt-2 pb-3 space-y-1" v-if= "!user">
                 <!-- Authentication Links -->
-                <router-link to="/login" class="block px-4 py-2 text-sm">Login</router-link>
+                <router-link to="/login" class="block px-4 py-2 text-sm">Login ssss</router-link>
+                <router-link to="/register" class="block px-4 py-2 text-sm">Register</router-link>
+            </div>
+
+            <div class="pt-2 pb-3 space-y-1" v-else>
+                <!-- Authentication Links -->
+                <router-link to="/login" class="block px-4 py-2 text-sm">Profisssssle</router-link>
+<!--                <router-link to="/profile" class="block px-4 py-2 text-sm">Profile</router-link>-->
+                <router-link to="/register" class="block px-4 py-2 text-sm">Register</router-link>
                 <router-link to="/register" class="block px-4 py-2 text-sm">Register</router-link>
             </div>
         </div>
@@ -122,11 +130,27 @@ const user = ref(null);
 const fetchUser = async () => {
     try {
         const response = await apiClient.get('/user');
-        user.value = response.data;
+
+        // Check if response.data contains the user information
+        if (!response.data) {
+            console.log('User is unauthenticated');
+            user.value = null; // Set user to null when unauthenticated
+        } else {
+            user.value = response.data; // Set the user value if data exists
+        }
+
     } catch (error) {
-        console.error('Error fetching user:', error);
+        if (error.response && error.response.status === 401) {
+            // Handle the case where the user is unauthenticated (401 error)
+            console.log('User is unauthenticated');
+            user.value = null;
+        } else {
+            // Handle other errors (server error, network error, etc.)
+            console.error('Error fetching user:', error);
+        }
     }
 };
+
 
 // Search function
 const searchCourses = async () => {

@@ -9,13 +9,15 @@ class Question extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['lesson_id', 'question_text'];  // Ensure lesson_id is fillable
+    protected $fillable = ['course_id', 'question_text'];
 
-    public function lesson()
+    // Define the relationship with the Course model
+    public function course()
     {
-        return $this->belongsTo(Lessons::class, 'lesson_id');
+        return $this->belongsTo(Course::class, 'course_id');
     }
 
+    // Define the relationship with the Response model
     public function responses()
     {
         return $this->hasMany(Response::class, 'question_id');

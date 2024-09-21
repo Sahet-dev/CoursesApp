@@ -75,6 +75,7 @@ class CourseController extends Controller
 
         // Handle thumbnail upload
         $thumbnailPath = $request->file('thumbnail')->store('thumbnails', 'public');
+        $user = Auth::user();
 
         // Create the course
         $course = Course::create([
@@ -82,7 +83,7 @@ class CourseController extends Controller
             'description' => $request->description,
             'thumbnail' => $thumbnailPath,
             'price' => $request->price,
-            'teacher_id' => auth()->id(),
+            'teacher_id' => $user->id,
         ]);
 
         // Create the lessons
@@ -96,8 +97,9 @@ class CourseController extends Controller
                 'markdown_text' => $lesson['markdown_text'],
             ]);
         }
+        Log::info('Course creation details', ['course' => $course]);
 
-        return response()->json(['id' => $course->id], 201);
+        return response()->json(['create course' => $course], 201);
     }
 
 
