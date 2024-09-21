@@ -213,6 +213,9 @@ class HomeController extends Controller
 
     public function getCommentsForLesson($lessonId)
     {
+        if(!Auth::check()) {
+            return response()->json(['error' => 'User not authenticated'], 401);
+        }
         $comments = Comment::with(['user', 'likes', 'replies.user', 'replies.likes'])
             ->where('lesson_id', $lessonId)
             ->get();
@@ -244,6 +247,31 @@ class HomeController extends Controller
             ];
         });
     }
+
+
+
+    public function getComments($lessonId)
+    {
+
+        $comments = Comment::with(['user', 'likes', 'replies.user', 'replies.likes'])
+            ->where('lesson_id', $lessonId)
+            ->get();
+
+        // Map comments to include required information
+        return $comments->map(function ($comment) {
+            return [
+                'id' => $comment->id,
+                'user' => [
+                    'id' => $comment->user->id,
+                    'name' => $comment->user->name,
+                    'avatar' => $comment->user->avatar,
+                ],
+                'comment' => $comment->comment,
+                'likes_count' => $comment->likes->count(),
+            ];
+        });
+    }
+
 
 
     public function createComment(Request $request, Course $course, Lessons $lesson)

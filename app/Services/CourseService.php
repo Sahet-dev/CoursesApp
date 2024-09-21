@@ -12,7 +12,7 @@ class CourseService
     public function getLatestCoursesWithAccessControl($limit = 4)
     {
         // Fetch the latest courses and their lessons with questions
-        $courses = Course::with('lessons.questions')->latest()->take($limit)->get();
+        $courses = Course::with('questions')->latest()->take($limit)->get();
 
         // Check if the user is authenticated
         $user = Auth::user();
@@ -41,7 +41,7 @@ class CourseService
     public function getCourseByIdWithAccessControl($id)
     {
         // Fetch the course by ID with its lessons and questions
-        $course = Course::with('lessons.questions')->findOrFail($id);
+        $course = Course::with('questions')->findOrFail($id);
 
         // Check if the user is authenticated
         $user = Auth::user();
@@ -61,7 +61,7 @@ class CourseService
     {
         // Eager load lessons with questions, comments, likes, and replies
         $course->load([
-            'lessons.questions',
+            'questions',
             'lessons.comments.user', // Load comments with the user who made them
             'lessons.comments.likes', // Load likes for comments
             'lessons.comments.replies.user', // Load replies with the user who made them
@@ -160,7 +160,7 @@ class CourseService
     public function getLessonsForCourseWithAccess($courseId)
     {
         // Fetch the course by ID with its lessons and questions
-        $course = Course::with('lessons.questions')->findOrFail($courseId);
+        $course = Course::with('questions')->findOrFail($courseId);
 
         // Get the authenticated user
         $user = Auth::user();

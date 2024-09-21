@@ -5,10 +5,13 @@ namespace App\Http\Controllers;
 use App\Models\Comment;
 use App\Models\Lessons;
 use App\Models\Course;
+use App\Models\User;
 use App\Services\CourseService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class FrontendCourseController extends Controller
 {
@@ -109,9 +112,9 @@ class FrontendCourseController extends Controller
         // Check if the user has access to the course
         $user = Auth::user();
 
-        if (!$course->isAvailableToUser($user)) {
-            return response()->json(['error' => 'You do not have access to this course.'], 403);
-        }
+//        if (!$course->isAvailableToUser($user)) {
+//            return response()->json(['error' => 'You do not have access to this course.'], 403);
+//        }
 
         // Create the comment
         $comment = Comment::create([
@@ -123,6 +126,67 @@ class FrontendCourseController extends Controller
         return response()->json(['message' => 'Comment added successfully!', 'comment' => $comment], 201);
     }
 
+    public function profilePage($id): JsonResponse
+    {
+        Log::info('User ID passed to profilePage:', ['id' => $id]);
+        $currentUser = Auth::user();
+
+        $user = User::with([
+            'achievements' => function ($query) {
+                $query->with('course'); // Eager load course data for achievements
+            },
+            'purchasedCourses' => function ($query) {
+                $query->with('teacher'); // Eager load teacher data for purchased courses
+            },
+            'engagements' => function ($query) {
+                $query->with('course'); // Eager load course data for engagements
+            },
+            'comments' => function ($query) use ($id) { // Filter comments by user ID
+                $query->where('user_id', $id)
+                    ->with(['lesson' => function ($lessonQuery) {
+                        $lessonQuery->latest()->take(5);
+                    }, 'likes']); // Eager load lesson data and likes for comments
+            },
+        ])->findOrFail($id);
+
+        // Hide `video_url` and `markdown_text` from the lesson relationship after fetching
+        foreach ($user->comments as $comment) {
+            if ($comment->lesson) {
+                $comment->lesson->setHidden(['video_url', 'markdown_text']);
+            }
+        }
+
+        $commentCount = $user->comments()->count();
+        $purchasedCoursesCount = $user->purchasedCourses()->count();
+
+        $registrationDate = $user->created_at->timezone('UTC');
+        $currentDate = Carbon::now('UTC');
+
+        // Calculate the difference in days and ensure it's positive
+        $daysSinceRegistration = abs($currentDate->diffInDays($registrationDate));
+
+        // For users with the "teacher" role, count the number of created courses
+        $createdCoursesCount = 0;
+        if ($user->role === 'teacher') {
+            $createdCoursesCount = Course::where('teacher_id', $user->id)->count();
+        }
+
+        $statistics = [
+            'commentCount' => $commentCount,
+            'completedLessonsCount' => $user->courses()->wherePivot('completed', true)->count(),
+            'purchasedCoursesCount' => $purchasedCoursesCount,
+            'registrationDate' => $registrationDate->format('Y-m-d'),
+            'daysSinceRegistration' => $daysSinceRegistration, // This should be an integer
+            'createdCoursesCount' => $user->courses()->count(),
+        ];
+
+        return response()->json([
+            'user' => $user,
+            'authenticated' => (bool) $currentUser,
+            'currentUser' => $currentUser ?: null,
+            'statistics' => $statistics,
+        ]);
+    }
 
 
 }

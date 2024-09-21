@@ -15,10 +15,7 @@ class Lessons extends Model
         return $this->belongsTo(Course::class);
     }
 
-    public function questions()
-    {
-        return $this->hasMany(Question::class, 'lesson_id');
-    }
+
     public function comments()
     {
         return $this->hasMany(Comment::class, 'lesson_id');

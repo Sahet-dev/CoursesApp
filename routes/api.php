@@ -16,10 +16,11 @@ use Illuminate\Support\Facades\Route;
 
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
-route::get('/lessons/{lessonId}/comments', [HomeController::class, 'getCommentsForLesson']);
+route::get('/lessons/{lessonId}/comments', [HomeController::class, 'getComments']);
 
 Route::post('/login', [AuthController::class, 'login']);
 Route::middleware(['auth:sanctum'])->group(function () {
+    route::get('/lessons/{lessonId}/comments/authenticated', [HomeController::class, 'getCommentsForLesson']);
 
     route::put('/users/change-role/{id}', [UserController::class, 'updateRole']);
 
@@ -39,7 +40,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/courses/{id}', [CourseController::class, 'show']);
     Route::post('/courses', [CourseController::class, 'store']);
     Route::delete('/courses/{id}', [CourseController::class, 'destroy']);
-    Route::get('/teacher-courses', [TeacherControlle::class, 'getOwnCourses'])->middleware('auth:sanctum');
+    Route::get('/teacher-courses', [TeacherControlle::class, 'getOwnCourses']);
     Route::get('/course-enrollments/{courseId}', [TeacherControlle::class, 'getCourseEnrollments']);
     Route::get('/subscriptions', [TeacherControlle::class, 'getSubscriptions']);
 
@@ -51,8 +52,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/tests/create', [LessonController::class, 'create'])->name('tests.create');
     Route::get('/tests/{id}', [LessonController::class, 'showTest'])->name('tests.showTest');
     Route::put('/tests/{id}', [LessonController::class, 'updateTest']);
-    Route::get('/lessons/{lessonId}/questions', [LessonController::class, 'getQuestionsByLesson']);
-    Route::put('/lessons/{lessonId}/questions', [LessonController::class, 'updateQuestionsForLesson'])->name('lessons.questions.update');
+    Route::get('/lessons/{lessonId}/questions', [LessonController::class, 'getQuestionsByCourse']);
+    Route::put('/lessons/{lessonId}/questions', [LessonController::class, 'updateQuestionsForCourse'])->name('lessons.questions.update');
     Route::get('/reviews', [CourseModerationController::class, 'index']);
 
     Route::get('/comments', [CourseModerationController::class, 'getComment']);
@@ -128,3 +129,4 @@ Route::post('/user-api/register', [UsersAuthController::class, 'register']);
 
 Route::get('/api-course', [FrontendCourseController::class, 'getCourses']);
 Route::get('/api-courses/{courseId}', [FrontendCourseController::class, 'showCourse']);
+Route::get('/user/profile/{id}', [FrontendCourseController::class, 'profilePage']);

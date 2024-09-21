@@ -156,7 +156,7 @@ class LessonController extends Controller
 
 
 
-    public function updateQuestionsForLesson(Request $request, $lessonId)
+    public function updateQuestionsForCourse(Request $request, $courseId)
     {
         // Check if the user has the 'admin', 'moderator', or 'teacher' role
         if (!Auth::user()->hasRole(['admin', 'moderator', 'teacher'])) {
@@ -165,17 +165,12 @@ class LessonController extends Controller
 
         $user = Auth::user();
 
-        // Fetch the lesson
-        $lesson = Lessons::findOrFail($lessonId);
+        // Fetch the course and ensure the authenticated user is the teacher
+        $course = Course::findOrFail($courseId);
 
-        // Check if the user is allowed to update the lesson
-        if ($user->hasRole('teacher')) {
-            // Ensure the lesson belongs to a course where the authenticated teacher is the teacher
-            $course = $lesson->course()->firstOrFail();
-
-            if ($course->teacher_id !== $user->id) {
-                return response()->json(['message' => 'Unauthorized'], 403);
-            }
+        // Check if the authenticated user owns the course
+        if ($user->hasRole('teacher') && $course->teacher_id !== $user->id) {
+            return response()->json(['message' => 'Unauthorized'], 403);
         }
 
         // Validate request data
@@ -193,6 +188,13 @@ class LessonController extends Controller
             if (isset($questionData['id'])) {
                 // Update existing question
                 $question = Question::findOrFail($questionData['id']);
+
+                // Ensure the question belongs to the course
+                if ($question->course_id !== $course->id) {
+                    return response()->json(['message' => 'Unauthorized: Question does not belong to this course'], 403);
+                }
+
+                // Update the question text
                 $question->update([
                     'question_text' => $questionData['question_text'],
                 ]);
@@ -216,7 +218,7 @@ class LessonController extends Controller
                 }
             } else {
                 // Create new question and its responses
-                $question = $lesson->questions()->create([
+                $question = $course->questions()->create([
                     'question_text' => $questionData['question_text'],
                 ]);
 
@@ -231,6 +233,7 @@ class LessonController extends Controller
 
         return response()->json(['message' => 'Questions and responses updated successfully!'], 200);
     }
+
 
 
 
@@ -272,29 +275,29 @@ class LessonController extends Controller
 
 
     // In your LessonController.php
-    public function getQuestionsByLesson($lessonId)
+    public function getQuestionsByCourse($courseId)
     {
-        // Check if the user has the 'admin', 'moderator', or 'teacher' role
-        if (!Auth::user()->hasRole(['admin', 'moderator', 'teacher'])) {
-            return response()->json(['message' => 'Unauthorized'], 403);
-        }
-
+        // Get the authenticated user
         $user = Auth::user();
 
-        // Retrieve the lesson with its course information
-        $lesson = Lessons::with('questions.responses', 'course')->find($lessonId);
-
-        if (!$lesson) {
-            return response()->json(['message' => 'Lesson not found.'], 404);
-        }
-
-        // Check if the user is a teacher and if they own the lesson's course
-        if ($user->hasRole('teacher') && $lesson->course->teacher_id !== $user->id) {
+        // Check if the user is a teacher
+        if (!$user->hasRole('teacher')) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
-        // Extract questions and responses directly from the lesson
-        $questions = $lesson->questions->map(function ($question) {
+        // Retrieve the course by ID, ensuring the teacher owns it
+        $course = Course::where('id', $courseId)
+            ->where('teacher_id', $user->id)
+            ->with('questions.responses') // Eager load questions and responses
+            ->first();
+
+        // If the course does not exist or doesn't belong to the teacher
+        if (!$course) {
+            return response()->json(['message' => 'Course not found or unauthorized.'], 404);
+        }
+
+        // Extract questions with responses
+        $questions = $course->questions->map(function ($question) {
             return [
                 'id' => $question->id,
                 'question_text' => $question->question_text,
@@ -308,8 +311,10 @@ class LessonController extends Controller
             ];
         });
 
-        return response()->json(['questions' => $questions]);
+        // Return the questions in the response
+        return response()->json(['questions' => $questions], 200);
     }
+
 
 
 

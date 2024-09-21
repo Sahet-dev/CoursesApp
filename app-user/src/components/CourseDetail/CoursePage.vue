@@ -72,7 +72,7 @@
 
 
                 <!-- Content Area -->
-                <div v-if="visible===false" class="bg-white p-4 rounded  w-full shadow md:flex-1  ">
+                <div v-if="visible===false" class="bg-white p-4 rounded  w-full shadow    ">
                     <div v-if="selectedLesson" class=" ">aaa
                         <h4 class="text-lg font-semibold mb-2">{{ selectedLesson.title }}</h4>
                         <div class="video-container">
@@ -164,29 +164,29 @@
                                                 <h2 class="text-xl sm:text-2xl font-semibold mb-4">Comments</h2>
                                                 <div v-for="comment in comments" :key="comment.id" class="mb-4 sm:mb-6 p-3 sm:p-4 bg-gray-100 rounded-md">
                                                     <div class="flex items-center mb-2 cursor-pointer hover:underline" @click="goToUser(comment.user.id)">
-                                                        <div class="flex items-center space-x-4">
-                                                            <!-- Avatar Image -->
+                                                        <div class="flex items-center space-x-4"  >
                                                             <img
                                                                 :src="(comment.user.avatar ? `/storage/${comment.user.avatar}` : defaultAvatar)"
                                                                 alt="User Avatar"
                                                                 class="w-12 h-12 sm:w-16 sm:h-16 rounded-full object-cover shadow-lg"
                                                             >
-                                                            <!-- User Name -->
-                                                            <div class="font-bold text-base sm:text-lg">
-                                                                {{ comment.user.name }}
-                                                            </div>
+                                                            <div class="font-bold text-base sm:text-lg">{{ comment.user.name }}</div>
                                                         </div>
-
                                                     </div>
                                                     <p class="text-gray-800 mb-2 break-words text-sm sm:text-base">{{ comment.comment }}</p>
                                                     <div class="text-xs sm:text-sm text-gray-500">Likes: {{ comment.likes_count }}</div>
                                                     <div v-if="currentUser" class="mt-2 flex space-x-2 sm:space-x-4">
-
-
-                                                        <button @click="likeComment(course.id, selectedLesson.id, comment.id)" class="text-blue-500 text-xs sm:text-sm hover:underline">
-                                                            {{ comment.liked_by_user ? 'Unlike' : 'Like' }}
+                                                        <button @click="likeComment(course.id, selectedLesson.id, comment)"
+                                                                class="text-blue-500 text-xs sm:text-sm hover:underline">
+                                                            <div v-if="comment.liked_by_user" class="flex items-center">
+                                                                <HandThumbUpIconSolid class="w-4 h-4"/>
+                                                                <span class="ml-2">Unlike</span>
+                                                            </div>
+                                                            <div v-else class="flex items-center">
+                                                                <HandThumbUpIcon class="w-4 h-4"/>
+                                                                <span class="ml-2">Like</span>
+                                                            </div>
                                                         </button>
-
                                                     </div>
                                                 </div>
                                             </div>
@@ -196,7 +196,7 @@
                                                 <p class="text-gray-500 text-sm sm:text-base">No comments available for this lesson.</p>
                                             </div>
 
-                                            <div class="mt-6">
+                                            <div class="mt-6" v-if="currentUser">
                                                 <h2 class="text-xl sm:text-2xl font-semibold mb-4">Add a Comment</h2>
                                                 <form @submit.prevent="submitComment" class="flex flex-col space-y-4">
                                                     <textarea v-model="newComment" rows="3" placeholder="Type your comment here..." class="p-2 border border-gray-300 rounded-md"></textarea>
@@ -240,11 +240,11 @@
 <script setup>
 import { ref, computed, watchEffect, onMounted, onUnmounted } from 'vue';
 import apiClient from "../../axios/index.js";
-import {useRoute} from "vue-router";
-import {BookOpenIcon, ChatBubbleLeftRightIcon} from "@heroicons/vue/24/outline/index.js";
+import {useRoute, useRouter} from "vue-router";
+import {BookOpenIcon, ChatBubbleLeftRightIcon, HandThumbUpIcon} from "@heroicons/vue/24/outline/index.js";
 import {BookOpenIcon as BookOpenIconSolid,
     ChatBubbleLeftRightIcon as ChatBubbleLeftRightIconSolid,
-    ChevronDoubleRightIcon, ChevronDoubleLeftIcon
+    ChevronDoubleRightIcon, ChevronDoubleLeftIcon, HandThumbUpIcon as HandThumbUpIconSolid
 } from "@heroicons/vue/24/solid";
 import defaultAvatar   from "../../assets/avatar_default.png";
 import {Tab, TabGroup, TabList, TabPanel, TabPanels} from "@headlessui/vue";
@@ -252,6 +252,7 @@ import Navbar from "../Navbar.vue";
 
 const courseData = ref({});
 const comments = ref([]);
+const likes = ref(null);
 const lessonStartTime = ref(null);
 const timeSpent = ref(0);
 const timerInterval = ref(null);
@@ -269,10 +270,7 @@ const detailedLessons = ref(  []);
 const titleOnlyLessons = ref(  []);
 const selectedLesson = ref( null);
 const totalLessons = computed(() => course.value.lessons?.length || 0);
-// const baseUrl = import.meta.env.VITE_APP_URL || 'http://localhost:8000';
-
-// const thumbnailUrl = computed(() => `${baseUrl}/storage/${courseData.value.thumbnail}`);
-
+const router = useRouter();
 const fetchUserData = async () => {
     try {
         const response = await apiClient.get('/user'); // Fetch user info
@@ -313,7 +311,6 @@ function startLessonTimer() {
     if (!lessonStartTime.value) {
         lessonStartTime.value = new Date();
 
-        console.log('startLessonTimer() called :', lessonStartTime)
 
     }
 
@@ -327,10 +324,8 @@ function startLessonTimer() {
 
 // Stop the timer and accumulate time when the lesson is paused or the user leaves the lesson
 function stopLessonTimer() {
-    console.log('stopLessonTimer() called')
 
     if (timerInterval.value) {
-        console.log('stopLessonTimer() called :', timerInterval)
 
         clearInterval(timerInterval.value); // Stop the timer
         timerInterval.value = null;
@@ -386,7 +381,6 @@ async function trackInteraction(interactionType) {
         });
 
         if (response.status === 200) {
-            console.log("Interaction tracked successfully!");
         } else {
             console.error('Failed to track interaction:', response);
         }
@@ -398,9 +392,18 @@ async function trackInteraction(interactionType) {
 
 
 
-function goToUser(id) {
-    // Inertia.get(route('profilePage', id), {});
+function s(id) {
+    console.log('id: ', id);
+    if (id) {
+        router.push({ path: `/user/${id}` });
+    } else {
+        console.error("User ID is undefined");
+    }
 }
+
+const goToUser = (userId) => {
+    router.push({name: 'Profile', params: {id: userId}});
+};
 
 
 const goToNextLesson = () => {
@@ -413,10 +416,10 @@ const goToNextLesson = () => {
             selectedLesson.value = course.value.lessons[nextIndex];
             trackInteraction('next_lesson');
         } else {
-            console.log('No more lessons.');
+            console.error('No more lessons.');
         }
     } else {
-        console.log('Current lesson not found.');
+        console.error('Current lesson not found.');
 
     }
 };
@@ -431,10 +434,10 @@ const goToPreviousLesson = () => {
             selectedLesson.value = course.value.lessons[nextIndex];
             trackInteraction('previous_lesson');
         } else {
-            console.log('No more lessons.');
+            console.error('No more lessons.');
         }
     } else {
-        console.log('Current lesson not found.');
+        console.error('Current lesson not found.');
 
     }
 };
@@ -466,12 +469,28 @@ async function selectLesson(lesson)     {
     resetTimer();
     visible.value = false;
 
+
+
+    const userData = await fetchUserData();
+    let apiEndpoint;
+
+    // Determine the correct API endpoint based on authentication status
+    if (userData) {
+        apiEndpoint = `/lessons/${lesson.id}/comments/authenticated`; // For authenticated users
+    } else {
+        apiEndpoint = `/lessons/${lesson.id}/comments`; // For unauthenticated users
+    }
+
     try {
-        const response = await apiClient.get(`/lessons/${lesson.id}/comments`);
+        // Fetch comments from the determined API endpoint
+        const response = await apiClient.get(apiEndpoint);
         comments.value = response.data;
+
     } catch (error) {
         console.error("Failed to fetch comments:", error);
     }
+
+
     await trackInteraction('select_lesson');
 }
 
@@ -522,18 +541,25 @@ const handleEnd = () => {
     trackInteraction('end_video');  // Track video end
 };
 
-const likeComment = (courseId, lessonId, commentId) => {
-    apiClient.post(`/courses/${courseId}/lessons/${lessonId}/comments/${commentId}/toggle-like`)
-        .then(response => {
-            console.log(response.data.message);
 
-            const interactionType = response.data.liked ? 'like_comment' : 'unlike_comment';
-            trackInteraction(interactionType);
-        })
-        .catch(error => {
-            console.error('Error toggling like:', error);
-        });
+
+
+const likeComment = async (courseId, lessonId, comment) => {
+    try {
+        const response = await apiClient.post(`/courses/${courseId}/lessons/${lessonId}/comments/${comment.id}/toggle-like`);
+
+        // Update comment based on server response
+        comment.liked_by_user = response.data.liked; // Update liked status
+        comment.likes_count += response.data.liked ? 1 : -1; // Update like count based on the action
+
+        const interactionType = response.data.liked ? 'like_comment' : 'unlike_comment';
+        trackInteraction(interactionType);
+        selectLesson(selectedLesson.value)
+    } catch (error) {
+        console.error('Error toggling like:', error);
+    }
 };
+
 
 const submitComment = () => {
     // Make sure course, lesson, and comment exist before submitting
@@ -547,7 +573,6 @@ const submitComment = () => {
         comment: newComment.value.trim()
     })
         .then(() => {
-            console.log('Comment submitted successfully');
             newComment.value = ''; // Clear the input field
             selectLesson(selectedLesson.value); // Refresh the lesson comments
         })
@@ -560,7 +585,6 @@ const submitComment = () => {
 const lessonVideoUrl = videoUrl => `http://localhost:8000/storage/${videoUrl}`;
 // const thumbnailUrl = computed(() => `http://localhost:8000/storage/${courseData.value.thumbnail}`);
 const thumbnailUrl = computed(() => `http://localhost:8000/storage/${courseData.value.thumbnail}`);
-console.log(thumbnailUrl, 'thumbnailUrl');
 function redirectToPurchase() {
     window.location.href = '/subscribe-or-purchase';
 }
