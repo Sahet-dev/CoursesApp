@@ -149,7 +149,8 @@ class FrontendCourseController extends Controller
             },
         ])->findOrFail($id);
 
-        // Hide `video_url` and `markdown_text` from the lesson relationship after fetching
+        $user->setHidden(['email', 'password', 'age', 'email_verified_at', 'remember_token']);
+
         foreach ($user->comments as $comment) {
             if ($comment->lesson) {
                 $comment->lesson->setHidden(['video_url', 'markdown_text']);
