@@ -19,19 +19,22 @@ class ReviewController extends Controller
 
         $review = Review::create($request->all());
 
-        // Redirect to a page or reload the current page
-        return redirect()->back()->with('success', 'Review submitted successfully!');
+        return response()->json([
+            'message' => 'Review submitted successfully!',
+            'review' => $review, // Optionally return the created review
+        ], 201); // 201 Created status code
     }
+
 
     public function index()
     {
-        $user =  Auth::user();
+        $user = Auth::user();
 
         $reviews = Review::with('user')->get();
 
-        return Inertia::render('Reviews/Index', [
-            'user' => $user,
-            'reviews' => $reviews,
-        ]);
+        return response()->json([
+
+        'reviews' => $reviews,
+    ]);
     }
 }
