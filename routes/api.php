@@ -8,6 +8,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LessonController;
+use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\TeacherControlle;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\UsersAuthController;
@@ -122,6 +123,14 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/store-interactions/{courseId}', [HomeController::class, 'storeInteractions'])->name('storeInteractions');
     Route::post('/courses/{courseId}/lessons/{lessonId}/comments/{commentId}/toggle-like', [HomeController::class, 'toggleLike'])
         ->name('comments.toggleLike');
+    Route::get('/get-profile-information', [UsersAuthController::class, 'getUserProfileData']);
+    Route::patch('/profile/update', [UsersAuthController::class, 'updateUserProfile']);
+    Route::post('/profile/updateImages', [UsersAuthController::class, 'uploadAvatar']);
+    Route::post('/reviews', [ReviewController::class, 'store']);
+    Route::post('/feedback', [FeedbackController::class, 'store']);
+    Route::get('/bookmarks', [FrontendCourseController::class, 'showBookmark']);
+    Route::post('/bookmarks/{course}', [FrontendCourseController::class, 'storeBookmark']);
+    Route::delete('/bookmarks/{course}', [FrontendCourseController::class, 'destroyBookmark']);
 
 });
 Route::post('/login-user', [UsersAuthController::class, 'login']);
@@ -130,3 +139,5 @@ Route::post('/user-api/register', [UsersAuthController::class, 'register']);
 Route::get('/api-course', [FrontendCourseController::class, 'getCourses']);
 Route::get('/api-courses/{courseId}', [FrontendCourseController::class, 'showCourse']);
 Route::get('/user/profile/{id}', [FrontendCourseController::class, 'profilePage']);
+Route::get('/reviews', [ReviewController::class, 'index']);
+Route::get('/course-catalog', [HomeController::class, 'search']);
