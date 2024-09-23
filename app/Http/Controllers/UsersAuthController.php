@@ -9,6 +9,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Inertia\Inertia;
 
 class UsersAuthController extends Controller
 {
@@ -111,5 +113,69 @@ class UsersAuthController extends Controller
             'user' => null, // Send a null user or an empty object
             'message' => 'User is not authenticated',
         ], 200);
+    }
+
+    public function uploadAvatar(Request $request)
+    {
+        $request->validate([
+            'avatar' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ]);
+
+        $user = $request->user();
+
+        if ($request->hasFile('avatar')) {
+            $avatar = $request->file('avatar');
+            $path = $avatar->store('avatars', 'public');
+
+            // Update user's avatar path in the database
+            $user->avatar = $path;
+            $user->save();
+
+            return response()->json([
+                'message' => 'Avatar uploaded successfully!',
+                'user' => $user->only(['id', 'name', 'email', 'avatar']),
+            ]);
+        }
+
+        return response()->json([
+            'message' => 'No file uploaded.',
+        ], 400); // Return a 400 Bad Request if no file was uploaded
+    }
+
+
+
+    public function getUserProfileData()
+    {
+
+        Log::info(Auth::user()->name . ' editing profile');
+        if (!Auth::check()) {
+            return response()->json(['message' => 'User not authenticated'], 401);
+        }
+
+        // Find the authenticated user by ID
+        $user = Auth::user();
+
+        // Return the user data as JSON
+        return response()->json($user);
+    }
+
+    public function updateUserProfile(Request $request)
+    {
+        // Validate the request data
+        $validatedData = $request->validate([
+            'name' => 'required|string|max:255',
+            'first_name' => 'nullable|string|max:255',
+            'lastname' => 'nullable|string|max:255',
+            'gender' => 'nullable|string|max:50',
+            'age' => 'nullable|integer|min:0',
+            'location' => 'nullable|string|max:255',
+            // Add other validations as needed
+        ]);
+
+        // Update the authenticated user profile
+        $user = Auth::user();
+        $user->update($validatedData);
+
+        return response()->json(['message' => 'Profile updated successfully!']);
     }
 }

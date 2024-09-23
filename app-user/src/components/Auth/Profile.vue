@@ -124,7 +124,8 @@ const statistics = ref({
     completedLessonsCount: 0,
     purchasedCoursesCount: 0,
     createdCoursesCount: 0,
-    daysSinceRegistration: 0
+    daysSinceRegistration: 0,
+    registrationDate: 0
 });
 const userId = ref(route.params.id);
 // Ref to hold the default image for the user
@@ -139,6 +140,7 @@ const fetchUserProfile = async () => {
         try {
             const response = await apiClient.get(`/user/profile/${userId}`);
             user.value = response.data.user;
+            statistics.value = response.data.statistics;
             // Handle response
         } catch (error) {
             console.error('Error fetching user profile:', error);

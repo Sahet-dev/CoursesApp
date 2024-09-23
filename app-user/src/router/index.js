@@ -5,6 +5,11 @@ import Register from '../components/Auth/Register.vue';
 import CoursePage from "../components/CourseDetail/CoursePage.vue";
 import MainPage from "../components/Main/MainPage.vue";
 import Profile from "../components/Auth/Profile.vue";
+import UpdateProfile from "../components/Auth/UpdateProfile.vue";
+import Index from "../components/Reviews/Index.vue";
+import FeedbackForm from "../components/FeedbackForm.vue";
+import CourseCatalog from "../components/CourseCatalog.vue";
+import Prices from "../components/Prices.vue";
 
 const routes = [
     {
@@ -32,6 +37,31 @@ const routes = [
         path: '/user/:id',
         name: 'Profile',
         component: Profile,
+    },
+    {
+        path: '/profile/:id',
+        name: 'UserProfile',
+        component: UpdateProfile,
+    },
+    {
+        path: '/reviews',
+        name: 'Reviews',
+        component: Index,
+    },
+    {
+        path: '/feedback',
+        name: 'Feedback',
+        component: FeedbackForm,
+    },
+    {
+        path: '/catalog',
+        name: 'CourseCatalog',
+        component: CourseCatalog,
+    },
+    {
+        path: '/prices',
+        name: 'Prices',
+        component: Prices,
     },
 
 ];

@@ -8,6 +8,7 @@ use App\Models\Engagement;
 use App\Models\Lessons;
 use App\Models\User;
 use App\Services\CourseService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -110,24 +111,16 @@ class HomeController extends Controller
 
 
 
-    public function search(Request $request)
+    public function search(Request $request): JsonResponse
     {
-
-        $user = auth()->user();
-
-        // Get the search term from the request
         $search = $request->input('search');
 
-        // Fetch courses, filtering by the search term if provided
         $courses = Course::when($search, function ($query, $search) {
             $query->where('title', 'like', "%{$search}%")
                 ->orWhere('description', 'like', "%{$search}%");
         })->get();
 
-        // Pass the courses and search term to the frontend via Inertia
-        return Inertia::render('components/CourseCatalog', [
-            'authenticated' => (bool)$user,
-            'user' => $user ?: null,
+        return response()->json([
             'courses' => $courses,
             'filters' => [
                 'search' => $search,

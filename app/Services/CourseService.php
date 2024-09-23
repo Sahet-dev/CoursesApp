@@ -76,12 +76,7 @@ class CourseService
                     'title' => $lesson->title,
                     'video_url' => $lesson->video_url,
                     'markdown_text' => $lesson->markdown_text,
-                    'questions' => $lesson->questions->map(function ($question) {
-                        return [
-                            'id' => $question->id,
-                            'question_text' => $question->question_text,
-                        ];
-                    }),
+
                     'comments' => $lesson->comments->map(function ($comment) {
                         return [
                             'id' => $comment->id,
@@ -180,12 +175,7 @@ class CourseService
                     'title' => $lesson->title,
                     'video_url' => $lesson->video_url,
                     'markdown_text' => $lesson->markdown_text,
-                    'questions' => $lesson->questions->map(function ($question) {
-                        return [
-                            'id' => $question->id,
-                            'question_text' => $question->question_text,
-                        ];
-                    }),
+
                     'comments' => $commentsWithLikes->get($lesson->id)->map(function ($comment) use ($user) {
                         return [
                             'id' => $comment->id,

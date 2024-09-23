@@ -190,4 +190,33 @@ class FrontendCourseController extends Controller
     }
 
 
+    public function showBookmark(Request $request)
+    {
+        $user = $request->user();
+        return response()->json($user->bookmarks);
+    }
+
+    // Add a course to bookmarks
+    public function storeBookmark(Request $request, Course $course)
+    {
+        $user = $request->user();
+        if (!$user->hasBookmarkedCourse($course)) {
+            $user->bookmarks()->attach($course);
+        }
+
+        return response()->json(['message' => 'Course added to bookmarks']);
+    }
+
+    // Remove a course from bookmarks
+    public function destroyBookmark(Request $request, Course $course)
+    {
+        $user = $request->user();
+        if ($user->hasBookmarkedCourse($course)) {
+            $user->bookmarks()->detach($course);
+        }
+
+        return response()->json(['message' => 'Course removed from bookmarks']);
+    }
+
+
 }
