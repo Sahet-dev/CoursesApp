@@ -7,10 +7,11 @@
                     <!-- Logo -->
                     <div class="relative shrink-0 flex items-center mr-2">
                         <router-link to="/" class="flex items-center">
-<!--                            <ApplicationLogo class="block h-9 w-auto fill-current text-gray-800" />-->
+                            <img :src="image" alt="Application Logo" class="w-16 h-16 items-center">
                             <span class="hidden md:block ml-2">TmCourses</span>
                         </router-link>
                     </div>
+
 
                     <!-- Search Input -->
                     <div class="flex-1 sm:ml-6 flex items-center justify-center">
@@ -34,20 +35,28 @@
                     <!-- Notifications Button -->
                     <div class="relative hidden sm:flex sm:items-center sm:ml-6">
                         <button
-                            @click="redirectTo('notifications')"
+                            @click="goToFeedback"
                             class="relative inline-flex items-center border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150"
                         >
-                            Updates
+                            Feedback
                         </button>
                     </div>
 
                     <!-- Prices Button -->
                     <div class="relative hidden sm:flex sm:items-center sm:ml-6 mr-2">
                         <button
-                            @click="redirectTo('prices')"
+                            @click="openPrices"
                             class="relative inline-flex items-center border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150"
                         >
                             Prices
+                        </button>
+                    </div>
+                    <div class="relative hidden sm:flex sm:items-center sm:ml-6 mr-2">
+                        <button
+                            @click="goToReviews"
+                            class="relative inline-flex items-center border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150"
+                        >
+                            Reviews
                         </button>
                     </div>
 
@@ -107,8 +116,9 @@
 
             <div class="pt-2 pb-3 space-y-1" v-else>
                 <!-- Authentication Links -->
+                <button class="block px-4 py-2 text-sm" @click="goToProfile(user.id)">Profile</button>
                 <router-link to="/login" class="block px-4 py-2 text-sm">Profisssssle</router-link>
-<!--                <router-link to="/profile" class="block px-4 py-2 text-sm">Profile</router-link>-->
+                <router-link to="/profile/:id" class="block px-4 py-2 text-sm">Profile</router-link>
                 <router-link to="/register" class="block px-4 py-2 text-sm">Register</router-link>
                 <router-link to="/register" class="block px-4 py-2 text-sm">Register</router-link>
             </div>
@@ -120,6 +130,8 @@
 import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import apiClient from "../axios/index.js";
+import ApplicationLogo from "./icon/ApplicationLogo.vue";
+import image from "../assets/IconTm.png";
 
 const router = useRouter();
 const showingNavigationDropdown = ref(false);
@@ -150,21 +162,31 @@ const fetchUser = async () => {
         }
     }
 };
+function goToProfile(userId){
+    router.push({ name: 'UserProfile', params: {id: userId}});
+}
+
+function goToFeedback(){
+    router.push({ name: 'Feedback'});
+}
+
+function goToReviews(){
+    router.push({ name: 'Reviews' });
+}
+
+
 
 
 // Search function
 const searchCourses = async () => {
-    try {
-        await apiClient.get('/courses/search', { params: { search: searchQuery.value } });
-        // Handle search result, e.g., redirect or update state
-    } catch (error) {
-        console.error('Error searching courses:', error);
+    if (searchQuery.value.trim()) {
+        router.push({ name: 'CourseCatalog', query: { search: searchQuery.value } });
     }
 };
 
 // Redirect function
-const redirectTo = (path) => {
-    router.push({ name: path });
+const openPrices = () => {
+    router.push({ name: 'Prices' });
 };
 
 // Handle mounting
