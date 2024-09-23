@@ -1,7 +1,7 @@
 <template>
-    <div>
+    <div class="bg-gradient-to-r from-gray-100 via-pink-50 to-blue-50">
 
-<Navbar/>
+        <Navbar/>
         <div class="container mx-auto   ">
             <!-- Course Header -->
             <div v-if="visible" class="container mx-auto p-4 lg:p-12">
@@ -50,7 +50,20 @@
                                 {{ totalLessons }} Lessons | {{ formattedTotalDuration }} | {{ completionPercentage }}% Completed
                             </p>
                         </div>
-                        <label for="mobile-lesson-select" class="block text-gray-700 font-bold mb-2">Select a Lesson:</label>
+                        <div class="flex items-center justify-between mb-2">
+                            <label for="mobile-lesson-select" class="text-gray-700 font-bold">
+                                Select a Lesson:
+                            </label>
+
+                            <!-- Bookmark Button on the right -->
+                            <button
+                                @click="toggleBookmark(course)"
+                                class="ml-2 text-sky-800 bg-transparent hover:bg-gray-200 rounded-full p-2"
+                            >
+                                <BookmarkIcon v-if="!isBookmarked(course)" class="w-5 h-5" />
+                                <BookmarkIconSolid v-else class="w-5 h-5" />
+                            </button>
+                        </div>
                         <select
                             id="mobile-lesson-select"
                             v-model="selectedLesson"
@@ -73,8 +86,9 @@
 
                 <!-- Content Area -->
                 <div v-if="visible===false" class="bg-white p-4 rounded  w-full shadow    ">
-                    <div v-if="selectedLesson" class=" ">aaa
+                    <div v-if="selectedLesson" class=" ">
                         <h4 class="text-lg font-semibold mb-2">{{ selectedLesson.title }}</h4>
+
                         <div class="video-container">
                             <video v-if="selectedLesson.video_url" :src="lessonVideoUrl(selectedLesson.video_url)"
                                    controls class="video"
@@ -233,7 +247,7 @@
             </div>
         </div>
 
-
+        <Footer />
     </div>
 </template>
 
@@ -241,14 +255,15 @@
 import { ref, computed, watchEffect, onMounted, onUnmounted } from 'vue';
 import apiClient from "../../axios/index.js";
 import {useRoute, useRouter} from "vue-router";
-import {BookOpenIcon, ChatBubbleLeftRightIcon, HandThumbUpIcon} from "@heroicons/vue/24/outline/index.js";
+import {BookmarkIcon, BookOpenIcon, ChatBubbleLeftRightIcon, HandThumbUpIcon} from "@heroicons/vue/24/outline/index.js";
 import {BookOpenIcon as BookOpenIconSolid,
     ChatBubbleLeftRightIcon as ChatBubbleLeftRightIconSolid,
-    ChevronDoubleRightIcon, ChevronDoubleLeftIcon, HandThumbUpIcon as HandThumbUpIconSolid
+    ChevronDoubleRightIcon, ChevronDoubleLeftIcon, HandThumbUpIcon as HandThumbUpIconSolid , BookmarkIcon as BookmarkIconSolid
 } from "@heroicons/vue/24/solid";
 import defaultAvatar   from "../../assets/avatar_default.png";
 import {Tab, TabGroup, TabList, TabPanel, TabPanels} from "@headlessui/vue";
 import Navbar from "../Navbar.vue";
+import Footer from "../Footer.vue";
 
 const courseData = ref({});
 const comments = ref([]);
@@ -267,6 +282,7 @@ const authenticated = ref(false);
 const route = useRoute();
 const visible = ref(true);
 const detailedLessons = ref(  []);
+const bookmarks = ref([]);
 const titleOnlyLessons = ref(  []);
 const selectedLesson = ref( null);
 const totalLessons = computed(() => course.value.lessons?.length || 0);
@@ -321,6 +337,35 @@ function startLessonTimer() {
         timeSpent.value = elapsedTime;
     }, 1000);
 }
+
+
+const fetchBookmarks = async () => {
+    const { data } = await apiClient.get('/bookmarks');
+    bookmarks.value = data;
+};
+
+// Check if a course is bookmarked
+const isBookmarked = (course) => {
+    return bookmarks.value.some((bookmark) => bookmark.id === course.id);
+};
+
+// Add or remove a bookmark
+const toggleBookmark = async (course) => {
+    if (isBookmarked(course)) {
+        await apiClient.delete(`/bookmarks/${course.id}`);
+        bookmarks.value = bookmarks.value.filter((bookmark) => bookmark.id !== course.id);
+    } else {
+        await apiClient.post(`/bookmarks/${course.id}`);
+        bookmarks.value.push(course);
+    }
+};
+
+// Remove a bookmark
+const removeBookmark = async (course) => {
+    await apiClient.delete(`/bookmarks/${course.id}`);
+    bookmarks.value = bookmarks.value.filter((bookmark) => bookmark.id !== course.id);
+};
+
 
 // Stop the timer and accumulate time when the lesson is paused or the user leaves the lesson
 function stopLessonTimer() {

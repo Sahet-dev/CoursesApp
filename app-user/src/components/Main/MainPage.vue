@@ -1,6 +1,7 @@
 <template>
 
-    <div class="page-container">
+    <Navbar />
+    <div v-if="user" class="page-container">
         <!-- Hero Section -->
         <section class="hero-section">
             <div class="hero-wrapper">
@@ -49,7 +50,7 @@
                         class="input-field"
                     />
                     <button
-                        @click="searchCourses"
+                        @click=""
                         :disabled="!searchQuery.trim()"
                         class="search-button"
                     >
@@ -68,12 +69,34 @@
                 <div class="courses-grid">
                     <div
                         v-for="course in popularCourses" :key="course.id" class="course-card"
-                        @click="openCourse(course.id)"
+
                     >
-                        <img :src="course.thumbnail" :alt="course.title" class="course-image">
-                        <h3 class="course-title">{{ course.title }}</h3>
-                        <p class="course-description">{{ course.description }}</p>
+                        <div  @click="openCourse(course.id)">
+                            <img :src="course.thumbnail" :alt="course.title" class="course-image">
+                            <h3 class="course-title">{{ course.title }}</h3>
+                            <p class="course-description">{{ course.description }}</p>
+                        </div>
+
                         <p class="course-price">${{ course.price }}</p>
+
+
+                        <div class="flex items-center justify-between mb-2">
+                            <div  class="text-gray-700 font-bold">
+                            </div>
+
+                            <!-- Bookmark Button on the right -->
+                            <button
+                                @click="toggleBookmark(course)"
+                                class="ml-2 text-sky-800 bg-transparent hover:bg-gray-200 rounded-full p-2"
+                            >
+                                <BookmarkIcon v-if="!isBookmarked(course)" class="w-5 h-5" />
+                                <BookmarkIconSolid v-else class="w-5 h-5" />
+                            </button>
+                        </div>
+
+
+
+
                     </div>
                 </div>
                 <div class="see-all-courses">
@@ -152,7 +175,9 @@
         </section>
 
     </div>
-
+    <div v-else>
+        <Home />
+    </div>
     <Footer />
 
 
@@ -170,17 +195,21 @@ import {ScrollTrigger} from "gsap/ScrollTrigger";
 import Lenis from "@studio-freight/lenis";
 import {Inertia} from "@inertiajs/inertia";
 import {useRouter} from "vue-router";
+import Navbar from "../Navbar.vue";
+import Home from "../Home.vue";
+import {BookmarkIcon} from "@heroicons/vue/24/outline";
+import { BookmarkIcon as BookmarkIconSolid } from "@heroicons/vue/24/solid";
 
 const image = imageUrl;
 const transitionsCompleted = ref(0);
 const totalTransitions = 4;
 const searchQuery = ref('');
-// Refs to control visibility of elements
 const showTitle = ref(false);
 const showSubtitle = ref(false);
 const showDescription = ref(false);
 const showButtons = ref(false);
-
+const bookmarks = ref([]);
+const user = ref({});
 const popularCourses = ref([]);
 const router = useRouter();
 const latestCourses = ref([]);
@@ -194,7 +223,6 @@ const fetchCourses = async () => {
     try {
         const response = await apiClient.get('/api-course'); // Replace 1 with dynamic course ID if needed
         const data = response.data;
-console.log(data)
         popularCourses.value = data.popularCourses || [];
         latestCourses.value = data.latestCourses || [];
     } catch (error) {
@@ -202,6 +230,29 @@ console.log(data)
     }
 };
 
+const fetchUser = async () => {
+    try {
+        const response = await apiClient.get('/user');
+
+        // Check if response.data contains the user information
+        if (!response.data) {
+            console.log('User is unauthenticated');
+            user.value = null; // Set user to null when unauthenticated
+        } else {
+            user.value = response.data; // Set the user value if data exists
+        }
+
+    } catch (error) {
+        if (error.response && error.response.status === 401) {
+            // Handle the case where the user is unauthenticated (401 error)
+            console.log('User is unauthenticated', error);
+            // user.value = null;
+        } else {
+            // Handle other errors (server error, network error, etc.)
+            console.error('Error fetching user:', error);
+        }
+    }
+};
 
 
 gsap.registerPlugin(ScrollTrigger);
@@ -224,15 +275,35 @@ requestAnimationFrame(raf)
 
 
 
-const searchCourses = () => {
-    Inertia.get(route('courses.search'), { search: searchQuery.value }, {
-        preserveState: true,
-        replace: true,
-    });
+
+
+
+const fetchBookmarks = async () => {
+    const { data } = await apiClient.get('/bookmarks');
+    bookmarks.value = data;
 };
 
+// Check if a course is bookmarked
+const isBookmarked = (course) => {
+    return bookmarks.value.some((bookmark) => bookmark.id === course.id);
+};
 
+// Add or remove a bookmark
+const toggleBookmark = async (course) => {
+    if (isBookmarked(course)) {
+        await apiClient.delete(`/bookmarks/${course.id}`);
+        bookmarks.value = bookmarks.value.filter((bookmark) => bookmark.id !== course.id);
+    } else {
+        await apiClient.post(`/bookmarks/${course.id}`);
+        bookmarks.value.push(course);
+    }
+};
 
+// Remove a bookmark
+const removeBookmark = async (course) => {
+    await apiClient.delete(`/bookmarks/${course.id}`);
+    bookmarks.value = bookmarks.value.filter((bookmark) => bookmark.id !== course.id);
+};
 
 
 
@@ -327,6 +398,8 @@ const openCourse = async (courseId) => {
 
 onMounted(() => {
     fetchCourses();
+    fetchUser(),
+        fetchBookmarks()
     showTitle.value = true;
     showSubtitle.value = true;
     showDescription.value = true;
@@ -352,5 +425,6 @@ onMounted(() => {
         );
     });
 });
+
 
 </script>
