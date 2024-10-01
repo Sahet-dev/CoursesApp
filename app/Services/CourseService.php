@@ -9,6 +9,9 @@ use Illuminate\Support\Facades\Auth;
 
 class CourseService
 {
+
+
+
     public function getLatestCoursesWithAccessControl($limit = 4)
     {
         // Fetch the latest courses and their lessons with questions
@@ -59,13 +62,12 @@ class CourseService
 
     public function getCourseLessonsWithAccessControl(Course $course, ?User $user)
     {
-        // Eager load lessons with questions, comments, likes, and replies
         $course->load([
             'questions',
-            'lessons.comments.user', // Load comments with the user who made them
-            'lessons.comments.likes', // Load likes for comments
-            'lessons.comments.replies.user', // Load replies with the user who made them
-            'lessons.comments.replies.likes', // Load likes for replies
+            'lessons.comments.user',
+            'lessons.comments.likes',
+            'lessons.comments.replies.user',
+            'lessons.comments.replies.likes',
         ]);
 
         if ($user && ($course->isAvailableToUser($user) || $course->isPurchasedBy($user))) {
@@ -106,7 +108,6 @@ class CourseService
                 ];
             });
         } else {
-            // Unauthenticated user or user without subscription
             $lessons = $course->lessons->map(function ($lesson) {
                 return [
                     'id' => $lesson->id,
@@ -123,7 +124,6 @@ class CourseService
                 ];
             });
 
-            // Merge full details of the first 4 lessons with title-only for the rest
             return $lessons->map(function ($lesson) use ($firstFourLessonsWithDetails) {
                 $fullDetails = $firstFourLessonsWithDetails->firstWhere('id', $lesson['id']);
                 return array_merge($lesson, $fullDetails ?? []);

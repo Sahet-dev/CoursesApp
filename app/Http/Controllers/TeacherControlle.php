@@ -12,6 +12,7 @@ use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class TeacherControlle extends Controller
 {
@@ -70,6 +71,7 @@ class TeacherControlle extends Controller
 
     public function teacherUpdate(Request $request, $id): JsonResponse
     {
+        Log::info('not working');
         $course = Course::find($id);
 
         if (!$course) {
@@ -80,6 +82,8 @@ class TeacherControlle extends Controller
         $validatedData = $request->validate([
             'title' => 'required|string|max:255',
             'price' => 'required|numeric|min:0',
+            'type' => 'required|string|max:255',
+            'description' => 'required|string',
             // Add other fields as needed
         ]);
 

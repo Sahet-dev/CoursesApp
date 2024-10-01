@@ -57,6 +57,8 @@ class CourseController extends Controller
     // API methods for admin
     public function store(Request $request)
     {
+        Log::info('Called : public function store(Request $request)');
+
         // Check if the user has one of the required roles
         if (!Auth::user()->hasRole(['admin', 'moderator', 'teacher'])) {
             return response()->json(['message' => 'Unauthorized'], 403);
@@ -67,6 +69,7 @@ class CourseController extends Controller
             'description' => 'required|string',
             'thumbnail' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
             'price' => 'required|numeric',
+            'type' => 'required|string',
             'lessons' => 'required|array',
             'lessons.*.title' => 'required|string|max:255',
             'lessons.*.video_url' => 'required|file|mimetypes:video/mp4,video/x-m4v,video/*',
@@ -83,6 +86,7 @@ class CourseController extends Controller
             'description' => $request->description,
             'thumbnail' => $thumbnailPath,
             'price' => $request->price,
+            'type' => $request->type,
             'teacher_id' => $user->id,
         ]);
 
@@ -104,55 +108,59 @@ class CourseController extends Controller
 
 
 
-    public function update(Request $request, $id): JsonResponse
-    {
-        // Check if the user has the 'admin', 'moderator', or 'teacher' role
-        if (!Auth::user()->hasRole(['admin', 'moderator', 'teacher'])) {
-            return response()->json(['message' => 'Unauthorized'], 403);
-        }
-
-        $user = Auth::user();
-
-        // Find the course by ID
-        if ($user->hasRole('teacher')) {
-            // Ensure teachers can only update courses they own
-            $course = Course::where('id', $id)
-                ->where('teacher_id', $user->id)
-                ->first();
-            if (!$course) {
-                return response()->json(['message' => 'Course not found or you are not authorized to update this course.'], 404);
-            }
-        } else {
-            // Admins and moderators can update any course
-            $course = Course::find($id);
-            if (!$course) {
-                return response()->json(['message' => 'Course not found.'], 404);
-            }
-        }
-
-        // Validate the input fields
-        $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'required|string',
-            'price' => 'required|numeric',
-            'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg,gif',
-        ]);
-
-        // Update course fields
-        $course->title = $request->input('title');
-        $course->description = $request->input('description');
-        $course->price = $request->input('price');
-
-        // Handle thumbnail update
-        if ($request->hasFile('thumbnail')) {
-            $course->thumbnail = $request->file('thumbnail')->store('thumbnails', 'public');
-        }
-
-        // Save the updated course
-        $course->save();
-
-        return response()->json(['message' => 'Course updated successfully.']);
-    }
+//    public function update(Request $request, $id): JsonResponse
+//    {
+//        Log::info('not working');
+//
+//        // Check if the user has the 'admin', 'moderator', or 'teacher' role
+//        if (!Auth::user()->hasRole(['admin', 'moderator', 'teacher'])) {
+//            return response()->json(['message' => 'Unauthorized'], 403);
+//        }
+//
+//        $user = Auth::user();
+//
+//        // Find the course by ID
+//        if ($user->hasRole('teacher')) {
+//            // Ensure teachers can only update courses they own
+//            $course = Course::where('id', $id)
+//                ->where('teacher_id', $user->id)
+//                ->first();
+//            if (!$course) {
+//                return response()->json(['message' => 'Course not found or you are not authorized to update this course.'], 404);
+//            }
+//        } else {
+//            // Admins and moderators can update any course
+//            $course = Course::find($id);
+//            if (!$course) {
+//                return response()->json(['message' => 'Course not found.'], 404);
+//            }
+//        }
+//
+//        // Validate the input fields
+//        $request->validate([
+//            'title' => 'required|string|max:255',
+//            'description' => 'required|string',
+//            'price' => 'required|numeric',
+//            'type' => 'required|string',
+//            'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg,gif',
+//        ]);
+//
+//        // Update course fields
+//        $course->title = $request->input('title');
+//        $course->description = $request->input('description');
+//        $course->price = $request->input('price');
+//        $course->type = $request->input('type');
+//
+//        // Handle thumbnail update
+//        if ($request->hasFile('thumbnail')) {
+//            $course->thumbnail = $request->file('thumbnail')->store('thumbnails', 'public');
+//        }
+//
+//        // Save the updated course
+//        $course->save();
+//        Log::info(json_encode($request->all()));
+//        return response()->json(['message' => 'Course updated successfully.']);
+//    }
 
 
 

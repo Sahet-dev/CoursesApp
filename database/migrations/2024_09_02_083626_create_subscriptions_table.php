@@ -16,7 +16,8 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->string('plan'); // e.g., basic, premium
             $table->timestamp('starts_at');
-            $table->decimal('price', 8, 2); // No ->after() here
+            $table->decimal('price', 8, 2)->nullable();
+            $table->decimal('price', 8, 2)->default(0)->change();
             $table->timestamp('ends_at')->nullable();
             $table->string('status'); // e.g., active, canceled
             $table->timestamps();

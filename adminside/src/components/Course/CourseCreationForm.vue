@@ -24,8 +24,10 @@
             <div class="mb-4">
                 <label for="courseType" class="block text-lg font-medium text-gray-700">Course Type</label>
                 <select v-model="course.type" id="courseType" class="w-full px-3 py-2 border rounded-md" required>
+                    <option value="subscription">Include in Subscription</option>
+                    <option value="free">Free</option>
                     <option value="purchase">Purchasable</option>
-                    <option value="subscription">Included in Subscription</option>
+
                 </select>
             </div>
 
@@ -111,7 +113,8 @@ const course = ref({
     title: '',
     description: '',
     thumbnail: null,
-    price: 0
+    price: 0,
+    type: ''
 });
 const lessons = ref([{ title: '', video_url: null, markdown_text: '' }]);
 const existingLessons = ref([]);

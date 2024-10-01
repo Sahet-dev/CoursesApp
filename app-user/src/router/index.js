@@ -10,6 +10,7 @@ import Index from "../components/Reviews/Index.vue";
 import FeedbackForm from "../components/FeedbackForm.vue";
 import CourseCatalog from "../components/CourseCatalog.vue";
 import Prices from "../components/Prices.vue";
+import SuccessPage from "../components/SuccessPage.vue";
 
 const routes = [
     {
@@ -62,6 +63,11 @@ const routes = [
         path: '/prices',
         name: 'Prices',
         component: Prices,
+    },
+    {
+        path: '/success',
+        name: 'Success',
+        component: SuccessPage,
     },
 
 ];

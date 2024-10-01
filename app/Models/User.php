@@ -33,6 +33,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'age',
         'location',
         'avatar',
+        'stripe_id'
 
     ];
 
@@ -119,7 +120,7 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->subscriptions()
             ->where('status', 'active')
-            ->where('ends_at', '>', now()) // Ensure subscription has not expired
+            ->where('ends_at', '>', now())
             ->exists();
     }
 

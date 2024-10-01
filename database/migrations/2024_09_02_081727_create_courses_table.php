@@ -17,8 +17,8 @@ return new class extends Migration
             $table->text('description');
             $table->string('thumbnail');
             $table->decimal('price', 8, 2);
-            $table->string('type')->default('purchase');
-            $table->unsignedBigInteger('teacher_id'); // Add the teacher_id column
+            $table->string('type')->default('subscription');
+            $table->unsignedBigInteger('teacher_id');
             $table->timestamps();
 
             $table->foreign('teacher_id')->references('id')->on('users')->onDelete('cascade');

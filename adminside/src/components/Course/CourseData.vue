@@ -43,6 +43,15 @@
                         <label for="price" class="block text-lg font-medium text-gray-700">Price</label>
                         <input v-model="course.price" id="price" type="number" step="0.01" class="w-full px-3 py-2 border rounded-md" required />
                     </div>
+                    <div class="mb-4">
+                        <label for="courseType" class="block text-lg font-medium text-gray-700">Course Type: {{course.type}}</label>
+                        <select v-model="course.type" id="courseType" class="w-full px-3 py-2 border rounded-md" required>
+                            <option value="subscription">Include in Subscription</option>
+                            <option value="free">Free</option>
+                            <option value="purchase">Purchasable</option>
+
+                        </select>
+                    </div>
                     <button type="submit" class="w-full bg-blue-500 text-white px-4 py-2 rounded-md shadow-sm hover:bg-blue-600">Update Course</button>
                     <div v-if="errorMessage" class="text-red-500 mt-2">{{ errorMessage }}</div>
                 </form>
@@ -72,7 +81,8 @@ const course = ref({
     title: '',
     description: '',
     thumbnail: '',
-    price: 0
+    price: 0,
+    type: ''
 });
 
 
@@ -92,7 +102,7 @@ const fetchCourse = async () => {
     try {
         const response = await apiClient.get(`/courses/${courseId}`);
         course.value = response.data.course;
-
+console.log(course.value)
     } catch (error) {
         errorMessage.value = 'Failed to load course data.';
     }
@@ -118,6 +128,8 @@ const updateCourseData = async () => {
         formData.append('title', course.value.title);
         formData.append('description', course.value.description);
         formData.append('price', course.value.price);
+        formData.append('type', course.value.type);
+
 
         // Only append the thumbnail if it's a file
         if (course.value.thumbnail instanceof File) {

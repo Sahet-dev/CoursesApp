@@ -9,6 +9,7 @@ use App\Http\Controllers\CourseController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LessonController;
 use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\TeacherControlle;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\UsersAuthController;
@@ -36,7 +37,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/courses/{courseId}/lessons/{lessonId}/comments/{commentId}/toggle-like', [HomeController::class, 'toggleLike']);
 
-    Route::put('/courses/{id}', [CourseController::class, 'update']);
+//    Route::put('/courses/{id}', [CourseController::class, 'update']);
     Route::get('/teacher/courses', [CourseController::class, 'index']);
     Route::get('/courses/{id}', [CourseController::class, 'show']);
     Route::post('/courses', [CourseController::class, 'store']);
@@ -94,7 +95,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/courses/{id}/preview', [TeacherControlle::class, 'teacherPreview'])->name('teacherPreview');
 
     // Route to update a course
-    Route::put('/courses/{id}', [TeacherControlle::class, 'teacherUpdate'])->name('teacherUpdate');
+    Route::put('/courses/{id}', [TeacherControlle::class, 'teacherUpdate']) ;
 
     // Route to delete a course
     Route::delete('/courses/{id}', [TeacherControlle::class, 'teacherDestroy'])->name('teacherDestroy');
@@ -121,8 +122,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/api-private-courses/{courseId}', [FrontendCourseController::class, 'showCourse']);
     Route::post('/courses/{courseId}/lessons/{lessonId}/save-time', [HomeController::class, 'saveLessonTime'])->name('saveLessonTime');
     Route::post('/store-interactions/{courseId}', [HomeController::class, 'storeInteractions'])->name('storeInteractions');
-    Route::post('/courses/{courseId}/lessons/{lessonId}/comments/{commentId}/toggle-like', [HomeController::class, 'toggleLike'])
-        ->name('comments.toggleLike');
+//    Route::post('/courses/{courseId}/lessons/{lessonId}/comments/{commentId}/toggle-like', [HomeController::class, 'toggleLike'])
+//        ->name('comments.toggleLike');
     Route::get('/get-profile-information', [UsersAuthController::class, 'getUserProfileData']);
     Route::patch('/profile/update', [UsersAuthController::class, 'updateUserProfile']);
     Route::post('/profile/updateImages', [UsersAuthController::class, 'uploadAvatar']);
@@ -132,7 +133,16 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/bookmarks/{course}', [FrontendCourseController::class, 'storeBookmark']);
     Route::delete('/bookmarks/{course}', [FrontendCourseController::class, 'destroyBookmark']);
 
+
+
+    Route::post('/create-checkout-session', [SubscriptionController::class, 'createCheckoutSession']);
+
+    Route::get('/success}', [SubscriptionController::class, 'success']);
+
+
 });
+
+Route::post('/stripe/webhook', [SubscriptionController::class, 'handleWebhook']);
 Route::post('/login-user', [UsersAuthController::class, 'login']);
 Route::post('/user-api/register', [UsersAuthController::class, 'register']);
 

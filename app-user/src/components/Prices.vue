@@ -15,7 +15,7 @@
                     <div class="px-6 py-8 bg-white sm:p-10 sm:pb-6">
                         <h3 class="text-2xl font-semibold text-center text-gray-900">Monthly Plan</h3>
                         <div class="mt-4 flex justify-center items-baseline text-6xl font-extrabold text-indigo-600">
-                            $15
+                            $14.99
                             <span class="ml-1 text-2xl font-medium text-gray-500">/mo</span>
                         </div>
                     </div>
@@ -62,9 +62,15 @@
                 >
                     <div class="px-6 py-8 bg-white sm:p-10 sm:pb-6">
                         <h3 class="text-2xl font-semibold text-center text-gray-900">Yearly Plan</h3>
+
+                        <!-- Display discounted price and original price with a line-through -->
                         <div class="mt-4 flex justify-center items-baseline text-6xl font-extrabold text-indigo-600">
-                            $150
+                            $119.99
                             <span class="ml-1 text-2xl font-medium text-gray-500">/yr</span>
+                        </div>
+                        <div class="mt-2 flex justify-center items-center text-xl">
+                            <span class="text-gray-400 line-through">$149.99</span>
+                            <span class="ml-2 text-green-600 font-semibold">Save $30</span>
                         </div>
                     </div>
                     <div class="flex-1 flex flex-col justify-between px-6 pt-6 pb-8 bg-gray-50 space-y-6 sm:p-10 sm:pt-6">
@@ -128,10 +134,39 @@
 import { ref } from 'vue'
 import Navbar from "./Navbar.vue";
 import Footer from "./Footer.vue";
+import apiClient from "../axios/index.js";
+import { loadStripe } from '@stripe/stripe-js';
+const stripePromise = loadStripe('pk_test_51Q2SHN2LpRd4wlvxgioe7rRuQ6scppAuXABzPTCycR53OnNkGXdqekinog4OsmDiNv2tfOz8PPPdkLoVhex0ZCEo00Z4o1Fr2W');
 
 const selectedPlan = ref('monthly')
 
-const selectPlan = (plan) => {
-    selectedPlan.value = plan
-}
+const selectPlan = async (plan) => {
+    selectedPlan.value = plan;
+
+    try {
+        const { data } = await apiClient.post('/create-checkout-session', { plan });
+
+        const stripe = await stripePromise;
+        await stripe.redirectToCheckout({sessionId: data.id});
+    } catch (error) {
+        console.error('Error creating checkout session:', error);
+    }
+};
+
+const handleSuccess = async () => {
+    const sessionId = new URLSearchParams(window.location.search).get('session_id');
+
+    try {
+        const response = await apiClient.get(`/payment/success?session_id=${sessionId}`);
+
+        // Redirect to a success page or handle the response as needed
+        // For example:
+        console.log('Payment successful:', response.data);
+        window.location.href = '/payment-success'; // Or any other page you want to show
+    } catch (error) {
+        console.error('Error handling success:', error);
+    }
+};
+
+
 </script>

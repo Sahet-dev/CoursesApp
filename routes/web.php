@@ -5,6 +5,7 @@ use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\SubscriptionController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -25,13 +26,6 @@ Route::middleware('auth')->group(function () {
         ->name('comments.toggleLike')
         ->middleware('auth');
 
-//    Route::post('/courses/{courseId}/lessons/{lessonId}/save-time', [HomeController::class, 'saveLessonTime'])->name('saveLessonTime');
-
-//    Route::post('/store-interactions/{courseId}', [HomeController::class, 'storeInteractions'])->name('storeInteractions');
-
-
-//    Route::post('/courses/{course}/lessons/{lesson}/comments', [HomeController::class, 'createComment'])->name('createComment');
-
     Route::get('/notifications', [HomeController::class, 'notificationsPage'])->name('notifications');
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -45,5 +39,5 @@ Route::middleware('auth')->group(function () {
     })->name('feedback');
 
 });
-
+//route::get('/success', [SubscriptionController::class, 'success'])->name('payment.success')->middleware('web');
 require __DIR__.'/auth.php';
