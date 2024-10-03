@@ -13,8 +13,15 @@ class CourseSeeder extends Seeder
      */
     public function run(): void
     {
-        Course::factory()
-            ->count(10) // Adjust the count as needed
-            ->create();
+
+        Course::create([
+            'title' => 'Officia labore aut quibusdam qui.',
+            'description' => 'Amet minima doloribus voluptatem voluptate quos expedita nostrum.',
+            'thumbnail' => 'https://via.placeholder.com/640x480.png/008811?text=error',
+            'teacher_id' => 1,
+            'premium' => 1,
+            'subscription_access' => 0,
+            // Remove 'price' if it no longer exists
+        ]);
     }
 }

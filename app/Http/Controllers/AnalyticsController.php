@@ -63,64 +63,59 @@ class AnalyticsController extends Controller
 
 
 
-
-
-
-
-
-    public function activeUsers(Request $request)
+    public function getDashboardMetrics(Request $request)
     {
+        // Check if the user has appropriate roles
         if (!Auth::user()->hasRole(['admin', 'moderator', 'teacher'])) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
+
+        // Get the start and end dates for metrics
         $startDate = $request->query('start_date');
         $endDate = $request->query('end_date');
 
+        // Fetch active users
         $activeUsers = User::getActiveUsers($startDate, $endDate);
 
-        return response()->json(['active_users' => $activeUsers]);
-    }
-
-    public function newSubscriptions(Request $request)
-    {
-        if (!Auth::user()->hasRole(['admin', 'moderator', 'teacher'])) {
-            return response()->json(['message' => 'Unauthorized'], 403);
-        }
-        $startDate = $request->query('start_date');
-        $endDate = $request->query('end_date');
-
+        // Fetch new subscriptions
         $newSubscriptions = Subscription::getNewSubscriptions($startDate, $endDate);
 
-        return response()->json(['new_subscriptions' => $newSubscriptions]);
-    }
-
-    public function churnRate(Request $request)
-    {
-        if (!Auth::user()->hasRole(['admin', 'moderator', 'teacher'])) {
-            return response()->json(['message' => 'Unauthorized'], 403);
-        }
-        $startDate = $request->query('start_date');
-        $endDate = $request->query('end_date');
-
+        // Fetch churn rate
         $churnRate = Subscription::getChurnRate($startDate, $endDate);
 
-        return response()->json(['churn_rate' => $churnRate]);
-    }
-
-    public function retentionRate(Request $request)
-    {
-        if (!Auth::user()->hasRole(['admin', 'moderator', 'teacher'])) {
-            return response()->json(['message' => 'Unauthorized'], 403);
-        }
+        // Fetch retention rate, if provided
         $initialPeriodStart = $request->query('initial_period_start');
         $initialPeriodEnd = $request->query('initial_period_end');
         $retentionPeriodStart = $request->query('retention_period_start');
         $retentionPeriodEnd = $request->query('retention_period_end');
-
         $retentionRate = Subscription::getRetentionRate($initialPeriodStart, $initialPeriodEnd, $retentionPeriodStart, $retentionPeriodEnd);
 
-        return response()->json(['retention_rate' => $retentionRate]);
+        // Financial metrics
+        $financialStartDate = Carbon::now()->subMonth(); // Example: 1 month ago
+        $financialEndDate = Carbon::now(); // Current date
+
+        $totalRevenue = FinancialMetricsService::getTotalRevenue();
+        $arpu = FinancialMetricsService::getARPU($financialStartDate, $financialEndDate);
+        $ltv = FinancialMetricsService::getLTV();
+
+        // Return all the data in a single JSON response
+        return response()->json([
+            'active_users' => $activeUsers,
+            'new_subscriptions' => $newSubscriptions,
+            'churn_rate' => $churnRate,
+            'retention_rate' => $retentionRate,
+            'financial_metrics' => [
+                'totalRevenue' => $totalRevenue,
+                'arpu' => $arpu,
+                'ltv' => $ltv
+            ]
+        ]);
     }
+
+
+
+
+
 
     public function financialMetrics()
     {
@@ -133,14 +128,14 @@ class AnalyticsController extends Controller
 
         // Calculate financial metrics
         $totalRevenue = FinancialMetricsService::getTotalRevenue();
-        $revenueByCourse = FinancialMetricsService::getRevenueByCourse();
+
         $arpu = FinancialMetricsService::getARPU($startDate, $endDate);
         $ltv = FinancialMetricsService::getLTV();
 
         // Return data as JSON response
         return response()->json([
             'totalRevenue' => $totalRevenue,
-            'revenueByCourse' => $revenueByCourse,
+
             'arpu' => $arpu,
             'ltv' => $ltv,
         ]);

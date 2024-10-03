@@ -11,11 +11,12 @@ class Course extends Model
     protected $fillable = [
         'title',
         'description',
-        'thumbnail',
         'price',
+        'thumbnail',
         'teacher_id',
         'premium',
-        'subscription_access'
+        'subscription_access',
+        'type'
     ];
 
     public function teacher()

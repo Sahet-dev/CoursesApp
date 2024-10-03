@@ -8,7 +8,10 @@
                 </button>
             </router-link>
         </div>
-        <div v-if="courses.data && courses.data.length" class="w-full border-collapse border border-gray-200">
+
+        <Loader v-if="loading" />
+
+        <div v-else-if="!loading && courses.data && courses.data.length" class="w-full border-collapse border border-gray-200">
             <table class="w-full table-fixed">
                 <thead>
                 <tr>
@@ -82,8 +85,12 @@
                 </div>
             </div>
         </div>
-        <div v-else>
-            <Loader />
+        <div v-else-if="!loading && (!courses.data || !courses.data.length)" class="flex flex-col items-center justify-center pt-6">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">No Courses Yet</h2>
+            <p class="text-gray-600 mb-4">Start by creating your first course.</p>
+            <button @click="createFirstCourse" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition duration-200">
+                Create First Course
+            </button>
         </div>
     </div>
 </template>
@@ -94,6 +101,8 @@ import apiClient from '../../../api/axios.js';
 import {useRouter} from 'vue-router';
 import Loader from "../Loader.vue";
 
+
+const loading = ref(true);
 const courses = ref({
     data: [],
     prev_page_url: null,
@@ -109,6 +118,8 @@ const fetchCourses = async (url = '/teacher/courses') => {
         console.log(courses.value);
     } catch (error) {
         console.error('Failed to fetch courses:', error);
+    }finally {
+        loading.value = false;
     }
 };
 
@@ -131,6 +142,11 @@ const deleteCourse = async (id) => {
         }
     }
 };
+const createFirstCourse = () => {
+    router.push({ name: 'NewCourse' });
+};
+
+
 
 onMounted(fetchCourses);
 </script>

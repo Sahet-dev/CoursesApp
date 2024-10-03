@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('title');
             $table->text('description');
             $table->string('thumbnail');
-            $table->decimal('price', 8, 2);
+            $table->decimal('price')->nullable();
             $table->string('type')->default('subscription');
             $table->unsignedBigInteger('teacher_id');
             $table->timestamps();

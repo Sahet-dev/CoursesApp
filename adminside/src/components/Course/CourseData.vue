@@ -48,7 +48,6 @@
                         <select v-model="course.type" id="courseType" class="w-full px-3 py-2 border rounded-md" required>
                             <option value="subscription">Include in Subscription</option>
                             <option value="free">Free</option>
-                            <option value="purchase">Purchasable</option>
 
                         </select>
                     </div>
@@ -68,7 +67,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed} from 'vue';
+import {ref, onMounted, computed, watch} from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import apiClient from "../../api/axios.js";
 import DashboardHeader from "../DashboardHeader.vue";
@@ -114,6 +113,14 @@ const handleFileUpload = (event) => {
         course.value.thumbnail = file;
     }
 };
+
+
+
+watch(() => course.value.type, (newValue) => {
+    console.log('Course type selected:', newValue);
+});
+
+
 function showNotification(message) {
     notification.value.message = message;
     notification.value.visible = true;

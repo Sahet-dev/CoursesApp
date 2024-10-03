@@ -125,54 +125,27 @@ const fetchAnalyticsData = async () => {
     };
 
     try {
-        const financialMetricsResponse = await apiClient.get('/analytics/financial-metrics');
-        totalRevenue.value = financialMetricsResponse.data.totalRevenue;
-        console.log(financialMetricsResponse.data.totalRevenue)
-        revenueByCourse.value = financialMetricsResponse.data.revenueByCourse;
-        arpu.value = financialMetricsResponse.data.arpu;
-        ltv.value = financialMetricsResponse.data.ltv;
-    } catch (error) {
-        errorMessage.value = 'Error fetching financial metrics.';
-        console.error(error);
-    }
-
-    try {
-        const activeUsersResponse = await apiClient.get('/analytics/active-users', { params });
-        activeUsers.value = activeUsersResponse.data.active_users;
-    } catch (error) {
-        errorMessage.value = 'Error fetching active users.';
-    }
-
-    try {
-        const newSubscriptionsResponse = await apiClient.get('/analytics/new-subscriptions', { params });
-        newSubscriptions.value = newSubscriptionsResponse.data.new_subscriptions;
-    } catch (error) {
-        errorMessage.value = 'Error fetching new subscriptions.';
-    }
-
-    try {
-        const churnRateResponse = await apiClient.get('/analytics/churn-rate', { params });
-        churnRate.value = churnRateResponse.data.churn_rate;
-    } catch (error) {
-        errorMessage.value = 'Error fetching churn rate.';
-    }
-
-    try {
-        const retentionRateResponse = await apiClient.get('/analytics/retention-rate', { params });
-        retentionRate.value = retentionRateResponse.data.retention_rate;
-    } catch (error) {
-        errorMessage.value = 'Error fetching retention rate.';
-    }
-    try {
-        const response = await apiClient.get('/analytics/course-engagement');
+        // Make a single API call to fetch all analytics data
+        const response = await apiClient.get('/analytics/dashboard-metrics', { params });
         const data = response.data;
 
-        // Populate data into Vue component state
+        // Update all relevant state values
+        totalRevenue.value = data.financial_metrics.totalRevenue;
+        revenueByCourse.value = data.financial_metrics.revenueByCourse;
+        arpu.value = data.financial_metrics.arpu;
+        ltv.value = data.financial_metrics.ltv;
+
+        activeUsers.value = data.active_users;
+        newSubscriptions.value = data.new_subscriptions;
+        churnRate.value = data.churn_rate;
+        retentionRate.value = data.retention_rate;
+
         popularCourses.value = data.popular_courses;
         completionRates.value = data.completion_rates;
         engagementMetrics.value = data.engagement_metrics;
+
     } catch (error) {
-        errorMessage.value = 'Error fetching course engagement data.';
+        errorMessage.value = 'Error fetching analytics data.';
         console.error(error);
     }
 };

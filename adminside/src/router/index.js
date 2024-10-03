@@ -38,7 +38,7 @@ const routes = [
         children: [
             { path: '', component: AdminMessage },
             { path: 'courses', component: TeacherContentManagement },
-            { path: 'new-course', component: CourseCreationForm },
+            { path: 'new-course', name: 'NewCourse', component: CourseCreationForm },
             { path: 'enrollment-list', component: EnrollmentList },
             { path: 'student-performance', component: StudentPerformance },
             { path: 'reviews', component: Reviews },

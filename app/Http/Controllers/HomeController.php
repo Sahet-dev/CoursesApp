@@ -82,7 +82,7 @@ class HomeController extends Controller
         $search = $request->input('search', '');
 
         // Fields to select
-        $fields = ['id', 'title', 'description', 'thumbnail', 'price'];
+        $fields = ['id', 'title', 'description', 'thumbnail', ];
 
         // Query to fetch all courses (both general and premium)
         $coursesQuery = Course::select($fields);

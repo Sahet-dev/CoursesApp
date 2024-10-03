@@ -12,18 +12,12 @@ class FinancialMetricsService
 {
     public static function getTotalRevenue()
     {
-        $courseRevenue = Course::sum('price');
+
         $subscriptionRevenue = Subscription::where('status', 'active')->sum('plan');
-        return $courseRevenue + $subscriptionRevenue;
+        return $subscriptionRevenue > 0 ? $subscriptionRevenue : 0;
     }
 
-    public static function getRevenueByCourse()
-    {
-        return Course::select('courses.id', 'courses.title', 'courses.description', 'courses.thumbnail', DB::raw('SUM(courses.price) as revenue'))
-            ->join('course_user', 'courses.id', '=', 'course_user.course_id')
-            ->groupBy('courses.id', 'courses.title', 'courses.description', 'courses.thumbnail')
-            ->get();
-    }
+
 
     public static function getARPU($startDate, $endDate)
     {

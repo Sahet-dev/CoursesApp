@@ -71,7 +71,7 @@ class TeacherControlle extends Controller
 
     public function teacherUpdate(Request $request, $id): JsonResponse
     {
-        Log::info('not working');
+
         $course = Course::find($id);
 
         if (!$course) {
@@ -84,12 +84,9 @@ class TeacherControlle extends Controller
             'price' => 'required|numeric|min:0',
             'type' => 'required|string|max:255',
             'description' => 'required|string',
-            // Add other fields as needed
         ]);
 
-        // Update the course with validated data
         $course->update($validatedData);
-
         return response()->json(['message' => 'Course updated successfully.', 'course' => $course]);
     }
 

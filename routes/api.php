@@ -27,11 +27,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
     route::put('/users/change-role/{id}', [UserController::class, 'updateRole']);
 
     Route::get('/analytics/course-engagement', [AnalyticsController::class, 'index']);
-    Route::get('/analytics/active-users', [AnalyticsController::class, 'activeUsers']);
-    Route::get('/analytics/new-subscriptions', [AnalyticsController::class, 'newSubscriptions']);
-    Route::get('/analytics/churn-rate', [AnalyticsController::class, 'churnRate']);
-    Route::get('/analytics/retention-rate', [AnalyticsController::class, 'retentionRate']);
+
     Route::get('/analytics/financial-metrics', [AnalyticsController::class, 'financialMetrics']);
+    Route::get('/analytics/dashboard-metrics', [AnalyticsController::class, 'getDashboardMetrics']);
+
 });
 
 Route::middleware('auth:sanctum')->group(function () {
