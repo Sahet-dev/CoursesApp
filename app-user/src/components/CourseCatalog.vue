@@ -6,9 +6,12 @@
             <h5 class="text-2xl mb-6 p-2">Results were found: {{ totalOccurrences }}</h5>
             <h5 class="text-2xl mb-6 p-2">For search term: "{{ search }}"</h5>
 
+            <div  v-if="loading" class=" mx-auto min-h-screen items-center pt-4">
+                <Loader />
 
+            </div>
             <!-- Display the courses -->
-            <div v-if="courses.courses && courses.courses.length">
+            <div v-else-if="!loading && courses.courses && courses.courses.length">
                 <div v-for="course in courses.courses" :key="course.id" class="bg-white rounded shadow p-6 mb-6" >
                     <div @click="openCourse(course.id)">
                         <img
@@ -33,7 +36,7 @@
 
 
 
-                    <p class="text-lg font-bold mb-2">${{ course.price }}</p>
+                     <div></div>
                     <div class="flex items-center justify-between mb-2">
                         <div  class="text-gray-700 font-bold">
                         </div>
@@ -53,7 +56,7 @@
             </div>
 
             <!-- Show message if no courses are found -->
-            <div v-else class="text-gray-500">No courses found matching the search criteria.</div>
+            <div v-else class="text-gray-500 min-h-screen ">No courses found matching the search criteria.</div>
         </div>
 
         <Footer />
@@ -71,12 +74,14 @@ import {useRoute, useRouter} from 'vue-router';
 import Footer from "./Footer.vue";
 import {BookmarkIcon} from "@heroicons/vue/24/outline";
 import { BookmarkIcon as BookmarkIconSolid } from "@heroicons/vue/24/solid";
+import Loader from "./CourseDetail/Loader.vue";
 const route = useRoute();
 const search = ref(route.query.search || '');
 const courses = ref([]);
 const searchCounts = ref({});
 const router = useRouter();
 const bookmarks = ref([]);
+const loading = ref(true);
 
 // Function to generate the course image URL
 const imageUrl = (thumbnail) => {
@@ -118,6 +123,8 @@ const fetchCourses = async () => {
         });
     } catch (error) {
         console.error(error);
+    }finally {
+        loading.value = false;
     }
 };
 

@@ -149,7 +149,6 @@ const createCourseAndAddLesson = async () => {
     const formData = new FormData();
     formData.append('title', course.value.title);
     formData.append('description', course.value.description);
-    formData.append('price', course.value.price);
     formData.append('thumbnail', course.value.thumbnail); // Append the file
     formData.append('type', course.value.type);
 

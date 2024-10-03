@@ -13,8 +13,8 @@
             </div>
         </transition>
         <div  v-bind="$attrs">
-
-            <div v-if="lessons.length" class="flex mx-auto p-6 bg-white rounded-md shadow-md">
+            <Loader v-if="loading" />
+            <div v-if="!loading && lessons.length" class="flex mx-auto p-6 bg-white rounded-md shadow-md">
                 <!-- Sidebar -->
                 <UpdateSidebar
                     :lessons="lessons"
@@ -81,9 +81,12 @@
                 </div>
             </div>
             <div v-else-if="errorMessage" class="text-red-500 mt-2">{{ errorMessage }}</div>
-            <div v-else class=" items-center justify-center flex text-center pt-6">
-                <Loader  />
-
+            <div v-else-if="!loading && !lessons.length" class="flex flex-col items-center justify-center pt-6">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">No Lessons Yet</h2>
+                <p class="text-gray-600 mb-4">Start by creating your first lesson for this course.</p>
+                <button @click="createFirstLesson" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition duration-200">
+                    Create First Lesson
+                </button>
             </div>
         </div>
     </div>
@@ -160,6 +163,8 @@ const notification = ref({
     message: '',
     visible: false
 });
+const loading = ref(true);
+
 const isMarkdownTextRequired = true;
 const isMarkdownTextValid = computed(() => {
     const markdownText = lessons.value[selectedLesson.value]?.markdown_text || '';
@@ -317,9 +322,14 @@ const fetchCourses = async () => {
         courses.value = response.data.course;
     } catch (error) {
         errorMessage.value = 'Failed to load course data.';
+    } finally {
+        loading.value = false;
     }
 };
 
+const createFirstLesson = async () => {
+    await addLesson()
+};
 
 const editCourse = () => {
     const courseId = route.params.id;

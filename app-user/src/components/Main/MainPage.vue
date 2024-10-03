@@ -221,7 +221,7 @@ const comments = ref([
 
 const fetchCourses = async () => {
     try {
-        const response = await apiClient.get('/api-course'); // Replace 1 with dynamic course ID if needed
+        const response = await apiClient.get('/api-course');
         const data = response.data;
         popularCourses.value = data.popularCourses || [];
         latestCourses.value = data.latestCourses || [];

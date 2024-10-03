@@ -85,7 +85,6 @@ class CourseController extends Controller
             'title' => $request->title,
             'description' => $request->description,
             'thumbnail' => $thumbnailPath,
-            'price' => $request->price,
             'type' => $request->type,
             'teacher_id' => $user->id,
         ]);
@@ -140,7 +139,6 @@ class CourseController extends Controller
 //        $request->validate([
 //            'title' => 'required|string|max:255',
 //            'description' => 'required|string',
-//            'price' => 'required|numeric',
 //            'type' => 'required|string',
 //            'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg,gif',
 //        ]);
@@ -148,7 +146,6 @@ class CourseController extends Controller
 //        // Update course fields
 //        $course->title = $request->input('title');
 //        $course->description = $request->input('description');
-//        $course->price = $request->input('price');
 //        $course->type = $request->input('type');
 //
 //        // Handle thumbnail update

@@ -3,83 +3,74 @@
         <h1 class="text-2xl font-semibold mb-4">User Management</h1>
 
         <!-- User List -->
-        <table v-if="users.data && users.data.length" class="w-full border-collapse border border-gray-200">
-            <thead>
-            <tr>
-                <th class="border border-gray-300 p-2 text-left">ID</th>
-                <th class="border border-gray-300 p-2 text-left">Name</th>
-                <th class="border border-gray-300 p-2 text-left">Email</th>
-                <th class="border border-gray-300 p-2 text-left">Role</th>
-                <th class="border border-gray-300 p-2 text-left">Actions</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr v-for="user in users.data" :key="user.id">
-                <td class="border border-gray-300 p-2">{{ user.id }}</td>
-                <td class="border border-gray-300 p-2">{{ user.name }}</td>
-                <td class="border border-gray-300 p-2">{{ user.email }}</td>
-                <td class="border border-gray-300 p-2">
-                    <select v-model="user.role" @change="updateUserRole(user)" class="mt-1 block w-full">
-                        <option value="student">Student</option>
-                        <option value="teacher">Teacher</option>
-                        <option value="moderator">Moderator</option>
-                    </select>
-                </td>
-                <td class="border border-gray-300 p-2 flex space-x-2">
-                    <button @click="editUser(user)" class="bg-yellow-500 text-white py-1 px-3 rounded-md hover:bg-yellow-600 transition-all duration-300">
-                        Edit
-                    </button>
-                    <button @click="deleteUser(user.id)" class="bg-red-500 text-white py-1 px-3 rounded-md hover:bg-red-600 transition-all duration-300">
-                        Delete
-                    </button>
-                </td>
-            </tr>
-            </tbody>
-        </table>
-        <div v-else>
+        <div v-if="loading">
             <Loader />
         </div>
 
-        <!-- Pagination Controls -->
-        <div v-if="users.data && (users.prev_page_url || users.next_page_url)"
-             class="flex justify-center items-center mt-6">
-            <!-- Pagination Information -->
-            <div class="mr-4">
-                Page {{ users.current_page }} of {{ users.last_page }}
+        <div v-else>
+            <!-- Check if users are found -->
+            <div v-if="users.data && users.data.length">
+                <table class="w-full border-collapse border border-gray-200">
+                    <thead>
+                    <tr>
+                        <th class="border border-gray-300 p-2 text-left">ID</th>
+                        <th class="border border-gray-300 p-2 text-left">Name</th>
+                        <th class="border border-gray-300 p-2 text-left">Email</th>
+                        <th class="border border-gray-300 p-2 text-left">Role</th>
+                        <th class="border border-gray-300 p-2 text-left">Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr v-for="user in users.data" :key="user.id">
+                        <td class="border border-gray-300 p-2">{{ user.id }}</td>
+                        <td class="border border-gray-300 p-2">{{ user.name }}</td>
+                        <td class="border border-gray-300 p-2">{{ user.email }}</td>
+                        <td class="border border-gray-300 p-2">
+                            <select v-model="user.role" @change="updateUserRole(user)" class="mt-1 block w-full">
+                                <option value="student">Student</option>
+                                <option value="teacher">Teacher</option>
+                                <option value="moderator">Moderator</option>
+                            </select>
+                        </td>
+                        <td class="border border-gray-300 p-2 flex space-x-2">
+                            <button @click="editUser(user)" class="bg-yellow-500 text-white py-1 px-3 rounded-md hover:bg-yellow-600 transition-all duration-300">
+                                Edit
+                            </button>
+                            <button @click="deleteUser(user.id)" class="bg-red-500 text-white py-1 px-3 rounded-md hover:bg-red-600 transition-all duration-300">
+                                Delete
+                            </button>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+
+                <!-- Pagination Controls -->
+                <div v-if="users.prev_page_url || users.next_page_url" class="flex justify-center items-center mt-6">
+                    <!-- Pagination Information -->
+                    <div class="mr-4">
+                        Page {{ users.current_page }} of {{ users.last_page }}
+                    </div>
+
+                    <!-- Pagination Buttons -->
+                    <div class="flex space-x-2">
+                        <button @click="fetchUsers(users.prev_page_url)" :disabled="!users.prev_page_url" class="px-4 py-2 mr-2 bg-gray-300 rounded hover:bg-gray-400 disabled:opacity-50">
+                            Previous
+                        </button>
+
+                        <button v-for="page in users.last_page" :key="page" @click="fetchUsers(getUserPageUrl(page))" :class="['px-4 py-2 rounded hover:bg-gray-400 transition-all duration-300', users.current_page === page ? 'bg-blue-500 text-white' : 'bg-gray-300']">
+                            {{ page }}
+                        </button>
+
+                        <button @click="fetchUsers(users.next_page_url)" :disabled="!users.next_page_url" class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 disabled:opacity-50">
+                            Next
+                        </button>
+                    </div>
+                </div>
             </div>
 
-            <!-- Pagination Buttons -->
-            <div class="flex space-x-2">
-                <!-- Previous Button -->
-                <button
-                    @click="fetchUsers(users.prev_page_url)"
-                    :disabled="!users.prev_page_url"
-                    class="px-4 py-2 mr-2 bg-gray-300 rounded hover:bg-gray-400 disabled:opacity-50"
-                >
-                    Previous
-                </button>
-
-                <!-- Page Numbers -->
-                <button
-                    v-for="page in users.last_page"
-                    :key="page"
-                    @click="fetchUsers(getUserPageUrl(page))"
-                    :class="[
-                'px-4 py-2 rounded hover:bg-gray-400 transition-all duration-300',
-                users.current_page === page ? 'bg-blue-500 text-white' : 'bg-gray-300'
-            ]"
-                >
-                    {{ page }}
-                </button>
-
-                <!-- Next Button -->
-                <button
-                    @click="fetchUsers(users.next_page_url)"
-                    :disabled="!users.next_page_url"
-                    class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 disabled:opacity-50"
-                >
-                    Next
-                </button>
+            <!-- No users found message -->
+            <div v-else>
+                No users yet registered.
             </div>
         </div>
     </div>
@@ -91,6 +82,7 @@ import apiClient from '../../../api/axios.js';
 import router from '../../../router';
 import axios from 'axios';
 import Loader from "../Loader.vue";
+const loading = ref(true);
 
 const users = ref({
     data: [],
@@ -121,6 +113,8 @@ const fetchUsers = async (url = '/users') => {
             console.error('Failed to fetch user data:', error);
             errorMessage.value = 'Failed to fetch user data.';
         }
+    }finally {
+        loading.value = false;
     }
 };
 
