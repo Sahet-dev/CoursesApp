@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Comment;
+use App\Models\Engagement;
 use App\Models\Lessons;
 use App\Models\Course;
 use App\Models\User;
@@ -94,11 +95,6 @@ class FrontendCourseController extends Controller
             'currentUser' => Auth::user(),
         ]);
     }
-
-
-
-
-
 
 
 
@@ -216,6 +212,26 @@ class FrontendCourseController extends Controller
         }
 
         return response()->json(['message' => 'Course removed from bookmarks']);
+    }
+
+
+    public function getUserActivities($userId)
+    {
+        // Fetch engagements for the user, including course and lesson details
+        $engagements = Engagement::where('user_id', $userId)
+            ->with(['course', 'lesson']) // Assuming 'lesson' is a relationship in Engagement model
+            ->get();
+
+        // Format the engagements for activities
+        $activities = $engagements->map(function ($engagement) {
+            return [
+                'id' => $engagement->id,
+                'action' => 'Engaged with course: ' . $engagement->course->title,
+                'date' => $engagement->created_at->toDateString(),
+            ];
+        });
+
+        return response()->json($activities);
     }
 
 

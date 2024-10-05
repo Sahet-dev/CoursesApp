@@ -1,7 +1,8 @@
 <template>
 
     <Navbar />
-    <div v-if="user" class="page-container">
+    <div v-if="!user" class="page-container">
+
         <!-- Hero Section -->
         <section class="hero-section">
             <div class="hero-wrapper">
