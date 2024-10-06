@@ -131,12 +131,10 @@ const userId = ref(route.params.id);
 // Ref to hold the default image for the user
 
 
-// Function to fetch user profile data
 const fetchUserProfile = async () => {
     const userId = route.params.id; // Retrieve the ID from route params
 
 
-        // Your API call here
         try {
             const response = await apiClient.get(`/user/profile/${userId}`);
             user.value = response.data.user;
@@ -155,5 +153,4 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* Tailwind classes are being used for styling. */
 </style>

@@ -131,7 +131,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/bookmarks', [FrontendCourseController::class, 'showBookmark']);
     Route::post('/bookmarks/{course}', [FrontendCourseController::class, 'storeBookmark']);
     Route::delete('/bookmarks/{course}', [FrontendCourseController::class, 'destroyBookmark']);
-    Route::get('/user/{userId}/activities', [FrontendCourseController::class, 'getUserActivities']);
+    Route::get('/user/activities', [FrontendCourseController::class, 'getUserActivities']);
+
 
 
     Route::post('/create-checkout-session', [SubscriptionController::class, 'createCheckoutSession']);

@@ -60,10 +60,11 @@
                         </button>
                     </div>
 
+
                     <!-- Authentication Links -->
                     <template v-if="!user">
                         <router-link to="/login" class="text-gray-200 border-b border-gray-200 bg-blue-500 p-2 rounded hover:text-gray-100 hover:bg-blue-800 focus:outline-none transition ease-in-out duration-150">
-                            Login s
+                            Login
                         </router-link>
                         <router-link to="/register" class="ml-4 text-gray-500 hover:text-gray-700 focus:outline-none transition ease-in-out duration-150">
                             Register
@@ -72,6 +73,14 @@
                     <template v-else>
                         <div class="text-gray-700 focus:outline-none transition ease-in-out duration-150">
                             {{ user.name }}
+                        </div>
+                        <div class="relative hidden sm:flex sm:items-center sm:ml-6 mr-2">
+                            <button
+                                @click="$emit('logout')"
+                                class="relative inline-flex items-center border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150"
+                            >
+                                Logout
+                            </button>
                         </div>
                     </template>
                 </div>
@@ -183,6 +192,20 @@ const searchCourses = async () => {
         router.push({ name: 'CourseCatalog', query: { search: searchQuery.value } });
     }
 };
+
+
+const handleLogout = async () => {
+    try {
+        const response = await apiClient.post('/logout');
+        console.log('Logout response:', response.data);
+        localStorage.removeItem('token'); // Clear token
+        await router.push('/');
+    } catch (error) {
+        console.error('Failed to logout:', error);
+        errorMessage.value = error.response?.data?.message || 'Failed to logout.';
+    }
+};
+
 
 // Redirect function
 const openPrices = () => {

@@ -135,7 +135,7 @@ class FrontendCourseController extends Controller
                 $query->with('teacher'); // Eager load teacher data for purchased courses
             },
             'engagements' => function ($query) {
-                $query->with('course'); // Eager load course data for engagements
+                $query->with('course');
             },
             'comments' => function ($query) use ($id) { // Filter comments by user ID
                 $query->where('user_id', $id)
@@ -215,23 +215,11 @@ class FrontendCourseController extends Controller
     }
 
 
-    public function getUserActivities($userId)
+    public function getUserActivities(Request $request): JsonResponse
     {
-        // Fetch engagements for the user, including course and lesson details
-        $engagements = Engagement::where('user_id', $userId)
-            ->with(['course', 'lesson']) // Assuming 'lesson' is a relationship in Engagement model
-            ->get();
-
-        // Format the engagements for activities
-        $activities = $engagements->map(function ($engagement) {
-            return [
-                'id' => $engagement->id,
-                'action' => 'Engaged with course: ' . $engagement->course->title,
-                'date' => $engagement->created_at->toDateString(),
-            ];
-        });
-
-        return response()->json($activities);
+        $currentUser =  $request->user();
+        Log::info($currentUser->engagements);
+          return response()->json($currentUser->engagements);
     }
 
 

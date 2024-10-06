@@ -76,54 +76,20 @@
 </template>
 
 <script setup>
-import {defineProps, ref} from 'vue';
+import { ref} from 'vue';
 import { UserIcon, BookmarkIcon, CheckBadgeIcon, PresentationChartLineIcon } from "@heroicons/vue/24/outline";
 import { UserIcon as UserIconSolid, BookmarkIcon as BookmarkIconSolid, CheckBadgeIcon as CheckBadgeIconSolid, PresentationChartLineIcon as PresentationChartLineIconSolid } from "@heroicons/vue/24/solid";
 import { TabGroup, TabList, Tab, TabPanels, TabPanel } from '@headlessui/vue';
-
-import {Inertia} from "@inertiajs/inertia";
 import Bookmarks from "./HomeComponents/Bookmarks.vue";
 import Account from "./HomeComponents/Account.vue";
 import Activity from "./HomeComponents/Activity .vue";
 import Completed from "./HomeComponents/Completed.vue";
 
 
-// Define the props
-const props = defineProps({
-    user: {
-        type: Object,
-        default: () => ({ name: '', email: '', avatarUrl: '', subscriptions: [] }), // Properly initialize with default structure
-    },
-
-    popularCourses: Array,
-    latestCourses: Array,
-    // accountDetails: Object,
-    // completedCourses: Array,
-    // bookmarkedItems: Array,
-    // activities: Array,
-});
 
 
-const getCourse = (id) => {
-    Inertia.get(route('courseDetail', { id }), {
 
-    });
-};
 
-console.log(props.popularCourses)
-console.log(props.latestCourses)
-// Dummy data for accountDetails
-const accountDetails = ref({
-    name: 'John Doe',
-    email: 'john.doe@example.com',
-    avatarUrl: 'https://example.com/avatar.jpg',
-    subscriptions: [
-        {
-            plan: 'Premium',
-            ends_at: '2024-12-31',
-        },
-    ],
-});
 
 // Dummy data for completedCourses
 const completedCourses = ref([
@@ -141,40 +107,12 @@ const completedCourses = ref([
     },
 ]);
 
-// Dummy data for bookmarkedItems
-const bookmarkedItems = ref([
-    {
-        id: 1,
-        title: 'Vue.js Essentials',
-        type: 'Article',
-        bookmarked_at: '2024-08-05',
-    },
-    {
-        id: 2,
-        title: 'Tailwind CSS Guide',
-        type: 'Video',
-        bookmarked_at: '2024-07-20',
-    },
-]);
 
-// Dummy data for activities
-const activities = ref([
-    {
-        id: 1,
-        action: 'Completed a course',
-        date: '2024-08-01',
-    },
-    {
-        id: 2,
-        action: 'Bookmarked an article',
-        date: '2024-08-05',
-    },
-]);
 
-console.log(props.user)
-function removeBookmark(id) {
-    console.log('Remove bookmark with id:', id);
-}
+
+
+
+
 const beforeEnter = (el) => {
     el.style.opacity = 0;
     el.style.transform = 'translateX(100px)';

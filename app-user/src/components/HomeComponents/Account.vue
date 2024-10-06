@@ -1,14 +1,11 @@
 <template>
     <div class="max-w-4xl mx-auto p-6 bg-white shadow-md rounded-lg">
-        <!-- Flex container with responsive adjustments -->
-        <div class="flex flex-col md:flex-row items-center md:items-start space-y-6 md:space-y-0 md:space-x-6">
+        <Loader v-if="loading" />
+
+        <div v-else class="flex flex-col md:flex-row items-center md:items-start space-y-6 md:space-y-0 md:space-x-6">
             <!-- Avatar Section -->
             <div class="flex-shrink-0">
-                <img
-                    :src="user.avatarUrl"
-                    alt="User Avatar"
-                    class="w-24 h-24 md:w-32 md:h-32 rounded-full object-cover border-4 border-gray-200 shadow-lg"
-                />
+                <img :src="defaultAvatar" alt="User Avatar" class="w-24 h-24 rounded-full object-cover" />
             </div>
 
             <!-- User Information Section -->
@@ -18,29 +15,25 @@
                     <!-- Name -->
                     <div class="flex flex-col md:flex-row items-start md:items-center space-y-2 md:space-y-0 md:space-x-2">
                         <span class="font-semibold text-gray-700 md:w-32">Name:</span>
-                        <p class="text-gray-600">{{ user.name }}</p>
+                        <p>{{ user?.name || 'N/A' }}</p>
                     </div>
 
                     <!-- Email -->
                     <div class="flex flex-col md:flex-row items-start md:items-center space-y-2 md:space-y-0 md:space-x-2">
                         <span class="font-semibold text-gray-700 md:w-32">Email:</span>
-                        <p class="text-gray-600">{{ user.email }}</p>
+                        <p>{{ user?.email || 'N/A' }}</p>
                     </div>
 
                     <!-- Plan -->
                     <div class="flex flex-col md:flex-row items-start md:items-center space-y-2 md:space-y-0 md:space-x-2">
                         <span class="font-semibold text-gray-700 md:w-32">Plan:</span>
-                        <p class="text-gray-600">
-                            {{ user.subscriptions?.length > 0 ? user.subscriptions[0].plan : 'No active subscription' }}
-                        </p>
+                        <p>{{ user?.plan || 'N/A' }}</p>
                     </div>
 
                     <!-- Expires At -->
                     <div class="flex flex-col md:flex-row items-start md:items-center space-y-2 md:space-y-0 md:space-x-2">
                         <span class="font-semibold text-gray-700 md:w-32">Expires At:</span>
-                        <p class="text-gray-600">
-                            {{ user.subscriptions?.length > 0 ? user.subscriptions[0].ends_at : 'N/A' }}
-                        </p>
+                        <p>{{ user?.expires_at || 'N/A' }}</p>
                     </div>
                 </div>
             </div>
@@ -50,27 +43,39 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import axios from 'axios';
 import { useRoute } from 'vue-router';
 import apiClient from "../../axios/index.js";
+import defaultAvatar from "../../assets/avatar_default.png";
+import Loader from "../CourseDetail/Loader.vue";
 
 const user = ref(null);
-const route = useRoute(); // Get the route to access route params
+const loading = ref(true);
+const route = useRoute();
 
-onMounted(() => {
-    fetchUserProfile(route.params.id);
-});
-
-const fetchUserProfile = async (userId) => {
+const fetchUser = async () => {
     try {
-        const response = await apiClient.get(`user/profile/{id}`);
-        user.value = response.data.user;
+        const response = await apiClient.get('/user');
+
+        if (!response.data) {
+            user.value = null;
+        } else {
+            user.value = response.data.data;
+        }
     } catch (error) {
-        console.error('Failed to fetch user profile:', error);
+        if (error.response && error.response.status === 401) {
+            user.value = null;
+        } else {
+            console.error('Error fetching user:', error);
+        }
+    } finally {
+        loading.value = false;
     }
 };
-</script>
 
+onMounted(() => {
+    fetchUser();
+});
+</script>
 
 <style scoped>
 </style>
