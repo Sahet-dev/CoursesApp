@@ -217,10 +217,29 @@ class FrontendCourseController extends Controller
 
     public function getUserActivities(Request $request): JsonResponse
     {
-        $currentUser =  $request->user();
-        Log::info($currentUser->engagements);
-          return response()->json($currentUser->engagements);
+        $currentUser = $request->user();
+        $engagements = $currentUser->engagements;
+
+        // Initialize an array to store the interaction counts per month
+        $monthlyInteractions = [];
+
+        foreach ($engagements as $engagement) {
+            foreach ($engagement->interactions as $interaction) {
+                // Get the month and year from the interaction timestamp
+                $month = \Carbon\Carbon::parse($interaction['timestamp'])->format('Y-m');
+
+                // Increment the count for the corresponding month
+                if (!isset($monthlyInteractions[$month])) {
+                    $monthlyInteractions[$month] = 0;
+                }
+                $monthlyInteractions[$month]++;
+            }
+        }
+
+        // Return the interaction count per month as JSON
+        return response()->json($monthlyInteractions);
     }
+
 
 
 }
