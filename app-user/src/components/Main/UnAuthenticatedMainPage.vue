@@ -25,8 +25,8 @@
 
                         <Transition @before-enter="beforeEnterButtons" @enter="enterButtons">
                             <div v-if="showButtons" class="hero-buttons">
-                                <button class="btn-primary">Start Subscription</button>
-                                <button class="btn-secondary">Browse Catalog</button>
+                                <button class="btn-primary" @click="openPrices">Start Subscription</button>
+                                <button class="btn-secondary" @click="goToCatalog">Browse Catalog</button>
                             </div>
                         </Transition>
                     </div>
@@ -69,7 +69,7 @@
 
                         >
                             <div  @click="openCourse(course.id)">
-                                <img :src="course.thumbnail" :alt="course.title" class="course-image">
+                                <img :src="imageUrl(course.thumbnail)" :alt="course.title" class="course-image">
                                 <h3 class="course-title">{{ course.title }}</h3>
                                 <p class="course-description">{{ course.description }}</p>
                             </div>
@@ -137,7 +137,7 @@
                             <p class="cta-description">
                                 And do it faster with the help of our courses on Technology and more!
                             </p>
-                            <button class="cta-button">Start Subscription</button>
+                            <button class="cta-button" @click="openPrices">Start Subscription </button>
                         </div>
                     </div>
                 </div>
@@ -148,7 +148,8 @@
 
 <script setup>
 import '../Main/css/mainPage.css'
-import imageUrl from '../../../../storage/app/public/Screenshot 2024-08-27 124053.png';
+import imageUrlSc from '../../../../storage/app/public/Screenshot 2024-08-27 124053.png';
+import {imageUrl} from '../../imageUtil.js';
 import {onMounted, ref, watch} from 'vue';
 import apiClient from "../../axios/index.js";
 import Footer from "../Footer.vue";
@@ -157,9 +158,10 @@ import {gsap} from "gsap";
 import {ScrollTrigger} from "gsap/ScrollTrigger";
 import Lenis from "@studio-freight/lenis";
 import {useRouter} from "vue-router";
+import CoursesList from "../CoursesList.vue";
 
 
-const image = imageUrl;
+const image = imageUrlSc;
 const transitionsCompleted = ref(0);
 const totalTransitions = 4;
 const searchQuery = ref('');
@@ -189,6 +191,11 @@ const fetchCourses = async () => {
     }
 };
 
+const openPrices = () => {
+    router.push({ name: 'Prices' });
+};
+
+
 const fetchUser = async () => {
     try {
         const response = await apiClient.get('/user');
@@ -213,6 +220,10 @@ const fetchUser = async () => {
     }finally {
         loading.value = false;
     }
+};
+
+const goToCatalog = () => {
+    router.push({ name: 'CoursesList' });
 };
 
 

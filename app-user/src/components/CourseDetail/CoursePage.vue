@@ -14,7 +14,7 @@
                     <div  >
                         <h1 class="text-2xl lg:text-4xl font-bold mb-4 lg:mb-6">{{ course.title }}</h1>
                         <div class="aspect-ratio-box">
-                            <img :src="`http://localhost:8000/storage/${course.thumbnail}`" :alt="course.title" class="thumbnail" />
+                            <img :src="imageUrl(course.thumbnail)" :alt="course.title" class="thumbnail" />
                         </div>
 
                         <p class="text-base lg:text-lg text-gray-700 mb-4">{{ course.description }}</p>
@@ -113,8 +113,8 @@
                                 >
                                     <h2 class="text-xl font-semibold mb-4 text-center">Access Restricted</h2>
                                     <p class="mb-6 text-center">Please subscribe or purchase to access this course's lessons.</p>
-                                    <button class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
-                                        Subscribe or Purchase
+                                    <button @click="openPrices" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
+                                        Subscribe
                                     </button>
                                 </div>
                             </div>
@@ -276,6 +276,7 @@ import {Tab, TabGroup, TabList, TabPanel, TabPanels} from "@headlessui/vue";
 import Navbar from "../Navbar.vue";
 import Footer from "../Footer.vue";
 import Loader from "./Loader.vue";
+import {imageUrl} from "../../imageUtil.js";
 
 const courseData = ref({});
 const comments = ref([]);
@@ -338,6 +339,10 @@ const fetchCoursesData = async () => {
     }
 };
 
+
+const openPrices = () => {
+    router.push({ name: 'Prices' });
+};
 
 function startLessonTimer() {
     if (!lessonStartTime.value) {

@@ -28,22 +28,20 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import {onMounted, ref} from 'vue';
+import apiClient from "../../axios/index.js";
 
-const completedCourses = ref([
-    {
-        id: 1,
-        title: 'Introduction to Vue.js',
-        completed_at: '2024-08-01',
-        rating: 4.5,
-    },
-    {
-        id: 2,
-        title: 'Advanced JavaScript',
-        completed_at: '2024-07-15',
-        rating: 4.8,
-    },
-]);
+const completedCourses = ref([]);
+const fetchCompletedCourses = async () => {
+    try {
+        const response = await apiClient.get('/user/completed-courses');
+        completedCourses.value = response.data;
+    } catch (error) {
+        console.error('Error fetching completed courses:', error);
+    }
+};
+
+onMounted(fetchCompletedCourses);
 </script>
 
 <style scoped>

@@ -11,12 +11,18 @@ import FeedbackForm from "../components/FeedbackForm.vue";
 import CourseCatalog from "../components/CourseCatalog.vue";
 import Prices from "../components/Prices.vue";
 import SuccessPage from "../components/SuccessPage.vue";
+import CoursesList from "../components/CoursesList.vue";
 
 const routes = [
     {
         path: '/',
         name: 'MainPage',
         component: MainPage,
+    },
+    {
+        path: '/courses/catalog',
+        name: 'CoursesList',
+        component: CoursesList
     },
     {
         path: '/course/:id',

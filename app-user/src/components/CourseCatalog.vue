@@ -75,6 +75,8 @@ import Footer from "./Footer.vue";
 import {BookmarkIcon} from "@heroicons/vue/24/outline";
 import { BookmarkIcon as BookmarkIconSolid } from "@heroicons/vue/24/solid";
 import Loader from "./CourseDetail/Loader.vue";
+import { imageUrl } from '../imageUtil.js';
+
 const route = useRoute();
 const search = ref(route.query.search || '');
 const courses = ref([]);
@@ -83,11 +85,7 @@ const router = useRouter();
 const bookmarks = ref([]);
 const loading = ref(true);
 
-// Function to generate the course image URL
-const imageUrl = (thumbnail) => {
-    const baseUrl = import.meta.env.VITE_APP_URL || 'http://localhost:8000';
-    return `${baseUrl}/storage/${thumbnail}`;
-};
+
 
 const splitText = (text) => {
     if (!search.value) return [{ text, isHighlighted: false }];
@@ -160,7 +158,7 @@ const removeBookmark = async (course) => {
 
 
 const openCourse = async (courseId) => {
-    router.push({ name: 'CoursePage', params: { id: courseId } });
+    await router.push({name: 'CoursePage', params: {id: courseId}});
 };
 
 // Watch for changes to the search term

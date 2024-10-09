@@ -12,6 +12,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class FrontendCourseController extends Controller
@@ -242,4 +243,50 @@ class FrontendCourseController extends Controller
 
 
 
+    public function getUserLatestActivities(Request $request): JsonResponse
+    {
+        $currentUser = $request->user();
+
+        // Get the most interacted courses for the user
+        $mostInteractedCourses = Engagement::where('user_id', $currentUser->id)
+            ->where('completed', 0)
+            ->select('course_id', DB::raw('COUNT(interactions) as interaction_count'))
+            ->groupBy('course_id')
+            ->orderBy('interaction_count', 'desc')
+            ->take(2)
+            ->with('course:id,title,description,thumbnail') // Eager load the course relationship
+            ->get();
+
+        return response()->json([
+            'most_interacted_courses' => $mostInteractedCourses,
+        ]);
+    }
+
+
+
+
+
+
+
+    public function courseCatalog(): JsonResponse
+    {
+        // Using the scope to get only the 'title', 'description', 'price', and 'thumbnail'
+        $courses = Course::withBasicDetails()->paginate(10);  // Lazy loading with pagination
+
+        return response()->json($courses);
+    }
+
+    public function getCompletedCourses(Request $request)
+    {
+        $currentUser = $request->user();
+        $completedCourses = Engagement::where('user_id', $currentUser->id)
+            ->where('completed', 1)
+            ->with('course')
+            ->get()
+            ->pluck('course');
+
+        return response()->json($completedCourses);
+    }
+
 }
+

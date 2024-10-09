@@ -32,15 +32,8 @@
                 </div>
 
                 <div class="hidden sm:flex sm:items-center sm:ml-6">
-                    <!-- Notifications Button -->
-                    <div class="relative hidden sm:flex sm:items-center sm:ml-6">
-                        <button
-                            @click="goToFeedback"
-                            class="relative inline-flex items-center border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150"
-                        >
-                            Feedback
-                        </button>
-                    </div>
+
+
 
                     <!-- Prices Button -->
                     <div class="relative hidden sm:flex sm:items-center sm:ml-6 mr-2">
@@ -71,16 +64,70 @@
                         </router-link>
                     </template>
                     <template v-else>
-                        <div class="text-gray-700 focus:outline-none transition ease-in-out duration-150">
-                            {{ user.name }}
-                        </div>
-                        <div class="relative hidden sm:flex sm:items-center sm:ml-6 mr-2">
-                            <button
-                                @click="$emit('logout')"
-                                class="relative inline-flex items-center border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150"
-                            >
-                                Logout
-                            </button>
+                        <div class=" ">
+                            <Menu as="div" class="relative inline-block text-left">
+                                <div>
+                                    <MenuButton
+                                        class="inline-flex w-full justify-center rounded-md  px-4 py-2 text-sm font-medium  hover:bg-black/10 focus:outline-none"
+                                    >
+                                        <UserIconSolid class="w-5 h-5 mr-2" />
+                                        {{user.name}}
+
+                                        <ChevronDownIcon
+                                            class="-mr-1 ml-2 h-5 w-5 text-violet-200 hover:text-violet-100"
+                                            aria-hidden="true"
+                                        />
+                                    </MenuButton>
+                                </div>
+
+                                <transition
+                                    enter-active-class="transition duration-100 ease-out"
+                                    enter-from-class="transform scale-95 opacity-0"
+                                    enter-to-class="transform scale-100 opacity-100"
+                                    leave-active-class="transition duration-75 ease-in"
+                                    leave-from-class="transform scale-100 opacity-100"
+                                    leave-to-class="transform scale-95 opacity-0"
+                                >
+                                    <MenuItems
+                                        class="absolute right-0 mt-2 w-56 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black/5 focus:outline-none"
+                                    >
+                                        <div class="px-1 py-1">
+                                            <MenuItem v-slot="{ active }">
+                                                <button @click="goToProfile(user.id)"
+                                                    :class="[
+                                                      active ? 'bg-blue-500 text-white' : 'text-gray-900',
+                                                      'group flex w-full items-center rounded-md px-2 py-2 text-sm',
+                                                    ]"
+                                                >
+                                                    <Bars3Icon
+                                                        :active="active"
+                                                        class="mr-2 h-5 w-5 text-blue-400"
+                                                        aria-hidden="true"
+                                                    />
+                                                    Profile
+                                                </button>
+                                            </MenuItem>
+                                            <MenuItem v-slot="{ active }">
+                                                <button  @click="handleLogout"
+                                                    :class="[
+                                                      active ? 'bg-blue-500 text-white' : 'text-gray-900',
+                                                      'group flex w-full items-center rounded-md px-2 py-2 text-sm',
+                                                    ]"
+                                                >
+                                                    <ArrowLeftStartOnRectangleIcon
+                                                    :active="active"
+                                                        class="mr-2 h-5 w-5 text-blue-400"
+                                                        aria-hidden="true"
+                                                    />
+                                                    Logout
+                                                </button>
+                                            </MenuItem>
+                                        </div>
+
+                                    </MenuItems>
+                                </transition>
+                            </Menu>
+
                         </div>
                     </template>
                 </div>
@@ -139,13 +186,19 @@
 import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import apiClient from "../axios/index.js";
-import ApplicationLogo from "./icon/ApplicationLogo.vue";
+import { UserCircleIcon as UserIconSolid } from "@heroicons/vue/24/solid";
+import { ArrowLeftStartOnRectangleIcon, Bars3Icon } from "@heroicons/vue/24/outline";
+
 import image from "../assets/IconTm.png";
+import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/vue'
+import { ChevronDownIcon } from '@heroicons/vue/20/solid'
+
 
 const router = useRouter();
 const showingNavigationDropdown = ref(false);
 const searchQuery = ref('');
 const user = ref(null);
+const isOpen = ref(false);
 
 // Fetch user info on mount
 const fetchUser = async () => {
@@ -157,7 +210,7 @@ const fetchUser = async () => {
             console.log('User is unauthenticated');
             user.value = null; // Set user to null when unauthenticated
         } else {
-            user.value = response.data; // Set the user value if data exists
+            user.value = response.data.data; // Set the user value if data exists
         }
 
     } catch (error) {
@@ -185,11 +238,19 @@ function goToReviews(){
 
 
 
+// Function to toggle dropdown visibility
+const openDropdown = () => {
+    isOpen.value = true;
+};
+
+const closeDropdown = () => {
+    isOpen.value = false;
+};
 
 // Search function
 const searchCourses = async () => {
     if (searchQuery.value.trim()) {
-        router.push({ name: 'CourseCatalog', query: { search: searchQuery.value } });
+        await router.push({name: 'CourseCatalog', query: {search: searchQuery.value}});
     }
 };
 
@@ -199,7 +260,8 @@ const handleLogout = async () => {
         const response = await apiClient.post('/logout');
         console.log('Logout response:', response.data);
         localStorage.removeItem('token'); // Clear token
-        await router.push('/');
+        window.location.reload();
+
     } catch (error) {
         console.error('Failed to logout:', error);
         errorMessage.value = error.response?.data?.message || 'Failed to logout.';

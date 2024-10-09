@@ -18,6 +18,8 @@
                         <li><a href="#">Courses</a></li>
                         <li><a href="#">About Us</a></li>
                         <li><a href="#">Contact</a></li>
+                        <li><button @click="goToFeedback">Feedback</button></li>
+
                     </ul>
                 </div>
 
@@ -48,6 +50,13 @@
         </div>
     </footer>
 </template>
+<script setup>
+import { useRouter } from 'vue-router';
+const router = useRouter();
+function goToFeedback(){
+    router.push({ name: 'Feedback'});
+}
+</script>
 <style scoped>
 /* Footer Component Styles */
 .footer {

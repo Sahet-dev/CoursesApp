@@ -17,7 +17,7 @@
                 <!-- Avatar and User Information -->
                 <div class="flex">
                     <div class="flex items-center justify-center relative group/avatar -mt-[64px] ml-[48px] w-[128px] h-[128px] rounded-full overflow-hidden">
-                        <img :src="(user.avatar ? `/storage/${user.avatar}` : defaultAvatar)" class="w-full h-full object-cover">
+                        <img :src="imageUrl(user.avatar ? `/storage/${user.avatar}` : defaultAvatar)" class="w-full h-full object-cover">
                     </div>
                 </div>
             </div>
@@ -116,6 +116,7 @@ import apiClient from "../../axios/index.js";
 import {useRoute} from "vue-router";
 import imageSrc from '../../assets/pngwing.com.png'
 import defaultAvatar from '../../assets/avatar_default.png'
+import {imageUrl} from "../../imageUtil.js";
 const route = useRoute();
 // Reactive properties to store user data and statistics
 const user = ref({});

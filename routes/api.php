@@ -132,7 +132,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/bookmarks/{course}', [FrontendCourseController::class, 'storeBookmark']);
     Route::delete('/bookmarks/{course}', [FrontendCourseController::class, 'destroyBookmark']);
     Route::get('/user/activities', [FrontendCourseController::class, 'getUserActivities']);
-
+    Route::get('/user/latest-activities', [FrontendCourseController::class, 'getUserLatestActivities']);
+    Route::get('/user/completed-courses', [FrontendCourseController::class, 'getCompletedCourses']);
 
 
     Route::post('/create-checkout-session', [SubscriptionController::class, 'createCheckoutSession']);
@@ -150,3 +151,4 @@ Route::get('/api-courses/{courseId}', [FrontendCourseController::class, 'showCou
 Route::get('/user/profile/{id}', [FrontendCourseController::class, 'profilePage']);
 Route::get('/reviews', [ReviewController::class, 'index']);
 Route::get('/course-catalog', [HomeController::class, 'search']);
+Route::get('/courses-list', [FrontendCourseController::class, 'courseCatalog']);

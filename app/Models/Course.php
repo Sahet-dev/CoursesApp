@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -18,6 +19,12 @@ class Course extends Model
         'subscription_access',
         'type'
     ];
+
+    public function scopeWithBasicDetails(Builder $query): Builder
+    {
+        return $query->select('id', 'title', 'description',  'thumbnail');
+    }
+
 
     public function teacher()
     {
