@@ -48,7 +48,7 @@
 
 <script setup>
 import { ref } from 'vue';
-import apiClient from "../../../../api/axios.js"; // Adjust the path according to your project structure
+import apiClient from "../../../../api/axios.js";
 
 const startDate = ref('');
 const endDate = ref('');
@@ -65,6 +65,7 @@ const fetchData = async () => {
     }
 };
 </script>
+
 
 <style scoped>
 /* Additional scoped styles can be added here if needed */

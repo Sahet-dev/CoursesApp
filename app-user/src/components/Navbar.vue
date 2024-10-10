@@ -181,18 +181,15 @@
         </div>
     </nav>
 </template>
-
 <script setup>
 import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import apiClient from "../axios/index.js";
 import { UserCircleIcon as UserIconSolid } from "@heroicons/vue/24/solid";
 import { ArrowLeftStartOnRectangleIcon, Bars3Icon } from "@heroicons/vue/24/outline";
-
 import image from "../assets/IconTm.png";
-import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/vue'
-import { ChevronDownIcon } from '@heroicons/vue/20/solid'
-
+import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/vue';
+import { ChevronDownIcon } from '@heroicons/vue/20/solid';
 
 const router = useRouter();
 const showingNavigationDropdown = ref(false);
@@ -200,45 +197,31 @@ const searchQuery = ref('');
 const user = ref(null);
 const isOpen = ref(false);
 
-// Fetch user info on mount
 const fetchUser = async () => {
     try {
         const response = await apiClient.get('/user');
-
-        // Check if response.data contains the user information
-        if (!response.data) {
-            console.log('User is unauthenticated');
-            user.value = null; // Set user to null when unauthenticated
-        } else {
-            user.value = response.data.data; // Set the user value if data exists
-        }
-
+        user.value = response.data ? response.data.data : null;
     } catch (error) {
         if (error.response && error.response.status === 401) {
-            // Handle the case where the user is unauthenticated (401 error)
-            console.log('User is unauthenticated');
             user.value = null;
         } else {
-            // Handle other errors (server error, network error, etc.)
             console.error('Error fetching user:', error);
         }
     }
 };
-function goToProfile(userId){
-    router.push({ name: 'UserProfile', params: {id: userId}});
-}
 
-function goToFeedback(){
-    router.push({ name: 'Feedback'});
-}
+const goToProfile = (userId) => {
+    router.push({ name: 'UserProfile', params: { id: userId } });
+};
 
-function goToReviews(){
+const goToFeedback = () => {
+    router.push({ name: 'Feedback' });
+};
+
+const goToReviews = () => {
     router.push({ name: 'Reviews' });
-}
+};
 
-
-
-// Function to toggle dropdown visibility
 const openDropdown = () => {
     isOpen.value = true;
 };
@@ -247,38 +230,32 @@ const closeDropdown = () => {
     isOpen.value = false;
 };
 
-// Search function
 const searchCourses = async () => {
     if (searchQuery.value.trim()) {
-        await router.push({name: 'CourseCatalog', query: {search: searchQuery.value}});
+        await router.push({ name: 'CourseCatalog', query: { search: searchQuery.value } });
     }
 };
-
 
 const handleLogout = async () => {
     try {
         const response = await apiClient.post('/logout');
         console.log('Logout response:', response.data);
-        localStorage.removeItem('token'); // Clear token
+        localStorage.removeItem('token');
         window.location.reload();
-
     } catch (error) {
         console.error('Failed to logout:', error);
-        errorMessage.value = error.response?.data?.message || 'Failed to logout.';
     }
 };
 
-
-// Redirect function
 const openPrices = () => {
     router.push({ name: 'Prices' });
 };
 
-// Handle mounting
 onMounted(() => {
     fetchUser();
 });
 </script>
+
 
 <style>
 .dropdown-menu {

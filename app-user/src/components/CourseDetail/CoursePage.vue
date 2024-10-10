@@ -278,7 +278,6 @@ import Footer from "../Footer.vue";
 import Loader from "./Loader.vue";
 import {imageUrl} from "../../imageUtil.js";
 
-const courseData = ref({});
 const comments = ref([]);
 const likes = ref(null);
 const lessonStartTime = ref(null);
@@ -304,17 +303,16 @@ const loading = ref(true);
 
 const fetchUserData = async () => {
     try {
-        const response = await apiClient.get('/user'); // Fetch user info
+        const response = await apiClient.get('/user');
         const userData = response.data;
-        currentUser.value = userData; // Assign user data
+        currentUser.value = userData;
         return userData;
     } catch (error) {
         console.error('Failed to fetch user data:', error);
-        return null; // Return null if there's an error (user not authenticated)
+        return null;
     }
 };
 
-// Fetch data on component mount
 const fetchCoursesData = async () => {
     const courseId = route.params.id;
     try {
@@ -347,11 +345,8 @@ const openPrices = () => {
 function startLessonTimer() {
     if (!lessonStartTime.value) {
         lessonStartTime.value = new Date();
-
-
     }
 
-    // Start an interval that increments timeSpent every second
     timerInterval.value = setInterval(() => {
         const now = new Date();
         const elapsedTime = Math.floor((now - lessonStartTime.value) / 1000); // Calculate elapsed time in seconds
@@ -365,12 +360,10 @@ const fetchBookmarks = async () => {
     bookmarks.value = data;
 };
 
-// Check if a course is bookmarked
 const isBookmarked = (course) => {
     return bookmarks.value.some((bookmark) => bookmark.id === course.id);
 };
 
-// Add or remove a bookmark
 const toggleBookmark = async (course) => {
     if (isBookmarked(course)) {
         await apiClient.delete(`/bookmarks/${course.id}`);
@@ -381,48 +374,40 @@ const toggleBookmark = async (course) => {
     }
 };
 
-// Remove a bookmark
 const removeBookmark = async (course) => {
     await apiClient.delete(`/bookmarks/${course.id}`);
     bookmarks.value = bookmarks.value.filter((bookmark) => bookmark.id !== course.id);
 };
 
 
-// Stop the timer and accumulate time when the lesson is paused or the user leaves the lesson
 function stopLessonTimer() {
-
     if (timerInterval.value) {
-
-        clearInterval(timerInterval.value); // Stop the timer
+        clearInterval(timerInterval.value);
         timerInterval.value = null;
 
         saveTimeSpent(courseId.value, lessonId.value);
     }
 
-    lessonStartTime.value = null; // Reset start time
+    lessonStartTime.value = null;
 }
 
-// Reset the timer when the user switches lessons
 function resetTimer() {
-    timeSpent.value = 0;          // Reset the time spent
-    lessonStartTime.value = null; // Reset the start time
+    timeSpent.value = 0;
+    lessonStartTime.value = null;
     if (timerInterval.value) {
-        clearInterval(timerInterval.value); // Clear any existing interval
+        clearInterval(timerInterval.value);
         timerInterval.value = null;
     }
 }
 
-// Function to save the accumulated time spent on the lesson
 const saveTimeSpent = async () => {
     const timeInSeconds = timeSpent.value;
 
     try {
-        // Make an API request to the backend
         const response = await apiClient.post(`/courses/${course.value.id}/lessons/${selectedLesson.value.id}/save-time`, {
             time_spent: timeInSeconds,
         });
     } catch (error) {
-        // Handle errors
         console.error('Failed to save time spent:', error.response ? error.response.data : error);
     }
 };
@@ -440,7 +425,7 @@ const isLastLesson = computed(() => {
 
 async function trackInteraction(interactionType) {
     try {
-        const response = await apiClient.post(`/store-interactions/${course.value.id}`, {  // Pass courseId in the URL
+        const response = await apiClient.post(`/store-interactions/${course.value.id}`, {
             interaction_type: interactionType,
             course_id: course.value.id,
             lesson_id: selectedLesson.value?.id || null,
@@ -540,15 +525,13 @@ async function selectLesson(lesson)     {
     const userData = await fetchUserData();
     let apiEndpoint;
 
-    // Determine the correct API endpoint based on authentication status
     if (userData) {
-        apiEndpoint = `/lessons/${lesson.id}/comments/authenticated`; // For authenticated users
+        apiEndpoint = `/lessons/${lesson.id}/comments/authenticated`;
     } else {
-        apiEndpoint = `/lessons/${lesson.id}/comments`; // For unauthenticated users
+        apiEndpoint = `/lessons/${lesson.id}/comments`;
     }
 
     try {
-        // Fetch comments from the determined API endpoint
         const response = await apiClient.get(apiEndpoint);
         comments.value = response.data;
 
@@ -574,7 +557,7 @@ const beforeEnter = (el) => {
 };
 
 const enter = (el, done) => {
-    el.offsetHeight; // trigger reflow
+    el.offsetHeight;
     el.style.transition = 'all 0.3s ease-out';
     el.style.opacity = 1;
     el.style.transform = 'translateX(0)';
@@ -599,12 +582,12 @@ const handlePlay = () => {
 
 const handlePause = () => {
     stopLessonTimer();
-    trackInteraction('pause_video');  // Track video pause
+    trackInteraction('pause_video');
 };
 
 const handleEnd = () => {
     stopLessonTimer();
-    trackInteraction('end_video');  // Track video end
+    trackInteraction('end_video');
 };
 
 
@@ -614,9 +597,8 @@ const likeComment = async (courseId, lessonId, comment) => {
     try {
         const response = await apiClient.post(`/courses/${courseId}/lessons/${lessonId}/comments/${comment.id}/toggle-like`);
 
-        // Update comment based on server response
-        comment.liked_by_user = response.data.liked; // Update liked status
-        comment.likes_count += response.data.liked ? 1 : -1; // Update like count based on the action
+        comment.liked_by_user = response.data.liked;
+        comment.likes_count += response.data.liked ? 1 : -1;
 
         const interactionType = response.data.liked ? 'like_comment' : 'unlike_comment';
         trackInteraction(interactionType);
@@ -628,19 +610,17 @@ const likeComment = async (courseId, lessonId, comment) => {
 
 
 const submitComment = () => {
-    // Make sure course, lesson, and comment exist before submitting
     if (!course.value.id || !selectedLesson.value?.id || !newComment.value.trim()) {
         console.error('Course ID, Lesson ID or Comment is missing');
         return;
     }
 
-    // Submit the comment
     apiClient.post(`/courses/${course.value.id}/lessons/${selectedLesson.value.id}/comments`, {
         comment: newComment.value.trim()
     })
         .then(() => {
-            newComment.value = ''; // Clear the input field
-            selectLesson(selectedLesson.value); // Refresh the lesson comments
+            newComment.value = '';
+            selectLesson(selectedLesson.value);
         })
         .catch(error => {
             console.error('Error submitting comment:', error);
@@ -649,8 +629,6 @@ const submitComment = () => {
 
 
 const lessonVideoUrl = videoUrl => `http://localhost:8000/storage/${videoUrl}`;
-// const thumbnailUrl = computed(() => `http://localhost:8000/storage/${courseData.value.thumbnail}`);
-const thumbnailUrl = computed(() => `http://localhost:8000/storage/${courseData.value.thumbnail}`);
 function redirectToPurchase() {
     window.location.href = '/subscribe-or-purchase';
 }

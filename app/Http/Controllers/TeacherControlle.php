@@ -25,7 +25,6 @@ class TeacherControlle extends Controller
         }
 
         $courses = $teacher->ownedCourses()->with('lessons')->get();
-
         return response()->json($courses, 200);
     }
 
@@ -37,7 +36,6 @@ class TeacherControlle extends Controller
             return response()->json(['message' => 'Course not found'], 404);
         }
 
-        // Get users who purchased the course
         $purchases = $course->purchases()->with('user')->get();
         $purchasedUsers = $purchases->map(function ($purchase) {
             return $purchase->user;
@@ -46,18 +44,15 @@ class TeacherControlle extends Controller
         return response()->json($purchasedUsers);
     }
 
-    // Fetch all subscriptions with their user data
     public function getSubscriptions(): JsonResponse
     {
         $subscriptions = Subscription::with('user')->get();
-
         return response()->json($subscriptions);
     }
 
-
     public function teacherPreview($id): JsonResponse
     {
-        $course = Course::with('lessons')->find($id); // Assuming lessons are related to courses
+        $course = Course::with('lessons')->find($id);
 
         if (!$course) {
             return response()->json(['message' => 'Course not found.'], 404);
@@ -66,19 +61,14 @@ class TeacherControlle extends Controller
         return response()->json($course);
     }
 
-
-
-
     public function teacherUpdate(Request $request, $id): JsonResponse
     {
-
         $course = Course::find($id);
 
         if (!$course) {
             return response()->json(['message' => 'Course not found.'], 404);
         }
 
-        // Validate the request data
         $validatedData = $request->validate([
             'title' => 'required|string|max:255',
             'price' => 'required|numeric|min:0',
@@ -90,7 +80,6 @@ class TeacherControlle extends Controller
         return response()->json(['message' => 'Course updated successfully.', 'course' => $course]);
     }
 
-    // Method to delete a course
     public function teacherDestroy($id): JsonResponse
     {
         $course = Course::find($id);
@@ -99,38 +88,27 @@ class TeacherControlle extends Controller
             return response()->json(['message' => 'Course not found.'], 404);
         }
 
-        // Delete the course
         $course->delete();
-
         return response()->json(['message' => 'Course deleted successfully.']);
     }
-
-
-
-//TECHER FINANCES
 
     public function getDashboardData()
     {
         $teacherId = auth()->user()->id;
 
-        // Total Revenue and Teacher Earnings
         $revenueShare = RevenueShare::where('teacher_id', $teacherId)->first();
         $totalRevenue = $revenueShare ? $revenueShare->total_revenue : 0;
         $teacherEarnings = $revenueShare ? $revenueShare->teacher_earnings : 0;
 
-        // Recent Transactions
         $recentPurchases = Purchase::where('course_id', $this->getTeacherCourseIds($teacherId))
             ->latest()
             ->take(10)
             ->get();
 
-        // Subscription Metrics
         $startDate = Carbon::now()->startOfMonth();
         $endDate = Carbon::now()->endOfMonth();
         $newSubscriptions = Subscription::getNewSubscriptions($startDate, $endDate);
         $churnRate = Subscription::getChurnRate($startDate, $endDate);
-
-
 
         return response()->json([
             'totalRevenue' => $totalRevenue,
@@ -145,7 +123,6 @@ class TeacherControlle extends Controller
     {
         return Course::where('teacher_id', $teacherId)->pluck('id');
     }
-
 
     public function showStudentPerformance(User $user): JsonResponse
     {
@@ -166,29 +143,4 @@ class TeacherControlle extends Controller
             'questions' => $questions,
         ]);
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 }

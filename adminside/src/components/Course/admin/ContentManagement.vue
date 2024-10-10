@@ -96,11 +96,10 @@
 </template>
 
 <script setup>
-import {ref, onMounted} from 'vue';
+import { ref, onMounted } from 'vue';
 import apiClient from '../../../api/axios.js';
-import {useRouter} from 'vue-router';
+import { useRouter } from 'vue-router';
 import Loader from "../Loader.vue";
-
 
 const loading = ref(true);
 const courses = ref({
@@ -110,25 +109,24 @@ const courses = ref({
 });
 const router = useRouter();
 
-// Fetch courses with optional pagination URL
 const fetchCourses = async (url = '/teacher/courses') => {
     try {
         const response = await apiClient.get(url);
-        courses.value = response.data; // Include pagination URLs and data
+        courses.value = response.data;
         console.log(courses.value);
     } catch (error) {
         console.error('Failed to fetch courses:', error);
-    }finally {
+    } finally {
         loading.value = false;
     }
 };
 
 const previewCourse = (courseId) => {
     // Preview course logic
-}
+};
 
 const editCourse = (courseId) => {
-    router.push({name: 'CourseUpdate', params: {id: courseId}});
+    router.push({ name: 'CourseUpdate', params: { id: courseId } });
 };
 
 const deleteCourse = async (id) => {
@@ -142,11 +140,10 @@ const deleteCourse = async (id) => {
         }
     }
 };
+
 const createFirstCourse = () => {
     router.push({ name: 'NewCourse' });
 };
-
-
 
 onMounted(fetchCourses);
 </script>

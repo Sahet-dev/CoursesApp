@@ -40,15 +40,12 @@ const selectedCourse = ref('');
 const courses = ref([]);
 
 onMounted(async () => {
-    // Load Stripe
     stripe.value = await loadStripe('your-stripe-public-key');
 
-    // Initialize Stripe Elements
     const elements = stripe.value.elements();
     cardElement.value = elements.create('card');
     cardElement.value.mount('#card-element');
 
-    // Fetch courses (you may adjust this API endpoint)
     const { data } = await apiClient.get('/courses');
     courses.value = data;
 });
@@ -60,20 +57,17 @@ const createSubscription = async () => {
     }
 
     try {
-        // Create Stripe payment method
         const { paymentMethod } = await stripe.value.createPaymentMethod({
             type: 'card',
             card: cardElement.value,
         });
         paymentMethodId.value = paymentMethod.id;
 
-        // Create Stripe customer
         const customerResponse = await apiClient.post('/stripe/create-customer', {
             payment_method: paymentMethodId.value,
         });
         customerId.value = customerResponse.data.customer_id;
 
-        // Create Subscription (use selected course and its price)
         const subscriptionResponse = await apiClient.post('/stripe/create-subscription', {
             customer_id: customerId.value,
             course_id: selectedCourse.value, // Send course ID for subscription
@@ -89,7 +83,6 @@ const createSubscription = async () => {
 </script>
 
 <style scoped>
-/* Basic styling for the form */
 #card-element {
     background-color: #f9fafb;
     padding: 10px;

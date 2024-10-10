@@ -14,13 +14,10 @@ class CourseService
 
     public function getLatestCoursesWithAccessControl($limit = 4)
     {
-        // Fetch the latest courses and their lessons with questions
         $courses = Course::with('questions')->latest()->take($limit)->get();
 
-        // Check if the user is authenticated
         $user = Auth::user();
 
-        // Map courses with appropriate lesson data based on user access
         return $courses->map(function ($course) use ($user) {
             return [
                 'id' => $course->id,
@@ -43,13 +40,10 @@ class CourseService
 
     public function getCourseByIdWithAccessControl($id)
     {
-        // Fetch the course by ID with its lessons and questions
         $course = Course::with('questions')->findOrFail($id);
 
-        // Check if the user is authenticated
         $user = Auth::user();
 
-        // Return course data with appropriate lesson data based on user access
         return [
             'id' => $course->id,
             'title' => $course->title,
@@ -71,7 +65,6 @@ class CourseService
         ]);
 
         if ($user && ($course->isAvailableToUser($user) || $course->isPurchasedBy($user))) {
-            // Authenticated user with access to full content
             return $course->lessons->map(function ($lesson) {
                 return [
                     'id' => $lesson->id,
@@ -136,13 +129,12 @@ class CourseService
     public function checkUserAccessStatus($user, $courseId): bool
     {
         if (!$user) {
-            return false; // User is not authenticated
+            return false;
         }
 
-        // Check if the user has an active subscription or has purchased the course
-        $course = Course::find($courseId); // Fetch the course
+        $course = Course::find($courseId);
         if (!$course) {
-            return false; // Course not found
+            return false;
         }
 
         return $course->isAvailableToUser($user) || $course->isPurchasedBy($user);
@@ -154,20 +146,15 @@ class CourseService
 
     public function getLessonsForCourseWithAccess($courseId)
     {
-        // Fetch the course by ID with its lessons and questions
         $course = Course::with('questions')->findOrFail($courseId);
 
-        // Get the authenticated user
         $user = Auth::user();
 
-        // Check if the user has access
         $userHasAccess = $this->checkUserAccessStatus($user, $courseId);
 
-        // Load comments, likes, and replies for all lessons in the course
         $commentsWithLikes = $course->lessons->load(['comments.user', 'comments.likes', 'comments.replies.user', 'comments.replies.likes'])
             ->pluck('comments', 'id');
 
-        // Prepare the lessons data based on user access
         if ($userHasAccess) {
             return $course->lessons->map(function ($lesson) use ($user, $commentsWithLikes) {
                 return [
@@ -205,7 +192,6 @@ class CourseService
                 ];
             });
         } else {
-            // User does not have access: limit to first 4 lessons with limited details
             $lessonsWithLimitedDetails = $course->lessons->take(4)->map(function ($lesson) {
                 return [
                     'id' => $lesson->id,
@@ -215,7 +201,6 @@ class CourseService
                 ];
             });
 
-            // Include only titles for the rest of the lessons
             $lessonTitlesOnly = $course->lessons->skip(4)->map(function ($lesson) {
                 return [
                     'id' => $lesson->id,
@@ -237,7 +222,6 @@ class CourseService
             ->where('lesson_id', $lessonId)
             ->get();
 
-        // Map comments to include required information
         return $comments->map(function ($comment) {
             return [
                 'id' => $comment->id,
@@ -263,7 +247,4 @@ class CourseService
             ];
         });
     }
-
-
-
 }

@@ -10,10 +10,8 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        // Retrieve data needed for the dashboard
         $user = auth()->user();
 
-        // Load necessary relationships and data for dashboard components
         $enrolledCourses = $user->courses()->with('lessons')->get();
         $recentActivity = $user->engagements()->latest()->limit(5)->get();
         $currentPlan = $user->subscriptions()->where('status', 'active')->first();

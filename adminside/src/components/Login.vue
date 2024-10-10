@@ -78,8 +78,17 @@ const login = async () => {
         loading.value = true;
         const response = await apiClient.post('/login', form.value); // Send form data
         localStorage.setItem('token', response.data.token); // Save token to localStorage
-        console.log('Token saved:', response.data.token);
-        router.push('/dashboard'); // Redirect after login
+        const userRole = response.data.user.role;
+        console.log('Token saved:', userRole);
+        if (userRole === 'admin') {
+            router.push('/admin-dashboard');
+        } else if (userRole === 'teacher') {
+            router.push('/teacher-dashboard');
+        } else if (userRole === 'moderator') {
+            router.push('/moderator-dashboard');
+        } else {
+            router.push('/'); // Default redirect for other roles
+        }
     } catch (error) {
         console.error('Login failed:', error);
         if (error.response && error.response.status === 422) {
@@ -94,5 +103,4 @@ const login = async () => {
 </script>
 
 <style scoped>
-/* Add any additional styling here if needed */
 </style>

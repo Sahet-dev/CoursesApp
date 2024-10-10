@@ -12,7 +12,6 @@ class CourseUser extends Pivot
 
     protected $fillable = ['course_id', 'user_id', 'enrolled_at', 'completed', 'completed_at'];
 
-    // If tracking purchases or payments explicitly
     public function purchase()
     {
         return $this->belongsTo(Purchase::class, 'course_id', 'course_id')->where('user_id', $this->user_id);

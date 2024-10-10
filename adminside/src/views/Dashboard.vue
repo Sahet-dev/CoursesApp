@@ -16,7 +16,7 @@
                 </div>
 
 
-                <!-- Show error message if present -->
+                <!-- Error message -->
                 <div class="text-red-500" v-if="errorMessage">{{ errorMessage }}</div>
             </main>
         </div>
@@ -24,16 +24,6 @@
 
     </div>
 </template>
-
-
-
-
-
-
-
-
-
-
 
 <script setup>
 import { ref, onMounted } from 'vue';
@@ -45,18 +35,18 @@ import TeacherDashboard from "../components/Course/teacher/TeacherDashboard.vue"
 import Footer from "./components/Footer.vue";
 import { useRouter } from 'vue-router';
 
-const user = ref(null); // Initialize user as null
+const user = ref(null);
 const errorMessage = ref('');
 const router = useRouter();
 
 const fetchUser = async () => {
     try {
         const response = await apiClient.get('/user');
-        user.value = response.data.data; // Access the nested data properly
+        user.value = response.data.data;
         console.log('Fetched user data:', user.value);
     } catch (error) {
         if (error.response?.status === 401) {
-            router.push('/login'); // Redirect to login if unauthorized
+            router.push('/login');
         } else {
             console.error('Failed to fetch user data:', error);
             errorMessage.value = 'Failed to fetch user data.';
@@ -67,16 +57,15 @@ const fetchUser = async () => {
 const handleLogout = async () => {
     try {
         const response = await apiClient.post('/logout');
-        console.log('Logout response:', response.data);
-        localStorage.removeItem('token'); // Clear token
-        router.push('/login'); // Redirect to login
+        localStorage.removeItem('token');
+        router.push('/login');
     } catch (error) {
         console.error('Failed to logout:', error);
         errorMessage.value = error.response?.data?.message || 'Failed to logout.';
     }
 };
 
-onMounted(fetchUser); // Fetch user data when the component is mounted
+onMounted(fetchUser);
 </script>
 
 <style>

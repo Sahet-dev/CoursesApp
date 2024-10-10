@@ -39,8 +39,6 @@ export function setProducts(state, [loading, response = null]) {
 
 
 
-// Mutations in your Vuex store (e.g., store.js or in a module)
 export function removeProduct(state, productId) {
     state.products.data = state.products.data.filter(product => product.id !== productId);
 }
-// Other mutations...

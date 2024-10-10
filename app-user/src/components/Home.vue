@@ -91,21 +91,6 @@ import Completed from "./HomeComponents/Completed.vue";
 
 
 
-// Dummy data for completedCourses
-const completedCourses = ref([
-    {
-        id: 1,
-        title: 'Introduction to Vue.js',
-        completed_at: '2024-08-01',
-        rating: 4.5,
-    },
-    {
-        id: 2,
-        title: 'Advanced JavaScript',
-        completed_at: '2024-07-15',
-        rating: 4.8,
-    },
-]);
 
 
 

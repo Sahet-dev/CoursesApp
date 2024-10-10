@@ -9,7 +9,7 @@ export const data = {
         {
             label: 'User Activities',
             backgroundColor: '#0bbf5a',
-            data: []  // This will be updated dynamically
+            data: []
         }
     ]
 };

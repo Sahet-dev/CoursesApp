@@ -171,7 +171,6 @@ import Lenis from '@studio-freight/lenis'
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Icons from "@/Components/Icons.vue";
-import GuestLayout from "@/Layouts/GuestLayout.vue";
 import Navbar from "@/Pages/components/Navbar.vue";
 import {Inertia} from "@inertiajs/inertia";
 
@@ -218,9 +217,7 @@ const searchCourses = () => {
     });
 };
 
-// Sample data for the "Why Us" features
 
-// Sample comments data
 const comments = ref([
     { id: 1, text: 'This platform has changed the way I learn. The tutorials are spot on.', author: 'Jane Doe' },
     { id: 2, text: 'Amazing content and great instructors!', author: 'John Smith' },
@@ -254,13 +251,11 @@ onMounted(() => {
 
 
 
-// Refs to control visibility of elements
 const showTitle = ref(false);
 const showSubtitle = ref(false);
 const showDescription = ref(false);
 const showButtons = ref(false);
 
-// Animation hooks for Title
 const beforeEnterTitle = (el) => {
     el.style.opacity = 0;
     el.style.transform = "translateY(-30px)";
@@ -276,7 +271,6 @@ const enterTitle = (el, done) => {
     });
 };
 
-// Animation hooks for Subtitle
 const beforeEnterSubtitle = (el) => {
     el.style.opacity = 0;
     el.style.transform = "translateY(-20px)";
@@ -293,7 +287,6 @@ const enterSubtitle = (el, done) => {
     });
 };
 
-// Animation hooks for Description
 const beforeEnterDescription = (el) => {
     el.style.opacity = 0;
     el.style.transform = "translateY(-50px)";
@@ -310,7 +303,6 @@ const enterDescription = (el, done) => {
     });
 };
 
-// Animation hooks for Buttons
 const beforeEnterButtons = (el) => {
     el.style.opacity = 0;
     el.style.transform = "translateY(0px)";
@@ -327,15 +319,12 @@ const enterButtons = (el, done) => {
     });
 };
 
-// When each transition completes
 const onTransitionComplete = () => {
     transitionsCompleted.value += 1;
 };
 
-// Watch for completion of all transitions
 watch(transitionsCompleted, (newVal) => {
     if (newVal === totalTransitions) {
-        // Refresh ScrollTrigger after all transitions are done
         ScrollTrigger.refresh();
     }
 });
@@ -347,7 +336,6 @@ const getCourse = (id) => {
 };
 
 
-// Show elements sequentially after mounting
 onMounted(() => {
     showTitle.value = true;
     showSubtitle.value = true;

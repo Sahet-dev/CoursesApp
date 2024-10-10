@@ -11,10 +11,8 @@ class Subscription extends Model
 
     protected $table = 'subscriptions';
 
-    // Use timestamps if applicable
     public $timestamps = true;
 
-    // Define your fillable attributes (or guarded if needed)
     protected $fillable = [
         'user_id',
         'plan',

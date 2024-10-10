@@ -22,5 +22,4 @@ axiosInstance.interceptors.request.use(
     }
 );
 
-// Export the configured Axios instance
 export default axiosInstance;

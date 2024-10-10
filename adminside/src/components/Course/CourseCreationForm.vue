@@ -26,7 +26,7 @@
                 <select v-model="course.type" id="courseType" class="w-full px-3 py-2 border rounded-md" required>
                     <option value="subscription">Include in Subscription</option>
                     <option value="free">Free</option>
-                    <option value="purchase">Purchasable</option>
+
 
                 </select>
             </div>
@@ -58,7 +58,7 @@
             <div v-if="errorMessage" class="text-red-500 mt-2">{{ errorMessage }}</div>
         </form>
 
-        <!-- Display Existing Lessons -->
+        <!-- Display  Lessons -->
         <div v-if="existingLessons.length > 0" class="mt-6">
             <h3 class="text-xl font-semibold text-gray-800 mb-4">Existing Lessons</h3>
             <ul class="space-y-4">
@@ -84,31 +84,32 @@
 <script setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import apiClient from "../../api/axios.js"; // Adjust path if needed
+import apiClient from "../../api/axios.js";
 import { ClassicEditor, Bold, Essentials, Italic, Mention, Paragraph,
-    Undo, Link, Code,  Strikethrough, Subscript, Superscript,
-    Underline, Font,CodeBlock, Indent, IndentBlock   } from 'ckeditor5';
+    Undo, Link, Code, Strikethrough, Subscript, Superscript,
+    Underline, Font, CodeBlock, Indent, IndentBlock } from 'ckeditor5';
 import 'ckeditor5/ckeditor5.css';
 import Footer from "../../views/components/Footer.vue";
 
 const editor = ClassicEditor;
 const editorConfig = {
     plugins: [
-        Bold, Essentials, Italic, Mention, Paragraph,
-        Undo, Link, Code, Strikethrough, Subscript,
-        Superscript, Underline, Font, CodeBlock,
-        Indent, IndentBlock
+        Bold, Essentials, Italic, Mention, Paragraph, Undo, Link, Code,
+        Strikethrough, Subscript, Superscript, Underline, Font,
+        CodeBlock, Indent, IndentBlock
     ],
     toolbar: {
         items: [
             'undo', 'redo', '|', 'bold', 'italic', 'underline',
-            'strikethrough', 'subscript', 'superscript',
-            'fontFamily', 'fontColor', 'fontBackgroundColor',
-            'codeBlock', 'outdent', 'indent', ]
+            'strikethrough', 'subscript', 'superscript', 'fontFamily',
+            'fontColor', 'fontBackgroundColor', 'codeBlock', 'outdent',
+            'indent'
+        ]
     }
 };
 
 const router = useRouter();
+
 const course = ref({
     title: '',
     description: '',
@@ -116,6 +117,7 @@ const course = ref({
     price: 0,
     type: ''
 });
+
 const lessons = ref([{ title: '', video_url: null, markdown_text: '' }]);
 const existingLessons = ref([]);
 const error = ref('');
@@ -137,7 +139,7 @@ const handleFileUpload = (event) => {
 const handleVideoUpload = (event, index) => {
     const file = event.target.files[0];
     if (file) {
-        lessons.value[index].video_url = file; // Store the file object directly
+        lessons.value[index].video_url = file;
     }
 };
 
@@ -149,13 +151,13 @@ const createCourseAndAddLesson = async () => {
     const formData = new FormData();
     formData.append('title', course.value.title);
     formData.append('description', course.value.description);
-    formData.append('thumbnail', course.value.thumbnail); // Append the file
+    formData.append('thumbnail', course.value.thumbnail);
+    formData.append('price', course.value.price);
     formData.append('type', course.value.type);
 
-    // Append lesson data
     lessons.value.forEach((lesson, index) => {
         formData.append(`lessons[${index}][title]`, lesson.title);
-        formData.append(`lessons[${index}][video_url]`, lesson.video_url); // Append the file object
+        formData.append(`lessons[${index}][video_url]`, lesson.video_url);
         formData.append(`lessons[${index}][markdown_text]`, lesson.markdown_text);
     });
 
@@ -165,12 +167,11 @@ const createCourseAndAddLesson = async () => {
                 'Content-Type': 'multipart/form-data',
             },
         });
-        course.value = { title: '', description: '', thumbnail: null, price: 0 }; // Clear form
-        lessons.value = [{ title: '', video_url: null, markdown_text: '' }]; // Clear lesson form
-        thumbnailPreview.value = null; // Clear thumbnail preview
+        course.value = { title: '', description: '', thumbnail: null, price: 0 };
+        lessons.value = [{ title: '', video_url: null, markdown_text: '' }];
+        thumbnailPreview.value = null;
         errorMessage.value = '';
 
-        // Optionally redirect or show success message
         router.push('content-management');
     } catch (error) {
         console.error('Failed to create course:', error);
@@ -179,6 +180,7 @@ const createCourseAndAddLesson = async () => {
 };
 </script>
 
+
 <style scoped>
-/* Course Creation Form styles */
+
 </style>

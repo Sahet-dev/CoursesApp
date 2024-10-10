@@ -12,7 +12,6 @@ class UserAchievement extends Model
 
     protected $fillable = ['user_id', 'achievement_id'];
 
-    // Define relationships if necessary
     public function user()
     {
         return $this->belongsTo(User::class);

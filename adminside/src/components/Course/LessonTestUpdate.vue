@@ -83,31 +83,23 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import apiClient from "../../api/axios.js"; // Adjust the path as needed
+import apiClient from "../../api/axios.js";
 import { useRoute } from 'vue-router';
 
 const route = useRoute();
-const notification = ref({
-    message: '',
-    visible: false
-});
+const notification = ref({ message: '', visible: false });
 const testId = ref(null);
-
 const errorMessage = ref('');
 const successMessage = ref('');
-
 const questions = ref([]);
 
-// Fetch Existing Test Data
 const fetchTest = async () => {
     try {
         const lessonId = route.params.id;
         const response = await apiClient.get(`/lessons/${lessonId}/questions`);
         questions.value = response.data.questions.map(question => ({
             ...question,
-            responses: question.responses.map(response => ({
-                ...response
-            }))
+            responses: question.responses.map(response => ({ ...response }))
         })) || [];
         testId.value = response.data.testId || null;
     } catch (error) {
@@ -125,29 +117,24 @@ function showNotification(message) {
     }, 3000);
 }
 
-// Remove a Response
 const removeResponse = (qIndex, rIndex) => {
     questions.value[qIndex].responses.splice(rIndex, 1);
 };
 
-// Handle Checkbox Change
 const handleCorrectResponseChange = (question, responseIndex) => {
     question.responses[responseIndex].is_correct = !question.responses[responseIndex].is_correct;
 
     if (question.responses[responseIndex].is_correct) {
-        // Uncheck all other checkboxes if one is checked as correct
         question.responses.forEach((response, index) => {
             if (index !== responseIndex) {
-                response.is_correct = false; // Uncheck other checkboxes
+                response.is_correct = false;
             }
         });
     }
 };
 
-// Validate Questions and Responses
 const validateTest = () => {
     for (const question of questions.value) {
-        // Check if there is at least one correct response for each question
         const hasCorrectResponse = question.responses.some(response => response.is_correct);
         if (!hasCorrectResponse) {
             errorMessage.value = `Question "${question.question_text}" must have at least one correct response.`;
@@ -157,21 +144,19 @@ const validateTest = () => {
     return true;
 };
 
-// Submit Updated Test Data
 const submitTest = async () => {
     if (!validateTest()) {
-        return; // Validation failed, do not submit
+        return;
     }
 
     try {
         const payload = {
             lesson_id: route.params.id,
-            questions: JSON.parse(JSON.stringify(questions.value)), // Deep clone to avoid reactivity issues
+            questions: JSON.parse(JSON.stringify(questions.value)),
         };
 
         const response = await apiClient.put(`/lessons/${route.params.id}/questions`, payload);
         console.log('Questions updated successfully:', response.data);
-
         showNotification('Test updated successfully!');
         successMessage.value = 'Test updated successfully!';
     } catch (error) {
@@ -180,7 +165,6 @@ const submitTest = async () => {
     }
 };
 
-// Fetch Test on Mount
 onMounted(() => {
     fetchTest();
 });

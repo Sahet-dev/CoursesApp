@@ -7,19 +7,52 @@
             Sorry, the page you are looking for does not exist.
         </p>
 
-        <router-link to="/where-am-i" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-6 rounded-md transition">
+        <button @click="goBackHome" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-6 rounded-md transition">
             Go Back Home
-        </router-link>
+        </button>
     </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import DashboardHeader from "./DashboardHeader.vue";
+import {onMounted, ref} from "vue";
+import apiClient from "../api/axios.js";
 
+const user = ref(null);
+const errorMessage = ref('');
 const router = useRouter();
-const countdown = ref(40);
+
+const fetchUser = async () => {
+    try {
+        const response = await apiClient.get('/user');
+        user.value = response.data.data;
+    } catch (error) {
+        if (error.response?.status === 401) {
+            router.push('/login');
+        } else {
+            console.error('Failed to fetch user data:', error);
+            errorMessage.value = 'Failed to fetch user data.';
+        }
+    }
+};
+
+
+
+
+
+const goBackHome = () => {
+    if (user.value.role === 'admin') {
+        router.push('/admin-dashboard');
+    } else if (user.value.role === 'teacher') {
+        router.push('/teacher-dashboard');
+    } else if (user.value.role === 'moderator') {
+        router.push('/moderator-dashboard');
+    } else {
+        router.push('/');
+    }
+};
+onMounted(fetchUser);
 
 </script>
 

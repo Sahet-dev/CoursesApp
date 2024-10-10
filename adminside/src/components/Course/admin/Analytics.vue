@@ -91,28 +91,23 @@
 
 
 
-
 <script setup>
 import { ref, onMounted } from 'vue';
 import apiClient from "../../../api/axios.js";
 import FinancialMetrics from "./FinancialMetrics.vue";
 
-
 const totalRevenue = ref(0);
 const revenueByCourse = ref([]);
 const arpu = ref(0);
 const ltv = ref(0);
-
 const activeUsers = ref(0);
 const newSubscriptions = ref(0);
 const churnRate = ref(0);
 const retentionRate = ref(0);
 const errorMessage = ref('');
-
 const popularCourses = ref([]);
 const completionRates = ref([]);
 const engagementMetrics = ref([]);
-
 
 const fetchAnalyticsData = async () => {
     const params = {
@@ -125,11 +120,9 @@ const fetchAnalyticsData = async () => {
     };
 
     try {
-        // Make a single API call to fetch all analytics data
         const response = await apiClient.get('/analytics/dashboard-metrics', { params });
         const data = response.data;
 
-        // Update all relevant state values
         totalRevenue.value = data.financial_metrics.totalRevenue;
         revenueByCourse.value = data.financial_metrics.revenueByCourse;
         arpu.value = data.financial_metrics.arpu;
@@ -154,4 +147,5 @@ onMounted(() => {
     fetchAnalyticsData();
 });
 </script>
+
 

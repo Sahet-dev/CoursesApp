@@ -244,55 +244,27 @@
 
     </div>
 </template>
-
 <script setup>
-import {defineProps, ref} from 'vue';
+import { defineProps, ref } from 'vue';
 import { UserIcon, BookmarkIcon, CheckBadgeIcon, PresentationChartLineIcon } from "@heroicons/vue/24/outline";
 import { UserIcon as UserIconSolid, BookmarkIcon as BookmarkIconSolid, CheckBadgeIcon as CheckBadgeIconSolid, PresentationChartLineIcon as PresentationChartLineIconSolid } from "@heroicons/vue/24/solid";
 import { TabGroup, TabList, Tab, TabPanels, TabPanel } from '@headlessui/vue';
-import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
-import { Link } from '@inertiajs/vue3';
-import {Inertia} from "@inertiajs/inertia";
+import { Inertia } from "@inertiajs/inertia";
 
-
-// Define the props
 const props = defineProps({
     user: {
         type: Object,
-        default: () => ({ name: '', email: '', avatarUrl: '', subscriptions: [] }), // Properly initialize with default structure
+        default: () => ({ name: '', email: '', avatarUrl: '', subscriptions: [] }),
     },
-
     popularCourses: Array,
     latestCourses: Array,
-    // accountDetails: Object,
-    // completedCourses: Array,
-    // bookmarkedItems: Array,
-    // activities: Array,
 });
-
 
 const getCourse = (id) => {
-    Inertia.get(route('courseDetail', { id }), {
-
-    });
+    Inertia.get(route('courseDetail', { id }));
 };
 
-console.log(props.popularCourses)
-console.log(props.latestCourses)
-// Dummy data for accountDetails
-const accountDetails = ref({
-    name: 'John Doe',
-    email: 'john.doe@example.com',
-    avatarUrl: 'https://example.com/avatar.jpg',
-    subscriptions: [
-        {
-            plan: 'Premium',
-            ends_at: '2024-12-31',
-        },
-    ],
-});
 
-// Dummy data for completedCourses
 const completedCourses = ref([
     {
         id: 1,
@@ -308,7 +280,6 @@ const completedCourses = ref([
     },
 ]);
 
-// Dummy data for bookmarkedItems
 const bookmarkedItems = ref([
     {
         id: 1,
@@ -324,7 +295,6 @@ const bookmarkedItems = ref([
     },
 ]);
 
-// Dummy data for activities
 const activities = ref([
     {
         id: 1,
@@ -338,10 +308,10 @@ const activities = ref([
     },
 ]);
 
-console.log(props.user)
 function removeBookmark(id) {
     console.log('Remove bookmark with id:', id);
 }
+
 const beforeEnter = (el) => {
     el.style.opacity = 0;
     el.style.transform = 'translateX(100px)';
@@ -361,10 +331,8 @@ const leave = (el, done) => {
     el.style.transform = 'translateX(-100px)';
     done();
 };
-
-
-
 </script>
+
 
 <style scoped>
 .orange {
@@ -373,7 +341,7 @@ const leave = (el, done) => {
 }
 .selected-tab {
     color: #5daeec;
-    text-decoration: none; /* Remove text underline */
+    text-decoration: none;
     padding-bottom: 2px;
 }
 .tab-enter-from {

@@ -99,7 +99,6 @@ const splitText = (text) => {
     }));
 };
 
-// Total occurrences in course titles and descriptions
 const totalOccurrences = computed(() => {
     return Object.values(searchCounts.value).reduce((acc, count) => acc + count, 0);
 });
@@ -112,7 +111,6 @@ const fetchCourses = async () => {
         courses.value = response.data; // The entire response object, which includes 'courses' and 'filters'
         console.log('courses:', courses.value); // Log the assigned data
 
-        // Update searchCounts based on the fetched courses
         searchCounts.value = {};
         courses.value.courses.forEach(course => {
             const titleOccurrences = (course.title.match(new RegExp(search.value, 'gi')) || []).length;
@@ -134,12 +132,10 @@ const fetchBookmarks = async () => {
     bookmarks.value = data;
 };
 
-// Check if a course is bookmarked
 const isBookmarked = (course) => {
     return bookmarks.value.some((bookmark) => bookmark.id === course.id);
 };
 
-// Add or remove a bookmark
 const toggleBookmark = async (course) => {
     if (isBookmarked(course)) {
         await apiClient.delete(`/bookmarks/${course.id}`);
@@ -150,7 +146,6 @@ const toggleBookmark = async (course) => {
     }
 };
 
-// Remove a bookmark
 const removeBookmark = async (course) => {
     await apiClient.delete(`/bookmarks/${course.id}`);
     bookmarks.value = bookmarks.value.filter((bookmark) => bookmark.id !== course.id);
@@ -161,13 +156,11 @@ const openCourse = async (courseId) => {
     await router.push({name: 'CoursePage', params: {id: courseId}});
 };
 
-// Watch for changes to the search term
 watch(() => route.query.search, (newSearchTerm) => {
     search.value = newSearchTerm;
     fetchCourses(); // Re-fetch courses when the search term changes
 });
 
-// Fetch courses on component mount
 onMounted(fetchCourses);
 </script>
 

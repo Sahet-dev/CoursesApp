@@ -72,7 +72,6 @@ import { useRoute, useRouter } from 'vue-router';
 import apiClient from "../../api/axios.js";
 import DashboardHeader from "../DashboardHeader.vue";
 import Loader from "./Loader.vue";
-import ButtonSpinner from "../ButtonSpinner.vue";
 
 const route = useRoute();
 const router = useRouter();

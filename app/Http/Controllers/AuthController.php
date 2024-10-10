@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Log;
 
 class AuthController extends Controller
 {
-    public function login(Request $request)
+    public function login(Request $request): Application|Response|ResponseFactory
     {
         $credentials = $request->validate([
             'email' => ['required', 'email'],

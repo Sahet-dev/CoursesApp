@@ -13,10 +13,10 @@ class Purchase extends Model
     protected $fillable = [
         'user_id',
         'course_id',
-        'transaction_id', // ID from the payment gateway
-        'payment_method', // e.g., 'credit_card', 'paypal'
+        'transaction_id',
+        'payment_method',
         'amount',
-        'status', // e.g., 'completed', 'pending', 'refunded'
+        'status',
         'purchase_date',
     ];
 

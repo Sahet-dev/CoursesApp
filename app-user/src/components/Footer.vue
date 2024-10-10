@@ -58,7 +58,6 @@ function goToFeedback(){
 }
 </script>
 <style scoped>
-/* Footer Component Styles */
 .footer {
     background-color: #2d3748; /* Dark gray background */
     color: white;

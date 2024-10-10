@@ -1,8 +1,7 @@
 <script setup>
 
 import { ref } from 'vue';
-import axios from 'axios';
-import { UserCircleIcon, CameraIcon, XMarkIcon, CheckCircleIcon } from "@heroicons/vue/24/outline";
+import {  CameraIcon, XMarkIcon, CheckCircleIcon } from "@heroicons/vue/24/outline";
 import apiClient from "../../axios/index.js";
 
 import imageSrc from '../../assets/pngwing.com.png'

@@ -38,7 +38,6 @@ const fetchUser = async () => {
     try {
         const response = await apiClient.get('/user');
 
-        // Check if response.data contains the user information
         if (!response.data) {
             console.log('User is unauthenticated');
             user.value = null; // Set user to null when unauthenticated
@@ -48,11 +47,8 @@ const fetchUser = async () => {
 
     } catch (error) {
         if (error.response && error.response.status === 401) {
-            // Handle the case where the user is unauthenticated (401 error)
             console.log('User is unauthenticated', error);
-            // user.value = null;
         } else {
-            // Handle other errors (server error, network error, etc.)
             console.error('Error fetching user:', error);
         }
     }finally {

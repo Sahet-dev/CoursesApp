@@ -152,7 +152,6 @@ import imageUrlSc from '../../../../storage/app/public/Screenshot 2024-08-27 124
 import {imageUrl} from '../../imageUtil.js';
 import {onMounted, ref, watch} from 'vue';
 import apiClient from "../../axios/index.js";
-import Footer from "../Footer.vue";
 import Icons from "../Icons.vue";
 import {gsap} from "gsap";
 import {ScrollTrigger} from "gsap/ScrollTrigger";
@@ -200,21 +199,17 @@ const fetchUser = async () => {
     try {
         const response = await apiClient.get('/user');
 
-        // Check if response.data contains the user information
         if (!response.data) {
             console.log('User is unauthenticated');
-            user.value = null; // Set user to null when unauthenticated
+            user.value = null;
         } else {
-            user.value = response.data; // Set the user value if data exists
+            user.value = response.data;
         }
 
     } catch (error) {
         if (error.response && error.response.status === 401) {
-            // Handle the case where the user is unauthenticated (401 error)
             console.log('User is unauthenticated', error);
-            // user.value = null;
         } else {
-            // Handle other errors (server error, network error, etc.)
             console.error('Error fetching user:', error);
         }
     }finally {

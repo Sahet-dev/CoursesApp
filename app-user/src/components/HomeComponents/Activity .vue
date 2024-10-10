@@ -67,7 +67,6 @@
         </div>
     </div>
 </template>
-
 <script setup>
 import {
     Chart as ChartJS,
@@ -78,13 +77,12 @@ import {
     Title,
     Tooltip,
     Legend
-} from 'chart.js'
-import { Line } from 'vue-chartjs'
-import * as chartConfig from './chartConfig.js'
-import { onMounted, ref } from "vue";
-import apiClient from "../../axios";
+} from 'chart.js';
+import { Line } from 'vue-chartjs';
+import * as chartConfig from './chartConfig.js';
+import { onMounted, ref } from 'vue';
+import apiClient from '../../axios';
 import { imageUrl } from '../../imageUtil.js';
-
 
 ChartJS.register(
     CategoryScale,
@@ -94,25 +92,21 @@ ChartJS.register(
     Title,
     Tooltip,
     Legend
-)
+);
 
-// Destructure data and options from chartConfig
-const { data, options } = chartConfig
+const { data, options } = chartConfig;
 const activities = ref([]);
 const latestActivities = ref([]);
 const isLoading = ref(true);
 const error = ref(null);
 
 const truncateDescription = (description, maxLength = 100) => {
-    if (description.length > maxLength) {
-        return description.substring(0, maxLength) + '...';
-    }
-    return description;
+    return description.length > maxLength
+        ? description.substring(0, maxLength) + '...'
+        : description;
 };
 
-// Update chart data with activities data
 const updateChartData = (activitiesData) => {
-    // Convert the activities object into an array of values sorted by months
     const sortedData = [
         activitiesData['2024-01'] || 0,
         activitiesData['2024-02'] || 0,
@@ -128,7 +122,6 @@ const updateChartData = (activitiesData) => {
         activitiesData['2024-12'] || 0
     ];
 
-    // Update the chart dataset
     data.datasets[0].data = sortedData;
 };
 
@@ -136,30 +129,26 @@ const fetchActivities = async () => {
     try {
         const response = await apiClient.get('/user/activities');
         activities.value = response.data;
-        updateChartData(activities.value);  // Update chart with fetched data
+        updateChartData(activities.value);
     } catch (err) {
         console.error('Error fetching activities:', err);
-        if (err.response && err.response.status === 401) {
-            error.value = 'Unauthorized. Please log in.';
-        } else {
-            error.value = 'Failed to load activities.';
-        }
+        error.value = err.response && err.response.status === 401
+            ? 'Unauthorized. Please log in.'
+            : 'Failed to load activities.';
     } finally {
         isLoading.value = false;
     }
 };
+
 const fetchLatestActivities = async () => {
     try {
         const response = await apiClient.get('/user/latest-activities');
         latestActivities.value = response.data;
-
     } catch (err) {
-        console.error('Error fetching activities:', err);
-        if (err.response && err.response.status === 401) {
-            error.value = 'Unauthorized. Please log in.';
-        } else {
-            error.value = 'Failed to load activities.';
-        }
+        console.error('Error fetching latest activities:', err);
+        error.value = err.response && err.response.status === 401
+            ? 'Unauthorized. Please log in.'
+            : 'Failed to load latest activities.';
     } finally {
         isLoading.value = false;
     }
@@ -167,6 +156,7 @@ const fetchLatestActivities = async () => {
 
 onMounted(() => {
     fetchActivities();
-    fetchLatestActivities()
+    fetchLatestActivities();
 });
 </script>
+

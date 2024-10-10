@@ -106,7 +106,6 @@ const fetchUser = async () => {
     try {
         const response = await apiClient.get('/user');
 
-        // Check if response.data contains the user information
         if (!response.data) {
             user.value = null;
         } else {
@@ -116,10 +115,8 @@ const fetchUser = async () => {
 
     } catch (error) {
         if (error.response && error.response.status === 401) {
-            // Handle the case where the user is unauthenticated (401 error)
             user.value = null;
         } else {
-            // Handle other errors (server error, network error, etc.)
             console.error('Error fetching user:', error);
         }
     }
@@ -128,7 +125,6 @@ const fetchReviews = async () => {
     try {
         const response = await apiClient.get('/reviews');
 
-        // Assuming the reviews are nested under `reviews` key
         if (response.data && response.data.reviews) {
             reviews.value = response.data.reviews;
         } else {
@@ -161,7 +157,6 @@ const submitReview = async () => {
 
         const newReview = response.data.review;
 
-        // Add the new review to the reviews array
         reviews.value.unshift({ // Add at the top
             id: newReview.id,
             user_id: newReview.user_id,

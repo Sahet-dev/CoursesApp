@@ -8,11 +8,9 @@ import ProfileManagement from '../components/Course/teacher/FinanceReports.vue';
 import apiClient from "../api/axios.js";
 import Login from "../components/Login.vue";
 
-// Import components for admin routes
 import UserManagement from '../components/Course/admin/UserManagement.vue';
 import ContentManagement from '../components/Course/admin/ContentManagement.vue';
 import Analytics from '../components/Course/admin/Analytics.vue';
-
 import Comments from '../components/Course/moderator/Comments.vue';
 import CourseCreationForm from "../components/Course/CourseCreationForm.vue";
 import CourseUpdateForm from "../components/Course/CourseUpdateForm.vue";
@@ -89,7 +87,7 @@ const routes = [
         ]
     },
 
-    // // Moderator routes
+    //  Moderator routes
     {
         path: '/moderator-dashboard',
         component: Dashboard,
@@ -103,6 +101,7 @@ const routes = [
 
         ]
     },
+
     {
         path: '/courses/:id/edit',
         name: 'CourseUpdate',
@@ -143,7 +142,7 @@ router.beforeEach(async (to, from, next) => {
             next('/login');
         } else {
             try {
-                await apiClient.get('/user'); // Verify token
+                await apiClient.get('/user');
                 next();
             } catch (error) {
                 localStorage.removeItem('token');

@@ -143,5 +143,5 @@ const imageSrc = ref('/storage/avatars/pngwing.com.png');
 </script>
 
 <style scoped>
-/* Tailwind classes are being used for styling. */
+
 </style>

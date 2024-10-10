@@ -59,7 +59,6 @@ export default {
 </script>
 
 <style scoped>
-/* Scoped styles if needed */
 #list a.router-link-exact-active {
     color: #5daeec;
     text-decoration-line: underline

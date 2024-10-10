@@ -77,19 +77,18 @@
 </template>
 
 <script setup>
-import {ref, onMounted} from 'vue';
+import { ref, onMounted } from 'vue';
 import apiClient from '../../../api/axios.js';
 import router from '../../../router';
 import axios from 'axios';
 import Loader from "../Loader.vue";
-const loading = ref(true);
 
+const loading = ref(true);
 const users = ref({
     data: [],
     prev_page_url: null,
     next_page_url: null,
 });
-
 const isEditing = ref(false);
 const form = ref({
     id: null,
@@ -97,14 +96,13 @@ const form = ref({
     email: '',
     role: 'student',
 });
-
 const errorMessage = ref('');
 
 // Fetch users with pagination
 const fetchUsers = async (url = '/users') => {
     try {
         const response = await apiClient.get(url);
-        users.value = response.data; // Set the paginated response
+        users.value = response.data;
         console.log('Fetched user data:', users.value);
     } catch (error) {
         if (error.response?.status === 401) {
@@ -113,13 +111,13 @@ const fetchUsers = async (url = '/users') => {
             console.error('Failed to fetch user data:', error);
             errorMessage.value = 'Failed to fetch user data.';
         }
-    }finally {
+    } finally {
         loading.value = false;
     }
 };
 
 const editUser = (user) => {
-    form.value = {...user};
+    form.value = { ...user };
     isEditing.value = true;
     showModal.value = true;
 };
@@ -140,7 +138,7 @@ const updateUserRole = async (user) => {
         return;
     }
     try {
-        await apiClient.put(`/users/change-role/${user.id}`, {role: user.role});
+        await apiClient.put(`/users/change-role/${user.id}`, { role: user.role });
         await fetchUsers();
     } catch (error) {
         console.error('Failed to update user role:', error);
@@ -156,7 +154,6 @@ const deleteUser = async (id) => {
     } catch (error) {
         console.error('Failed to delete user:', error);
         const errorMessage = error.response?.data?.message || 'An unexpected error occurred';
-        console.log(errorMessage);
         alert(errorMessage);
     }
 };

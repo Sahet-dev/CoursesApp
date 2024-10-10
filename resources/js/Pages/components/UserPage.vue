@@ -257,7 +257,6 @@ import { Link } from '@inertiajs/vue3';
 import {Inertia} from "@inertiajs/inertia";
 
 
-// Define the props
 const props = defineProps({
     user: {
         type: Object,
@@ -266,10 +265,7 @@ const props = defineProps({
 
     popularCourses: Array,
     latestCourses: Array,
-    // accountDetails: Object,
-    // completedCourses: Array,
-    // bookmarkedItems: Array,
-    // activities: Array,
+
 });
 
 
@@ -281,7 +277,6 @@ const getCourse = (id) => {
 
 console.log(props.popularCourses)
 console.log(props.latestCourses)
-// Dummy data for accountDetails
 const accountDetails = ref({
     name: 'John Doe',
     email: 'john.doe@example.com',
@@ -294,7 +289,6 @@ const accountDetails = ref({
     ],
 });
 
-// Dummy data for completedCourses
 const completedCourses = ref([
     {
         id: 1,
@@ -310,7 +304,6 @@ const completedCourses = ref([
     },
 ]);
 
-// Dummy data for bookmarkedItems
 const bookmarkedItems = ref([
     {
         id: 1,
@@ -326,7 +319,6 @@ const bookmarkedItems = ref([
     },
 ]);
 
-// Dummy data for activities
 const activities = ref([
     {
         id: 1,

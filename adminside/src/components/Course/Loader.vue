@@ -17,21 +17,19 @@
 import { ref, onMounted } from 'vue';
 
 const loading = ref(true);
-const timeout = 60000; // 60 seconds
+const timeout = 60000;
 
 const retry = () => {
-    // Logic to retry fetching the data
     loading.value = true;
     setTimeout(() => {
         loading.value = false;
-    }, 1000); // Simulate retry
+    }, 1000);
 };
 
-// Timeout to switch from loading to error state
 onMounted(() => {
     setTimeout(() => {
         if (loading.value) {
-            loading.value = false; // Switch to error message after timeout
+            loading.value = false;
         }
     }, timeout);
 });

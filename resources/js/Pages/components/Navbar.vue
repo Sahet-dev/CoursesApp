@@ -153,7 +153,7 @@ import { onMounted, ref} from 'vue';
 import ApplicationLogo from '@/Components/ApplicationLogo.vue';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
 import {Link, usePage} from '@inertiajs/vue3';
-import { beforeEnterEl, enterEl, lenis } from '@/utils/animations';
+import {   lenis } from '@/utils/animations';
 import {Inertia} from "@inertiajs/inertia";
 
 
@@ -167,14 +167,11 @@ import {Inertia} from "@inertiajs/inertia";
 
 
 const showingNavigationDropdown = ref(false);
-// State for navigation dropdown
 
 
 
-// Search query state
 const searchQuery = ref('');
 
-// Search function
 const searchCourses = () => {
     Inertia.get(route('courses.search'), { search: searchQuery.value }, {
         preserveState: true,

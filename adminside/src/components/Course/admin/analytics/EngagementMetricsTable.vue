@@ -36,7 +36,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import apiClient from "../../../../api/axios.js"; // Adjust the path according to your project structure
+import apiClient from "../../../../api/axios.js";
 
 const popularCourses = ref([]);
 const completionRates = ref([]);
@@ -57,6 +57,7 @@ onMounted(() => {
     fetchData();
 });
 </script>
+
 
 <style scoped>
 /* Additional scoped styles can be added here if needed */

@@ -58,5 +58,5 @@ const fetchData = async () => {
 </script>
 
 <style scoped>
-/* Additional scoped styles can be added here if needed */
+
 </style>

@@ -95,8 +95,8 @@
 </template>
 
 <script setup>
-import {ref, onMounted, computed} from 'vue';
-import {useRoute, useRouter} from 'vue-router';
+import { ref, onMounted, computed } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import apiClient from "../../api/axios.js";
 import UpdateSidebar from "./UpdateSidebar.vue";
 import DashboardHeader from "../DashboardHeader.vue";
@@ -121,7 +121,6 @@ import {
 } from 'ckeditor5';
 import 'ckeditor5/ckeditor5.css';
 import Loader from "./Loader.vue";
-import * as response from "autoprefixer";
 
 const editor = ClassicEditor;
 const editorConfig = {
@@ -144,25 +143,21 @@ const editorConfig = {
 const route = useRoute();
 const router = useRouter();
 
-const questions = ref([
-    {
-        question_text: 'Sample Question 1',
-        responses: [
-            { response_text: 'Option 1', is_correct: false },
-            { response_text: 'Option 2', is_correct: false },
-            { response_text: 'Option 3', is_correct: true },
-            { response_text: 'Option 4', is_correct: false },
-        ]
-    }
-]);
-const courses = ref({id: null});
+const questions = ref([{
+    question_text: 'Sample Question 1',
+    responses: [
+        { response_text: 'Option 1', is_correct: false },
+        { response_text: 'Option 2', is_correct: false },
+        { response_text: 'Option 3', is_correct: true },
+        { response_text: 'Option 4', is_correct: false },
+    ]
+}]);
+
+const courses = ref({ id: null });
 const lessons = ref([]);
 const selectedLesson = ref(null);
 const errorMessage = ref('');
-const notification = ref({
-    message: '',
-    visible: false
-});
+const notification = ref({ message: '', visible: false });
 const loading = ref(true);
 
 const isMarkdownTextRequired = true;
@@ -171,24 +166,10 @@ const isMarkdownTextValid = computed(() => {
     return !isMarkdownTextRequired || markdownText.trim() !== '';
 });
 
-
-// Function to create a test for the selected lesson
 const createTest = async () => {
-
     const courseId = route.params.id;
-
-        // Redirect to the UpdateTest page
-        router.push({ name: 'ViewCreateTest', params: { id: courseId } });
-
-
+    router.push({ name: 'ViewCreateTest', params: { id: courseId } });
 };
-
-
-
-
-
-
-
 
 const fetchLessons = async (courseId) => {
     try {
@@ -220,14 +201,14 @@ const handleFileChange = (event) => {
     }
 };
 
-function showNotification(message) {
+const showNotification = (message) => {
     notification.value.message = message;
     notification.value.visible = true;
 
     setTimeout(() => {
         notification.value.visible = false;
     }, 3000);
-}
+};
 
 const updateLesson = async () => {
     try {
@@ -254,17 +235,11 @@ const updateLesson = async () => {
             formData.append('video_url', lesson.videoFile);
         }
 
-
-
         formData.append('_method', 'PUT');
         const response = await apiClient.post(`/lessons/${lesson.id}`, formData);
-
-
         showNotification('Lesson updated successfully!');
-
         errorMessage.value = '';
     } catch (error) {
-
         console.error('Failed to update lesson:', error);
         if (error.response && error.response.data.errors) {
             errorMessage.value = Object.values(error.response.data.errors).flat().join(', ');
@@ -274,22 +249,20 @@ const updateLesson = async () => {
     }
 };
 
-const courseId = route.params.id; // Retrieve the ID from route params
+const courseId = route.params.id;
 
 const addLesson = async () => {
     try {
-        const newLessonTitle = 'New Lesson Title'; // Example title
+        const newLessonTitle = 'New Lesson Title';
         const newMarkdownText = 'Dushundirilish';
 
         const formData = new FormData();
         formData.append('title', newLessonTitle);
         formData.append('markdown_text', newMarkdownText);
-        // Optionally append the course_id if required
         formData.append('course_id', courseId);
 
         const response = await apiClient.post(`/courses/${courseId}/lessons`, formData, {
             headers: { 'Content-Type': 'multipart/form-data' }
-
         });
         showNotification('New lesson added successfully!');
         lessons.value.push({
@@ -299,7 +272,6 @@ const addLesson = async () => {
             video_url: response.data.lesson.video_url || 'default_video.mp4',
             videoPreview: response.data.lesson.video_url ? `http://127.0.0.1:8000/storage/${response.data.lesson.video_url}` : 'http://127.0.0.1:8000/storage/default_video.mp4',
         });
-
         selectedLesson.value = lessons.value.length - 1;
     } catch (error) {
         console.error('Failed to add new lesson:', error);
@@ -311,12 +283,8 @@ const addLesson = async () => {
     }
 };
 
-
-
-
-
 const fetchCourses = async () => {
-    const courseId = route.params.id; // Retrieve the ID from route params
+    const courseId = route.params.id;
     try {
         const response = await apiClient.get(`/courses/${courseId}`);
         courses.value = response.data.course;
@@ -328,14 +296,14 @@ const fetchCourses = async () => {
 };
 
 const createFirstLesson = async () => {
-    await addLesson()
+    await addLesson();
 };
 
 const editCourse = () => {
     const courseId = route.params.id;
-    // Use your router to navigate to the update page, passing the course ID
     router.push({ name: 'CourseData', params: { id: courseId } });
 };
+
 onMounted(() => {
     const courseId = route.params.id;
     if (courseId) {
@@ -344,6 +312,7 @@ onMounted(() => {
 });
 fetchCourses();
 </script>
+
 
 
 <style>

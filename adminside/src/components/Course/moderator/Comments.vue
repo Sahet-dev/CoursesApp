@@ -107,7 +107,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import apiClient from '../../../api/axios.js'; // Import your axios instance
+import apiClient from '../../../api/axios.js';
 
 const comments = ref({
     data: [],
@@ -115,57 +115,51 @@ const comments = ref({
     next_page_url: null,
 });
 
-const editingComment = ref(null); // To track the comment being edited
+const editingComment = ref(null);
 
-// Fetch comments with pagination
 const fetchComments = async (url = '/comments') => {
     try {
         const response = await apiClient.get(url);
-        comments.value = response.data; // Set the paginated response
+        comments.value = response.data;
     } catch (error) {
         console.error('Failed to fetch comments', error);
     }
 };
 
-// Start editing a comment
 const startEditingComment = (comment) => {
-    editingComment.value = { ...comment }; // Make a copy of the comment for editing
+    editingComment.value = { ...comment };
 };
 
-// Update the comment
 const updateComment = async (comment) => {
     try {
         const response = await apiClient.put(`/comments/${comment.id}`, { comment: comment.comment });
         alert(response.data.message);
-        editingComment.value = null; // Clear the editing comment
-        fetchComments(); // Refresh the comments list
+        editingComment.value = null;
+        fetchComments();
     } catch (error) {
         console.error('Failed to update comment', error);
     }
 };
 
-// Cancel editing
 const cancelEdit = () => {
     editingComment.value = null;
 };
 
-// Delete a comment
 const deleteComment = async (id) => {
     if (confirm('Are you sure you want to delete this comment?')) {
         try {
             const response = await apiClient.delete(`/comments/${id}`);
             alert(response.data.message);
-            fetchComments(); // Refresh the comments list
+            fetchComments();
         } catch (error) {
             console.error('Failed to delete comment', error);
         }
     }
 };
 
-// Fetch comments on component mount
 onMounted(() => fetchComments());
 </script>
 
 <style scoped>
-/* Add custom styles here if needed */
+
 </style>

@@ -118,7 +118,6 @@ import imageSrc from '../../assets/pngwing.com.png'
 import defaultAvatar from '../../assets/avatar_default.png'
 import {imageUrl} from "../../imageUtil.js";
 const route = useRoute();
-// Reactive properties to store user data and statistics
 const user = ref({});
 const statistics = ref({
     commentCount: 0,
@@ -128,8 +127,6 @@ const statistics = ref({
     daysSinceRegistration: 0,
     registrationDate: 0
 });
-const userId = ref(route.params.id);
-// Ref to hold the default image for the user
 
 
 const fetchUserProfile = async () => {
@@ -147,7 +144,6 @@ const fetchUserProfile = async () => {
 
 };
 
-// Fetch the data when the component is mounted
 onMounted(() => {
     fetchUserProfile();
 });

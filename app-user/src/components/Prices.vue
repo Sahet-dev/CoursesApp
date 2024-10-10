@@ -2,6 +2,10 @@
     <Navbar />
     <div class="min-h-screen bg-gradient-to-br from-indigo-100 to-purple-100 py-12 px-4 sm:px-6 lg:px-8">
         <div class="max-w-4xl mx-auto">
+            <p v-if="!user" class="text-4xl  text-center text-gray-900 mb-8">Please <router-link to="/login"
+            class="text-blue-500 border-b   rounded hover:text-gray-100 hover:bg-blue-800 focus:text-underline transition ease-in-out duration-150">
+                Login
+            </router-link> first, then</p>
             <h2 class="text-4xl font-extrabold text-center text-gray-900 mb-8">
                 Choose Your <span class="text-indigo-600">Subscription Plan</span>
             </h2>
@@ -46,12 +50,22 @@
                                 <p class="ml-3 text-base text-gray-700">Support included</p>
                             </li>
                         </ul>
+
                         <button
                             @click="selectPlan('monthly')"
-                            class="w-full bg-indigo-600 text-white rounded-md px-4 py-3 text-lg font-semibold hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-600 transition-colors duration-200"
+                            :disabled="!user"
+                            :class="{
+                                'bg-indigo-600 hover:bg-indigo-700 cursor-pointer': user,
+                                'bg-gray-400 cursor-not-allowed': !user
+                            }"
+                            class="w-full text-white rounded-md px-4 py-3 text-lg font-semibold focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-600 transition-colors duration-200"
                         >
-                            Select Monthly Plan
+                            Select Yearly Plan
                         </button>
+
+
+
+
                     </div>
                 </div>
 
@@ -110,10 +124,16 @@
                         </ul>
                         <button
                             @click="selectPlan('yearly')"
-                            class="w-full bg-indigo-600 text-white rounded-md px-4 py-3 text-lg font-semibold hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-600 transition-colors duration-200"
+                            :disabled="!user"
+                            :class="{
+                                'bg-indigo-600 hover:bg-indigo-700 cursor-pointer': user,
+                                'bg-gray-400 cursor-not-allowed': !user
+                            }"
+                            class="w-full text-white rounded-md px-4 py-3 text-lg font-semibold focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-600 transition-colors duration-200"
                         >
                             Select Yearly Plan
                         </button>
+
                     </div>
                 </div>
             </div>
@@ -131,42 +151,43 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue';
 import Navbar from "./Navbar.vue";
 import Footer from "./Footer.vue";
 import apiClient from "../axios/index.js";
 import { loadStripe } from '@stripe/stripe-js';
-const stripePromise = loadStripe('pk_test_51Q2SHN2LpRd4wlvxgioe7rRuQ6scppAuXABzPTCycR53OnNkGXdqekinog4OsmDiNv2tfOz8PPPdkLoVhex0ZCEo00Z4o1Fr2W');
 
-const selectedPlan = ref('monthly')
+const stripePromise = loadStripe('pk_test_51Q2SHN2LpRd4wlvxgioe7rRuQ6scppAuXABzPTCycR53OnNkGXdqekinog4OsmDiNv2tfOz8PPPdkLoVhex0ZCEo00Z4o1Fr2W');
+const user = ref(null);
+const selectedPlan = ref('monthly');
 
 const selectPlan = async (plan) => {
     selectedPlan.value = plan;
 
     try {
         const { data } = await apiClient.post('/create-checkout-session', { plan });
-
         const stripe = await stripePromise;
-        await stripe.redirectToCheckout({sessionId: data.id});
+        await stripe.redirectToCheckout({ sessionId: data.id });
     } catch (error) {
         console.error('Error creating checkout session:', error);
     }
 };
 
-const handleSuccess = async () => {
-    const sessionId = new URLSearchParams(window.location.search).get('session_id');
-
+const fetchUser = async () => {
     try {
-        const response = await apiClient.get(`/payment/success?session_id=${sessionId}`);
-
-        // Redirect to a success page or handle the response as needed
-        // For example:
-        console.log('Payment successful:', response.data);
-        window.location.href = '/payment-success'; // Or any other page you want to show
+        const response = await apiClient.get('/user');
+        user.value = response.data ? response.data.data : null;
     } catch (error) {
-        console.error('Error handling success:', error);
+        if (error.response && error.response.status === 401) {
+            user.value = null;
+        } else {
+            console.error('Error fetching user:', error);
+        }
     }
 };
 
-
+onMounted(() => {
+    fetchUser();
+});
 </script>
+

@@ -118,25 +118,21 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import apiClient from "../../api/axios.js"; // Adjust the path as needed
-import {useRoute, useRouter} from 'vue-router';
-
+import apiClient from "../../api/axios.js";
+import { useRoute, useRouter } from 'vue-router';
 
 const router = useRouter();
-
 const route = useRoute();
+
 const notification = ref({
     message: '',
     visible: false
 });
 const testId = ref(null);
-
 const errorMessage = ref('');
 const successMessage = ref('');
-
 const questions = ref([]);
 
-// Fetch Existing Test Data
 const fetchTest = async () => {
     try {
         const lessonId = route.params.id;
@@ -156,7 +152,6 @@ const fetchTest = async () => {
     }
 };
 
-
 function showNotification(message) {
     notification.value.message = message;
     notification.value.visible = true;
@@ -166,7 +161,6 @@ function showNotification(message) {
     }, 3000);
 }
 
-// Add a New Question
 const addQuestion = () => {
     questions.value.push({
         question_text: '',
@@ -179,12 +173,10 @@ const addQuestion = () => {
     });
 };
 
-// Remove a Question
 const removeQuestion = (qIndex) => {
     questions.value.splice(qIndex, 1);
 };
 
-// Add a New Response
 const addResponse = (qIndex) => {
     questions.value[qIndex].responses.push({
         response_text: '',
@@ -193,29 +185,24 @@ const addResponse = (qIndex) => {
     });
 };
 
-// Remove a Response
 const removeResponse = (qIndex, rIndex) => {
     questions.value[qIndex].responses.splice(rIndex, 1);
 };
 
-// Handle Checkbox Change
 const handleCorrectResponseChange = (question, responseIndex) => {
     question.responses[responseIndex].is_correct = !question.responses[responseIndex].is_correct;
 
     if (question.responses[responseIndex].is_correct) {
-        // Uncheck all other checkboxes if one is checked as correct
         question.responses.forEach((response, index) => {
             if (index !== responseIndex) {
-                response.is_correct = false; // Uncheck other checkboxes
+                response.is_correct = false;
             }
         });
     }
 };
 
-// Validate Questions and Responses
 const validateTest = () => {
     for (const question of questions.value) {
-        // Check if there is at least one correct response for each question
         const hasCorrectResponse = question.responses.some(response => response.is_correct);
         if (!hasCorrectResponse) {
             errorMessage.value = `Question "${question.question_text}" must have at least one correct response.`;
@@ -225,35 +212,26 @@ const validateTest = () => {
     return true;
 };
 
-
-
 const updateTest = async () => {
-
     const courseId = route.params.id;
-
-    // Redirect to the UpdateTest page
     router.push({ name: 'UpdateTest', params: { id: courseId } });
-
-
 };
 
-
-// Submit Create Test Data
 const submitTest = async () => {
     if (!validateTest()) {
-        return; // Validation failed, do not submit
+        return;
     }
 
     try {
         const payload = {
             lesson_id: route.params.id,
-            questions: JSON.parse(JSON.stringify(questions.value)), // Deep clone to avoid reactivity issues
+            questions: JSON.parse(JSON.stringify(questions.value)),
         };
 
-        const response = await apiClient.put(`/lessons/${route.params.id}/questions`, payload); //
+        const response = await apiClient.put(`/lessons/${route.params.id}/questions`, payload);
         console.log('Questions created successfully:', response.data);
 
-        showNotification('New Question and Answers Created')
+        showNotification('New Question and Answers Created');
         successMessage.value = 'Questions created successfully!';
     } catch (error) {
         console.error('Error creating questions:', error.response?.data?.message || error.message);
@@ -261,7 +239,6 @@ const submitTest = async () => {
     }
 };
 
-// Fetch Test on Mount
 onMounted(() => {
     fetchTest();
 });

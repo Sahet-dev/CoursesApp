@@ -38,16 +38,14 @@ const handleSuccess = async () => {
 
     try {
         const response = await apiClient.get(`/success?session_id=${sessionId}`);
-
-        // Handle the success response as needed
         console.log('Payment successful:', response.data);
-        window.location.href = '/payment-success'; // Redirect to a success page or handle as needed
+        window.location.href = '/payment-success';
     } catch (error) {
         console.error('Error handling success:', error);
     }
 };
 
 onMounted(() => {
-    handleSuccess(); // Call the function when the component is mounted
+    handleSuccess();
 });
 </script>

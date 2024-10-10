@@ -21,8 +21,8 @@ class ReviewController extends Controller
 
         return response()->json([
             'message' => 'Review submitted successfully!',
-            'review' => $review, // Optionally return the created review
-        ], 201); // 201 Created status code
+            'review' => $review,
+        ], 201);
     }
 
 

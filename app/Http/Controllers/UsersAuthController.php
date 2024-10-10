@@ -16,15 +16,12 @@ class UsersAuthController extends Controller
 {
     public function login(Request $request)
     {
-        // Validate the request
         $request->validate([
             'email' => 'required|email',
             'password' => 'required|string|min:6',
         ]);
 
-        // Attempt to log the user in
         if (Auth::attempt($request->only('email', 'password'))) {
-            // Generate token
             $user = Auth::user();
             $token = $user->createToken('authToken')->plainTextToken;
 
@@ -43,30 +40,24 @@ class UsersAuthController extends Controller
 
     public function register(Request $request)
     {
-        // Validate the request
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|string|min:6|confirmed', // Ensure 'password_confirmation' field is also submitted
         ]);
 
-        // Create a new user
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password), // Hash the password
         ]);
 
-        // Log the user in
         Auth::login($user);
 
-        // Generate token
         $token = $user->createToken('authToken')->plainTextToken;
 
-        // Create HTTP-only cookie
         $cookie = Cookie::make('auth_token', $token, 60, '/', null, true, true, false, 'Strict');
 
-        // Return success response with the cookie
         return response()->json([
             'message' => 'Registered successfully',
             'user' => $user,
@@ -78,19 +69,15 @@ class UsersAuthController extends Controller
         $user = Auth::user();
 
         if ($user) {
-            // Revoke the user's token
             $user->tokens()->where('id', $user->currentAccessToken()->id)->delete();
 
-            // Clear the authentication cookie
             $cookie = Cookie::forget('auth_token');
 
-            // Return success response
             return response()->json([
                 'message' => 'Logged out successfully',
             ])->withCookie($cookie);
         }
 
-        // Return error if no user is authenticated
         return response()->json([
             'message' => 'No authenticated user',
         ], 401);
@@ -99,18 +86,16 @@ class UsersAuthController extends Controller
 
     public function getUser(Request $request): JsonResponse
     {
-        $user = $request->user(); // Fetch the authenticated user, if any
+        $user = $request->user();
 
         if ($user) {
-            // If the user is authenticated, return user data
             return response()->json([
                 'user' => new UserResource($user),
             ]);
         }
 
-        // If no user is authenticated, return null or an appropriate message
         return response()->json([
-            'user' => null, // Send a null user or an empty object
+            'user' => null,
             'message' => 'User is not authenticated',
         ], 200);
     }
@@ -152,16 +137,13 @@ class UsersAuthController extends Controller
             return response()->json(['message' => 'User not authenticated'], 401);
         }
 
-        // Find the authenticated user by ID
         $user = Auth::user();
 
-        // Return the user data as JSON
         return response()->json($user);
     }
 
     public function updateUserProfile(Request $request)
     {
-        // Validate the request data
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
             'first_name' => 'nullable|string|max:255',
@@ -169,10 +151,8 @@ class UsersAuthController extends Controller
             'gender' => 'nullable|string|max:50',
             'age' => 'nullable|integer|min:0',
             'location' => 'nullable|string|max:255',
-            // Add other validations as needed
         ]);
 
-        // Update the authenticated user profile
         $user = Auth::user();
         $user->update($validatedData);
 
