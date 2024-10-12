@@ -18,50 +18,45 @@ use Illuminate\Support\Facades\Log;
 class FrontendCourseController extends Controller
 {
     protected CourseService $courseService;
+
     public function __construct(CourseService $courseService)
     {
         $this->courseService = $courseService;
     }
 
-    public function getCourses(Request $request)
+    public function getCourses(Request $request): JsonResponse
     {
-        // Check if the user is authenticated
         if (Auth::check()) {
             $user = auth()->user();
 
-            // Fetch popular and latest courses
             $popularCourses = $this->courseService->getMostPopularCourses(4);
             $latestCourses = $this->courseService->getLatestCoursesWithAccessControl(4);
 
-            // Map courses with lessons
             $coursesWithLessons = $popularCourses->map(function ($course) use ($user) {
                 return [
-                    'id' => $course['id'], // Assuming $course is an array
-                    'title' => $course['title'], // Assuming $course is an array
-                    'lessons' => $this->courseService->getCourseLessonsWithAccessControl(Course::find($course['id']), $user), // Use the method to get lessons
+                    'id' => $course['id'],
+                    'title' => $course['title'],
+                    'lessons' => $this->courseService->getCourseLessonsWithAccessControl(Course::find($course['id']), $user),
                 ];
             });
 
             $latestCoursesWithLessons = $latestCourses->map(function ($course) use ($user) {
                 return [
-                    'id' => $course['id'], // Assuming $course is an array
-                    'title' => $course['title'], // Assuming $course is an array
-                    'lessons' => $this->courseService->getCourseLessonsWithAccessControl(Course::find($course['id']), $user), // Use the method to get lessons
+                    'id' => $course['id'],
+                    'title' => $course['title'],
+                    'lessons' => $this->courseService->getCourseLessonsWithAccessControl(Course::find($course['id']), $user),
                 ];
             });
 
-            // Return JSON response with user data and courses
             return response()->json([
                 'popularCourses' => $coursesWithLessons,
                 'latestCourses' => $latestCoursesWithLessons,
-                'user' => $user
+                'user' => $user,
             ]);
         } else {
-            // Fetch popular and latest courses
             $popularCourses = $this->courseService->getMostPopularCourses(4);
             $latestCourses = $this->courseService->getLatestCoursesWithAccessControl(4);
 
-            // Return JSON response for guest users
             return response()->json([
                 'popularCourses' => $popularCourses,
                 'latestCourses' => $latestCourses,
@@ -69,51 +64,14 @@ class FrontendCourseController extends Controller
         }
     }
 
-
-
-    public function showCourse(int $id): JsonResponse
-    {
-        // Fetch the course with access control using the existing service
-        $course = $this->courseService->getCourseByIdWithAccessControl($id);
-
-//        $user = Auth::check() ? Auth::user() : null;
-
-        $user = Auth::check() ? Auth::user() : null;
-
-        // Determine if the user has access to all course content
-        $userHasAccess = $this->courseService->checkUserAccessStatus($user, $id);
-
-        // Fetch lessons based on access control without modifying the current method
-        $lessons = $this->courseService->getLessonsForCourseWithAccess($id);
-
-        // Return JSON response
-        return response()->json([
-            'authenticated' => (bool)$user,
-            'course' => $course,
-            'user' => $user,
-            'userHasAccess' => $userHasAccess, // Pass the access status
-            'lessons' => $lessons,
-            'currentUser' => Auth::user(),
-        ]);
-    }
-
-
-
     public function storeComment(Request $request, Course $course, Lessons $lesson): JsonResponse
     {
-        // Validate the comment input
         $validated = $request->validate([
             'comment' => 'required|string|max:1000',
         ]);
 
-        // Check if the user has access to the course
         $user = Auth::user();
 
-//        if (!$course->isAvailableToUser($user)) {
-//            return response()->json(['error' => 'You do not have access to this course.'], 403);
-//        }
-
-        // Create the comment
         $comment = Comment::create([
             'lesson_id' => $lesson->id,
             'user_id' => $user->id,
@@ -130,19 +88,19 @@ class FrontendCourseController extends Controller
 
         $user = User::with([
             'achievements' => function ($query) {
-                $query->with('course'); // Eager load course data for achievements
+                $query->with('course');
             },
             'purchasedCourses' => function ($query) {
-                $query->with('teacher'); // Eager load teacher data for purchased courses
+                $query->with('teacher');
             },
             'engagements' => function ($query) {
                 $query->with('course');
             },
-            'comments' => function ($query) use ($id) { // Filter comments by user ID
+            'comments' => function ($query) use ($id) {
                 $query->where('user_id', $id)
                     ->with(['lesson' => function ($lessonQuery) {
                         $lessonQuery->latest()->take(5);
-                    }, 'likes']); // Eager load lesson data and likes for comments
+                    }, 'likes']);
             },
         ])->findOrFail($id);
 
@@ -160,10 +118,8 @@ class FrontendCourseController extends Controller
         $registrationDate = $user->created_at->timezone('UTC');
         $currentDate = Carbon::now('UTC');
 
-        // Calculate the difference in days and ensure it's positive
         $daysSinceRegistration = abs($currentDate->diffInDays($registrationDate));
 
-        // For users with the "teacher" role, count the number of created courses
         $createdCoursesCount = 0;
         if ($user->role === 'teacher') {
             $createdCoursesCount = Course::where('teacher_id', $user->id)->count();
@@ -174,7 +130,7 @@ class FrontendCourseController extends Controller
             'completedLessonsCount' => $user->courses()->wherePivot('completed', true)->count(),
             'purchasedCoursesCount' => $purchasedCoursesCount,
             'registrationDate' => $registrationDate->format('Y-m-d'),
-            'daysSinceRegistration' => $daysSinceRegistration, // This should be an integer
+            'daysSinceRegistration' => $daysSinceRegistration,
             'createdCoursesCount' => $user->courses()->count(),
         ];
 
@@ -186,15 +142,13 @@ class FrontendCourseController extends Controller
         ]);
     }
 
-
-    public function showBookmark(Request $request)
+    public function showBookmark(Request $request): JsonResponse
     {
         $user = $request->user();
         return response()->json($user->bookmarks);
     }
 
-    // Add a course to bookmarks
-    public function storeBookmark(Request $request, Course $course)
+    public function storeBookmark(Request $request, Course $course): JsonResponse
     {
         $user = $request->user();
         if (!$user->hasBookmarkedCourse($course)) {
@@ -204,8 +158,7 @@ class FrontendCourseController extends Controller
         return response()->json(['message' => 'Course added to bookmarks']);
     }
 
-    // Remove a course from bookmarks
-    public function destroyBookmark(Request $request, Course $course)
+    public function destroyBookmark(Request $request, Course $course): JsonResponse
     {
         $user = $request->user();
         if ($user->hasBookmarkedCourse($course)) {
@@ -215,21 +168,17 @@ class FrontendCourseController extends Controller
         return response()->json(['message' => 'Course removed from bookmarks']);
     }
 
-
     public function getUserActivities(Request $request): JsonResponse
     {
         $currentUser = $request->user();
         $engagements = $currentUser->engagements;
 
-        // Initialize an array to store the interaction counts per month
         $monthlyInteractions = [];
 
         foreach ($engagements as $engagement) {
             foreach ($engagement->interactions as $interaction) {
-                // Get the month and year from the interaction timestamp
                 $month = \Carbon\Carbon::parse($interaction['timestamp'])->format('Y-m');
 
-                // Increment the count for the corresponding month
                 if (!isset($monthlyInteractions[$month])) {
                     $monthlyInteractions[$month] = 0;
                 }
@@ -237,24 +186,20 @@ class FrontendCourseController extends Controller
             }
         }
 
-        // Return the interaction count per month as JSON
         return response()->json($monthlyInteractions);
     }
-
-
 
     public function getUserLatestActivities(Request $request): JsonResponse
     {
         $currentUser = $request->user();
 
-        // Get the most interacted courses for the user
         $mostInteractedCourses = Engagement::where('user_id', $currentUser->id)
             ->where('completed', 0)
             ->select('course_id', DB::raw('COUNT(interactions) as interaction_count'))
             ->groupBy('course_id')
             ->orderBy('interaction_count', 'desc')
             ->take(2)
-            ->with('course:id,title,description,thumbnail') // Eager load the course relationship
+            ->with('course:id,title,description,thumbnail')
             ->get();
 
         return response()->json([
@@ -262,21 +207,14 @@ class FrontendCourseController extends Controller
         ]);
     }
 
-
-
-
-
-
-
     public function courseCatalog(): JsonResponse
     {
-        // Using the scope to get only the 'title', 'description', 'price', and 'thumbnail'
-        $courses = Course::withBasicDetails()->paginate(10);  // Lazy loading with pagination
+        $courses = Course::withBasicDetails()->paginate(10);
 
         return response()->json($courses);
     }
 
-    public function getCompletedCourses(Request $request)
+    public function getCompletedCourses(Request $request): JsonResponse
     {
         $currentUser = $request->user();
         $completedCourses = Engagement::where('user_id', $currentUser->id)
@@ -287,6 +225,5 @@ class FrontendCourseController extends Controller
 
         return response()->json($completedCourses);
     }
-
 }
 

@@ -20,10 +20,7 @@ class Course extends Model
         'type'
     ];
 
-    public function scopeWithBasicDetails(Builder $query): Builder
-    {
-        return $query->select('id', 'title', 'description',  'thumbnail');
-    }
+
 
 
     public function teacher()
@@ -45,6 +42,10 @@ class Course extends Model
         return $this->belongsToMany(User::class)->withPivot('completed')->withTimestamps();
     }
 
+    public function scopeWithBasicDetails(Builder $query): Builder
+    {
+        return $query->select('id', 'title', 'description',  'thumbnail', 'price');
+    }
 
     public function markUserAsCompleted(User $user): void
     {
@@ -66,6 +67,14 @@ class Course extends Model
     {
         return $this->purchases()->where('user_id', $user->id)->exists();
     }
+    public function isCourseFree(?User $user): bool
+    {
+        if ($this->type === 'free') {
+            return $user !== null;
+        }
+
+        return false;
+    }
 
 
     public function engagements()
@@ -75,11 +84,12 @@ class Course extends Model
 
     public function isAvailableToUser(User $user): bool
     {
-        // Check if the user has an active subscription or has purchased this course
+        if ($this->type === 'free') {
+            return true;
+        }
         return $user->hasActiveSubscription() || $this->hasBeenPurchasedBy($user);
     }
 
-// Example method to check if a course has been purchased by a user
     public function hasBeenPurchasedBy(User $user): bool
     {
         return $this->purchases()->where('user_id', $user->id)->exists();

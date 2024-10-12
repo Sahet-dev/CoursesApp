@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AnalyticsController;
+use App\Http\Controllers\CourseTypeController;
 use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\FrontendCourseController;
 use App\Http\Controllers\Moderator\CourseModerationController;
@@ -118,7 +119,7 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/save-comment', [FrontendCourseController::class, 'storeComment']);
     Route::post('/courses/{course}/lessons/{lesson}/comments', [FrontendCourseController::class, 'storeComment'])->name('createComment');
-    Route::get('/api-private-courses/{courseId}', [FrontendCourseController::class, 'showCourse']);
+    Route::get('/api-private-courses/{courseId}', [CourseTypeController::class, 'showCourse']);
     Route::post('/courses/{courseId}/lessons/{lessonId}/save-time', [HomeController::class, 'saveLessonTime'])->name('saveLessonTime');
     Route::post('/store-interactions/{courseId}', [HomeController::class, 'storeInteractions'])->name('storeInteractions');
 //    Route::post('/courses/{courseId}/lessons/{lessonId}/comments/{commentId}/toggle-like', [HomeController::class, 'toggleLike'])
