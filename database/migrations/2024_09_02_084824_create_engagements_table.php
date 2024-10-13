@@ -18,7 +18,6 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->boolean('completed')->default(false);
             $table->integer('time_spent')->default(0); // in minutes
-            $table->json('interactions')->nullable();
             $table->integer('assignments_completed')->default(0); // assignments completed
             $table->timestamps();
         });

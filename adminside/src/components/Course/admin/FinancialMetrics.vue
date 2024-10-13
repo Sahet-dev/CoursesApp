@@ -29,7 +29,7 @@
                     <td class="py-2 px-4 border-b">{{ course.description }}</td>
                     <td class="py-2 px-4 border-b">{{ course.revenue }}</td>
                     <td class="py-2 px-4 border-b">
-                        <img :src="course.thumbnail" alt="Course Thumbnail" class="w-20 h-20 object-cover" />
+                        <img :src="imageUrl(course.thumbnail)" alt="Course Thumbnail" class="w-20 h-20 object-cover" />
                     </td>
                 </tr>
                 </tbody>

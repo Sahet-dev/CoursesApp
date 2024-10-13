@@ -46,10 +46,10 @@
                             v-model="searchQuery"
                             type="text"
                             placeholder="Search courses..."
-                            class="input-field"
+                            class="input-field text-gray-800"
                         />
                         <button
-                            @click=""
+                            @click="searchCourses"
                             :disabled="!searchQuery.trim()"
                             class="search-button"
                         >
@@ -178,6 +178,12 @@ const comments = ref([
     {id: 3, text: 'Highly recommend for anyone looking to upskill.', author: 'Alice Johnson'}
 ]);
 const loading = ref(true);
+
+const searchCourses = async () => {
+    if (searchQuery.value.trim()) {
+        await router.push({ name: 'CourseCatalog', query: { search: searchQuery.value } });
+    }
+};
 
 const fetchCourses = async () => {
     try {

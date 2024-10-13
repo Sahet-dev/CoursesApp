@@ -65,7 +65,7 @@ class LessonController extends Controller
         $validatedData = $request->validate([
             'title' => 'required|string|max:255',
             'markdown_text' => 'nullable|string',
-            'video_url' => 'nullable|file|mimes:mp4,mov,avi,wmv|max:20480',
+            'video_url' => 'nullable|file|mimes:mp4,mov,avi,wmv|max:200480',
         ]);
 
         $lesson->update($validatedData);

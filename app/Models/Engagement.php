@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Engagement extends Model
 {
@@ -14,7 +15,6 @@ class Engagement extends Model
         'user_id',
         'lesson_id',
         'time_spent',
-        'interactions',
         'assignments_completed',
         'completed',
     ];
@@ -28,14 +28,18 @@ class Engagement extends Model
         return $this->belongsTo(Course::class);
     }
 
-    public function user()
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    public function interactions(): HasMany
+    {
+        return $this->hasMany(Interaction::class);
+    }
 
     /**
-     * Append a new interaction to the interactions array.
+     * Append a new interaction.
      *
      * @param string $interactionType
      * @param int|null $lessonId
@@ -44,21 +48,15 @@ class Engagement extends Model
      */
     public function addInteraction(string $interactionType, ?int $lessonId, string $timestamp)
     {
-        // Structure of new interaction data
-        $newInteraction = [
+        $this->interactions()->create([
             'interaction_type' => $interactionType,
             'lesson_id' => $lessonId,
             'timestamp' => $timestamp,
-        ];
+        ]);
 
-        $interactions = is_array($this->interactions) ? $this->interactions : [];
-
-        $interactions[] = $newInteraction;
-
-        $this->interactions = $interactions;
-
-        $this->save();
     }
+
+
 
 
 }

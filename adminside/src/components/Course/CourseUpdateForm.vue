@@ -52,7 +52,7 @@
                             </div>
                             <div class="mb-4">
                                 <label for="video_url" class="block text-lg font-medium text-gray-700">Video file</label>
-                                <input type="file" @change="handleFileChange" />
+                                <input type="file" name="video_url" @change="handleFileChange" />
                                 <!-- Video Preview -->
                                 <video v-if="lessons[selectedLesson].videoPreview" :src="lessons[selectedLesson].videoPreview" controls class="mt-2 w-full max-w-xs"></video>
                                 <p v-if="lessons[selectedLesson].video_url && !lessons[selectedLesson].videoPreview" class="mt-2">{{ lessons[selectedLesson].video_url }}</p>
@@ -74,9 +74,23 @@
                             class="w-full bg-gray-200 text-gray-800 px-4 py-2 rounded-md shadow-sm hover:bg-gray-300 mb-4">
                         + Add Another Lesson
                     </button>
-                    <button @click="updateLesson" class="w-full mt-4 bg-blue-500 text-white px-4 py-2 rounded-md">Save Changes</button>
 
-                    <!-- Error Message -->
+
+                    <button @click="updateLesson" class="w-full mt-4 bg-blue-500 text-white px-4 py-2 rounded-md flex items-center justify-center" :disabled="loader">
+                        <svg v-if="loader" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.0" width="24px" height="24px" viewBox="0 0 128 128" xml:space="preserve" class="mr-2">
+                            <g>
+                              <path fill="#fff" d="M38.2 16.53S20.3 29.78 18 48.83c-2.62 21.44 8.4 32.68 8.4 32.68l6.5-3.8-.4 29.67L6.92 92.53l6.5-3.8S3.92 70 10.35 49.2c8.2-26.57 27.86-32.67 27.86-32.67zm-2.9 93.7s20.42 8.85 38.1 1.33c19.9-8.45 24.14-23.62 24.14-23.62L91 84.24l25.9-14.5-.1 29.53-6.52-3.7s-11.5 17.55-32.74 22.4c-27.13 6.2-42.24-7.74-42.24-7.74zm82.73-44.44s-2.55-22.14-17.9-33.7C82.86 19.1 67.6 23 67.6 23l.06 7.53-25.5-15.16L67.78.67l.05 7.5S88.8 9.4 103.6 25.35c18.96 20.4 14.43 40.46 14.43 40.46z"/>
+                                <animateTransform attributeName="transform" type="rotate" from="360 64 64" to="0 64 64" dur="1080ms" repeatCount="indefinite"></animateTransform>
+                            </g>
+                          </svg>
+                        <span v-if="!loader">Save Changes</span>
+                        <span v-else>Saving...</span>
+                    </button>
+
+
+
+
+                     <!-- Error Message -->
                     <div v-if="errorMessage" class="text-red-500 mt-2">{{ errorMessage }}</div>
                 </div>
             </div>
@@ -142,7 +156,7 @@ const editorConfig = {
 
 const route = useRoute();
 const router = useRouter();
-
+const loader = ref(false);
 const questions = ref([{
     question_text: 'Sample Question 1',
     responses: [
@@ -212,6 +226,8 @@ const showNotification = (message) => {
 
 const updateLesson = async () => {
     try {
+        loader.value = true;
+
         if (selectedLesson.value === null || lessons.value.length === 0) {
             errorMessage.value = 'No lesson selected or lessons are empty.';
             return;
@@ -246,6 +262,8 @@ const updateLesson = async () => {
         } else {
             errorMessage.value = 'Failed to update lesson. Please try again.';
         }
+    }finally {
+        loader.value = false;
     }
 };
 
