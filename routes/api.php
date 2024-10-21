@@ -148,7 +148,7 @@ Route::post('/login-user', [UsersAuthController::class, 'login']);
 Route::post('/user-api/register', [UsersAuthController::class, 'register']);
 
 Route::get('/api-course', [FrontendCourseController::class, 'getCourses']);
-Route::get('/api-courses/{courseId}', [CourseTypeController::class, 'showCourse']);
+Route::get('/api-courses/{courseId}', [FrontendCourseController::class, 'showCourse']);
 Route::get('/user/profile/{id}', [FrontendCourseController::class, 'profilePage']);
 Route::get('/reviews', [ReviewController::class, 'index']);
 Route::get('/course-catalog', [HomeController::class, 'search']);

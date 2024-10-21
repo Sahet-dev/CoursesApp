@@ -38,26 +38,18 @@ class AnalyticsController extends Controller
         });
 
         $engagementMetrics = Course::with(['engagements' => function ($query) {
-            $query->selectRaw('course_id, AVG(time_spent) as avg_time_spent, AVG(assignments_completed) as avg_assignments_completed')
+            $query->selectRaw('course_id, AVG(time_spent) as avg_time_spent, AVG(interactions) as avg_interactions, AVG(assignments_completed) as avg_assignments_completed')
                 ->groupBy('course_id');
-        }, 'engagements.interactions' => function ($query) {
-            // Calculate the average interactions from the interactions table
-            $query->selectRaw('engagement_id, COUNT(*) as total_interactions')
-                ->groupBy('engagement_id');
         }])
             ->get()
             ->map(function ($course) {
-                // Map the calculated values for each course
-                $engagement = $course->engagements->first();
-
                 return [
                     'course' => $course->title,
-                    'avg_time_spent' => $engagement->avg_time_spent ?? 0,
-                    'avg_interactions' => isset($engagement->interactions) ? $engagement->interactions->count() : 0,
-                    'avg_assignments_completed' => $engagement->avg_assignments_completed ?? 0,
+                    'avg_time_spent' => $course->engagements->first()->avg_time_spent ?? 0,
+                    'avg_interactions' => $course->engagements->first()->avg_interactions ?? 0,
+                    'avg_assignments_completed' => $course->engagements->first()->avg_assignments_completed ?? 0,
                 ];
             });
-
 
         return response()->json([
             'popular_courses' => $popularCourses,

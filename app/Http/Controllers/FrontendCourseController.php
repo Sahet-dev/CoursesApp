@@ -168,51 +168,44 @@ class FrontendCourseController extends Controller
         return response()->json(['message' => 'Course removed from bookmarks']);
     }
 
+    public function getUserActivities(Request $request): JsonResponse
+    {
+        $currentUser = $request->user();
+        $engagements = $currentUser->engagements;
+
+        $monthlyInteractions = [];
+
+        foreach ($engagements as $engagement) {
+            foreach ($engagement->interactions as $interaction) {
+                $month = \Carbon\Carbon::parse($interaction['timestamp'])->format('Y-m');
+
+                if (!isset($monthlyInteractions[$month])) {
+                    $monthlyInteractions[$month] = 0;
+                }
+                $monthlyInteractions[$month]++;
+            }
+        }
+
+        return response()->json($monthlyInteractions);
+    }
+
     public function getUserLatestActivities(Request $request): JsonResponse
     {
         $currentUser = $request->user();
 
-        $latestCourses = DB::table('interactions')
-            ->join('engagements', 'interactions.engagement_id', '=', 'engagements.id')
-            ->join('courses', 'engagements.course_id', '=', 'courses.id')
-            ->where('engagements.user_id', $currentUser->id)
-            ->orderBy('interactions.timestamp', 'desc')
-            ->select('courses.id', 'courses.title', 'courses.description', 'courses.thumbnail', 'courses.price', 'courses.type')
-            ->distinct()
-            ->take(2)
-            ->get();
-
-
-        $popularCourses = DB::table('interactions')
-            ->join('engagements', 'interactions.engagement_id', '=', 'engagements.id')
-            ->join('courses', 'engagements.course_id', '=', 'courses.id')
-            ->select(
-                'courses.id',
-                'courses.title',
-                'courses.description',
-                'courses.thumbnail',
-                'courses.price',
-                'courses.type',
-                DB::raw('COUNT(interactions.id) as interaction_count')
-            )
-            ->groupBy(
-                'courses.id',
-                'courses.title',
-                'courses.description',
-                'courses.thumbnail',
-                'courses.price',
-                'courses.type'
-            )
+        $mostInteractedCourses = Engagement::where('user_id', $currentUser->id)
+            ->where('completed', 0)
+            ->select('course_id', DB::raw('COUNT(interactions) as interaction_count'))
+            ->groupBy('course_id')
             ->orderBy('interaction_count', 'desc')
-            ->take(4)
+            ->take(2)
+            ->with('course:id,title,description,thumbnail')
             ->get();
 
         return response()->json([
-            'latestCourses' => $latestCourses,
-            'popularCourses' => $popularCourses
+            'most_interacted_courses' => $mostInteractedCourses,
         ]);
     }
-
 
     public function courseCatalog(): JsonResponse
     {
@@ -231,24 +224,6 @@ class FrontendCourseController extends Controller
             ->pluck('course');
 
         return response()->json($completedCourses);
-    }
-
-    public function getUserActivities(Request $request): JsonResponse
-    {
-        $currentUser = $request->user();
-
-        $monthlyInteractions = DB::table('interactions')
-            ->join('engagements', 'interactions.engagement_id', '=', 'engagements.id')
-            ->where('engagements.user_id', $currentUser->id)
-            ->select(
-                DB::raw("DATE_FORMAT(interactions.timestamp, '%Y-%m') as month"),
-                DB::raw('COUNT(interactions.id) as interaction_count')
-            )
-            ->groupBy('month')
-            ->orderBy('month', 'asc')
-            ->get();
-
-        return response()->json($monthlyInteractions);
     }
 }
 

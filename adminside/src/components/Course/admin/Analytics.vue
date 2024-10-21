@@ -29,9 +29,63 @@
             {{ errorMessage }}
         </div>
 
+        <div class="mb-8">
+            <h2 class="text-2xl font-bold mb-4">Popular Courses</h2>
+            <table class="min-w-full bg-white border border-gray-200 shadow-md rounded-lg overflow-hidden">
+                <thead>
+                <tr class="bg-gray-100">
+                    <th class="px-4 py-2 text-left">Course Title</th>
+                    <th class="px-4 py-2 text-right">Enrollments</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr v-for="course in popularCourses" :key="course.id" class="border-t">
+                    <td class="px-4 py-2">{{ course.title }}</td>
+                    <td class="px-4 py-2 text-right">{{ course.users_count }}</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
 
+        <div class="mb-8">
+            <h2 class="text-2xl font-bold mb-4">Course Completion Rates</h2>
+            <table class="min-w-full bg-white border border-gray-200 shadow-md rounded-lg overflow-hidden">
+                <thead>
+                <tr class="bg-gray-100">
+                    <th class="px-4 py-2 text-left">Course Title</th>
+                    <th class="px-4 py-2 text-right">Completion Rate</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr v-for="rate in completionRates" :key="rate.course" class="border-t">
+                    <td class="px-4 py-2">{{ rate.course }}</td>
+                    <td class="px-4 py-2 text-right">{{ rate.completion_rate.toFixed(2) }}%</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
 
-
+        <div class="mb-8">
+            <h2 class="text-2xl font-bold mb-4">Engagement Metrics</h2>
+            <table class="min-w-full bg-white border border-gray-200 shadow-md rounded-lg overflow-hidden">
+                <thead>
+                <tr class="bg-gray-100">
+                    <th class="px-4 py-2 text-left">Course Title</th>
+                    <th class="px-4 py-2 text-right">Avg. Time Spent (minutes)</th>
+                    <th class="px-4 py-2 text-right">Avg. Interactions</th>
+                    <th class="px-4 py-2 text-right">Avg. Assignments Completed</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr v-for="engagement in engagementMetrics" :key="engagement.course" class="border-t">
+                    <td class="px-4 py-2">{{ engagement.course }}</td>
+                    <td class="px-4 py-2 text-right">{{ engagement.avg_time_spent }}</td>
+                    <td class="px-4 py-2 text-right">{{ engagement.avg_interactions }}</td>
+                    <td class="px-4 py-2 text-right">{{ engagement.avg_assignments_completed }}</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 </template>
 
@@ -53,6 +107,7 @@ const retentionRate = ref(0);
 const errorMessage = ref('');
 const popularCourses = ref([]);
 const completionRates = ref([]);
+const engagementMetrics = ref([]);
 
 const fetchAnalyticsData = async () => {
     const params = {
@@ -78,6 +133,9 @@ const fetchAnalyticsData = async () => {
         churnRate.value = data.churn_rate;
         retentionRate.value = data.retention_rate;
 
+        popularCourses.value = data.popular_courses;
+        completionRates.value = data.completion_rates;
+        engagementMetrics.value = data.engagement_metrics;
 
     } catch (error) {
         errorMessage.value = 'Error fetching analytics data.';
