@@ -14,10 +14,13 @@
                 <div class="footer-section links">
                     <h3>Quick Links</h3>
                     <ul>
-                        <li><a href="#">Home</a></li>
-                        <li><a href="#">Courses</a></li>
-                        <li><a href="#">About Us</a></li>
-                        <li><a href="#">Contact</a></li>
+                        <li>
+                            <router-link to="/" >Home</router-link>
+                        </li>
+                        <li>
+                            <router-link to="/courses/catalog" >Courses catalog</router-link>
+                        </li>
+                        <li><a href="#">About Me & Contact</a></li>
                         <li><button @click="goToFeedback">Feedback</button></li>
 
                     </ul>
@@ -26,8 +29,8 @@
                 <!-- Footer Contact Information -->
                 <div class="footer-section contact">
                     <h3>Contact Us</h3>
-                    <p><i class="fas fa-map-marker-alt"></i> 123 Learning St, Education City</p>
-                    <p><i class="fas fa-phone"></i> +1 (555) 123-4567</p>
+                    <p><i class="fas fa-map-marker-alt"></i> Romania. Cluj-Napoca City</p>
+                    <p><i class="fas fa-phone"></i> +40 (0770) 578-771</p>
                     <p><i class="fas fa-envelope"></i> support@courseapp.com</p>
                 </div>
 
@@ -46,7 +49,7 @@
 
         <!-- Footer Bottom -->
         <div class="footer-bottom">
-            &copy; 2024 CourseApp.com | Designed by CourseApp Team
+            &copy; 2024 CourseApp.com | Designed by Sahet
         </div>
     </footer>
 </template>

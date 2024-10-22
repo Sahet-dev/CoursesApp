@@ -36,7 +36,8 @@ class HomeController extends Controller
             return [
                 'id' => $course['id'],
                 'title' => $course['title'],
-                'lessons' => $this->courseService->getCourseLessonsWithAccessControl(Course::find($course['id']), $user),
+                'lessons' => $this->courseService->
+                getCourseLessonsWithAccessControl(Course::find($course['id']), $user),
             ];
         });
 

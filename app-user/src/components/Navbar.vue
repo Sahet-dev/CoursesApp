@@ -166,17 +166,19 @@
         >
             <div class="pt-2 pb-3 space-y-1" v-if= "!user">
                 <!-- Authentication Links -->
-                <router-link to="/login" class="block px-4 py-2 text-sm">Login ssss</router-link>
+                <router-link to="/login" class="block px-4 py-2 text-sm">Login </router-link>
                 <router-link to="/register" class="block px-4 py-2 text-sm">Register</router-link>
+                <router-link to="/prices" class="block px-4 py-2 text-sm">Prices</router-link>
+                <router-link to="/courses/catalog" class="block px-4 py-2 text-sm">Courses catalog</router-link>
+
             </div>
 
             <div class="pt-2 pb-3 space-y-1" v-else>
                 <!-- Authentication Links -->
-                <button class="block px-4 py-2 text-sm" @click="goToProfile(user.id)">Profile</button>
-                <router-link to="/login" class="block px-4 py-2 text-sm">Profisssssle</router-link>
+                <router-link to="/feedback" class="block px-4 py-2 text-sm">Feedback</router-link>
+                <router-link to="/prices" class="block px-4 py-2 text-sm">Prices</router-link>
+                <router-link to="/courses/catalog" class="block px-4 py-2 text-sm">Courses catalog</router-link>
                 <router-link to="/profile/:id" class="block px-4 py-2 text-sm">Profile</router-link>
-                <router-link to="/register" class="block px-4 py-2 text-sm">Register</router-link>
-                <router-link to="/register" class="block px-4 py-2 text-sm">Register</router-link>
             </div>
         </div>
     </nav>
