@@ -46,10 +46,10 @@
                             v-model="searchQuery"
                             type="text"
                             placeholder="Search courses..."
-                            class="input-field"
+                            class="input-field text-gray-800"
                         />
                         <button
-                            @click=""
+                            @click="searchCourses"
                             :disabled="!searchQuery.trim()"
                             class="search-button"
                         >
@@ -194,6 +194,11 @@ const openPrices = () => {
     router.push({ name: 'Prices' });
 };
 
+const searchCourses = async () => {
+    if (searchQuery.value.trim()) {
+        await router.push({ name: 'CourseCatalog', query: { search: searchQuery.value } });
+    }
+};
 
 const fetchUser = async () => {
     try {

@@ -20,8 +20,15 @@ class Course extends Model
         'type'
     ];
 
+    public function engagements()
+    {
+        return $this->hasMany(Engagement::class);
+    }
 
-
+    public function users()
+    {
+        return $this->belongsToMany(User::class)->withPivot('completed')->withTimestamps();
+    }
 
     public function teacher()
     {
@@ -37,10 +44,7 @@ class Course extends Model
     {
         return $this->hasMany(Lessons::class);
     }
-    public function users()
-    {
-        return $this->belongsToMany(User::class)->withPivot('completed')->withTimestamps();
-    }
+
 
     public function scopeWithBasicDetails(Builder $query): Builder
     {
@@ -77,10 +81,7 @@ class Course extends Model
     }
 
 
-    public function engagements()
-    {
-        return $this->hasMany(Engagement::class);
-    }
+
 
     public function isAvailableToUser(User $user): bool
     {
