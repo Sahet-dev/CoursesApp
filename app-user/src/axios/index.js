@@ -1,8 +1,7 @@
 import axios from 'axios';
 
 const apiClient = axios.create({
-    baseURL: 'http://localhost:8000/api',
-
+    baseURL: 'https://course-server.sahet-dev.com/api',
 });
 
 apiClient.interceptors.request.use(config => {
