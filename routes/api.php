@@ -21,7 +21,7 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', [HomeController::class, 'index'])->name('home');
 route::get('/lessons/{lessonId}/comments', [HomeController::class, 'getComments']);
 
-Route::post('/login', [AuthController::class, 'login'])->middleware(['api', 'web']);
+Route::post('/login', [AuthController::class, 'login'])->middleware(['api']);
 Route::middleware(['auth:sanctum'])->group(function () {
     route::get('/lessons/{lessonId}/comments/authenticated', [HomeController::class, 'getCommentsForLesson']);
 
