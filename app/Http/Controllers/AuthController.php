@@ -29,7 +29,7 @@ class AuthController extends Controller
             return response(['message' => 'Email or password is incorrect'], 422);
         }
 
-        $request->session()->regenerate();
+
 
         /** @var User $user */
         $user = Auth::user();
