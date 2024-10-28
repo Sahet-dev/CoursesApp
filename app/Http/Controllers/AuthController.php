@@ -26,9 +26,10 @@ class AuthController extends Controller
 
 
         if (!Auth::attempt($credentials, $remember)) {
-            $request->session()->regenerate();
             return response(['message' => 'Email or password is incorrect'], 422);
         }
+
+        $request->session()->regenerate();
 
         /** @var User $user */
         $user = Auth::user();
