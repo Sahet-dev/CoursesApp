@@ -7,11 +7,30 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\SubscriptionController;
 use Illuminate\Foundation\Application;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 
 
+Route::get('/send-test-email', function () {
+    Mail::raw('This is a test email from Laravel!', function ($message) {
+        $message->to('kakajansahy@gmail.com')
+        ->subject('Test Email from Laravel');
+    });
 
+    return 'Test email has been sent!';
+});
+
+Route::get('storage/{path}', function ($path) {
+    $decodedPath = urldecode($path);
+
+    if (Storage::disk('public')->exists($decodedPath)) {
+        return Storage::disk('public')->response($decodedPath);
+    }
+
+    abort(404);
+})->where('path', '.*');
 
 Route::get('/', [HomeController::class, 'main'])->name('main-page');
 Route::get('/courses', [HomeController::class, 'search'])->name('courses.search');
