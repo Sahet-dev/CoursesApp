@@ -103,4 +103,21 @@ class Course extends Model
     }
 
 
+    public static function getPopularCourses(int $limit = 4)
+    {
+        return self::withCount('engagements')
+            ->orderBy('engagements_count', 'desc')
+            ->withBasicDetails()
+            ->limit($limit)
+            ->get();
+    }
+
+    public static function getLatestCourses(int $limit = 4)
+    {
+        return self::withBasicDetails()
+        ->orderBy('created_at', 'desc')
+        ->limit($limit)
+            ->get();
+    }
+
 }

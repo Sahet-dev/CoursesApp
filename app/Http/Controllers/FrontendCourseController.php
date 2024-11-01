@@ -26,42 +26,17 @@ class FrontendCourseController extends Controller
 
     public function getCourses(Request $request): JsonResponse
     {
-        if (Auth::check()) {
-            $user = auth()->user();
+        $user = auth()->user();
 
-            $popularCourses = $this->courseService->getMostPopularCourses(4);
-            $latestCourses = $this->courseService->getLatestCoursesWithAccessControl(4);
+        $popularCourses = Course::getPopularCourses();
+        $latestCourses = Course::getLatestCourses();
 
-            $coursesWithLessons = $popularCourses->map(function ($course) use ($user) {
-                return [
-                    'id' => $course['id'],
-                    'title' => $course['title'],
-                    'lessons' => $this->courseService->getCourseLessonsWithAccessControl(Course::find($course['id']), $user),
-                ];
-            });
+        return response()->json([
+            'popularCourses' => $popularCourses,
+            'latestCourses' => $latestCourses,
+            'user' => $user,
+        ]);
 
-            $latestCoursesWithLessons = $latestCourses->map(function ($course) use ($user) {
-                return [
-                    'id' => $course['id'],
-                    'title' => $course['title'],
-                    'lessons' => $this->courseService->getCourseLessonsWithAccessControl(Course::find($course['id']), $user),
-                ];
-            });
-
-            return response()->json([
-                'popularCourses' => $coursesWithLessons,
-                'latestCourses' => $latestCoursesWithLessons,
-                'user' => $user,
-            ]);
-        } else {
-            $popularCourses = $this->courseService->getMostPopularCourses(4);
-            $latestCourses = $this->courseService->getLatestCoursesWithAccessControl(4);
-
-            return response()->json([
-                'popularCourses' => $popularCourses,
-                'latestCourses' => $latestCourses,
-            ]);
-        }
     }
 
     public function storeComment(Request $request, Course $course, Lessons $lesson): JsonResponse
