@@ -7,7 +7,9 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\SubscriptionController;
 use Illuminate\Foundation\Application;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
@@ -22,15 +24,22 @@ Route::get('/send-test-email', function () {
     return 'Test email has been sent!';
 });
 
-Route::get('storage/{path}', function ($path) {
-    $decodedPath = urldecode($path);
+// in web.php
+Route::get('storage/{filename}', function ($filename) {
+    $path = storage_path('app/public/' . $filename);
 
-    if (Storage::disk('public')->exists($decodedPath)) {
-        return Storage::disk('public')->response($decodedPath);
+    if (!File::exists($path)) {
+        abort(404);
     }
 
-    abort(404);
-})->where('path', '.*');
+    $file = File::get($path);
+    $type = File::mimeType($path);
+
+    $response = Response::make($file, 200);
+    $response->header("Content-Type", $type);
+
+    return $response;
+})->where('filename', '.*');
 
 Route::get('/', [HomeController::class, 'main'])->name('main-page');
 Route::get('/courses', [HomeController::class, 'search'])->name('courses.search');
