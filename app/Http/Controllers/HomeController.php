@@ -153,6 +153,10 @@ class HomeController extends Controller
             $query->withCount('likes');
         }])->find($lessonId);
 
+        if ($lesson) {
+            $lesson->makeHidden(['title', 'video_url', 'markdown_text', 'created_at', 'updated_at']);
+        }
+
         return response()->json([
             'message' => $message,
             'selectedLesson' => $lesson,

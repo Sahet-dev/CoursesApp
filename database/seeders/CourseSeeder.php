@@ -17,7 +17,7 @@ class CourseSeeder extends Seeder
         Course::create([
             'title' => 'Officia labore aut quibusdam qui.',
             'description' => 'Amet minima doloribus voluptatem voluptate quos expedita nostrum.',
-            'thumbnail' => 'https://via.placeholder.com/640x480.png/008811?text=error',
+            'thumbnail' => 'https://picsum.photos/id/237/200/300',
             'teacher_id' => 1,
             'premium' => 1,
             'subscription_access' => 0,
