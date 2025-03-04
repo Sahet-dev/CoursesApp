@@ -15,6 +15,7 @@ use App\Http\Controllers\TeacherControlle;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\UsersAuthController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\EmailVerificationController;
 
 
 
@@ -140,6 +141,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/create-checkout-session', [SubscriptionController::class, 'createCheckoutSession']);
     Route::get('/success}', [SubscriptionController::class, 'success']);
 
+    Route::post('/send-verification-code', [EmailVerificationController::class, 'sendVerificationCode']);
+    Route::post('/verify-code', [EmailVerificationController::class, 'verifyCode']);
 
 });
 
