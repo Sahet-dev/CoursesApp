@@ -145,6 +145,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/verify-code', [EmailVerificationController::class, 'verifyCode']);
 
 });
+Route::post('/send-password-reset-link', [EmailVerificationController::class, 'sendPasswordResetLink']);
 
 Route::post('/stripe/webhook', [SubscriptionController::class, 'handleWebhook']);
 Route::post('/login-user', [UsersAuthController::class, 'login']);
