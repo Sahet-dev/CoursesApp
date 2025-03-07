@@ -42,6 +42,7 @@ Route::get('storage/{filename}', function ($filename) {
 })->where('filename', '.*');
 
 Route::get('/', [HomeController::class, 'main'])->name('main-page');
+
 Route::get('/courses', [HomeController::class, 'search'])->name('courses.search');
 Route::get('/user/{id}', [ProfileController::class, 'profilePage'])->name('profilePage');
 Route::get('/courses/{id}', [HomeController::class, 'show'])->name('courseDetail');

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\VerificationCodeMail;
 use App\Models\EmailVerification;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
@@ -27,15 +28,12 @@ class EmailVerificationController extends Controller
             ['code' => $code, 'expires_at' => $expiresAt]
         );
 
-
         try {
-            Mail::raw("Your verification code is: $code", function ($message) use ($request) {
-                $message->to($request->email)
-                    ->subject('Your Verification Code');
-            });
+            Mail::to($request->email)->send(new VerificationCodeMail($code));
 
         } catch (\Exception $e) {
             Log::error("Mail sending failed: " . $e->getMessage());
+            return response()->json(['message' => 'Failed to send verification email.'], 500);
         }
 
         return response()->json(['message' => 'Verification code sent.'], 200);
@@ -77,16 +75,13 @@ class EmailVerificationController extends Controller
             'email' => 'required|email|exists:users,email',
         ]);
 
-        // Generate password reset link
         $response = Password::sendResetLink(
             $request->only('email')
         );
 
         if ($response === Password::RESET_LINK_SENT) {
-            // Return success response if email sent
             return response()->json(['message' => 'Password reset link sent. Please check your email.'], 200);
         } else {
-            // Return error response if failed
             return response()->json(['message' => 'Failed to send password reset link.'], 400);
         }
     }
