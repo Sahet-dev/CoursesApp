@@ -14,8 +14,26 @@ use Illuminate\Support\Facades\Password;
 
 class EmailVerificationController extends Controller
 {
+    public function user(Request $request)
+    {
+        return response()->json(auth()->user());
+    }
+
     public function sendVerificationCode(Request $request): JsonResponse
     {
+        // Ensure the user is authenticated
+        $user = $request->user(); // Get authenticated user
+
+        if (!$user) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
+        $email = $user->email;
+
+        if (!$email) {
+            return response()->json(['message' => 'Email is required.'], 400);
+        }
+
         $request->validate([
             'email' => 'required|email|exists:users,email'
         ]);
@@ -24,13 +42,12 @@ class EmailVerificationController extends Controller
         $expiresAt = Carbon::now()->addMinutes(30);
 
         EmailVerification::updateOrCreate(
-            ['email' => $request->email],
+            ['email' => $email],
             ['code' => $code, 'expires_at' => $expiresAt]
         );
 
         try {
-            Mail::to($request->email)->send(new VerificationCodeMail($code));
-
+            Mail::to($email)->send(new VerificationCodeMail($code));
         } catch (\Exception $e) {
             Log::error("Mail sending failed: " . $e->getMessage());
             return response()->json(['message' => 'Failed to send verification email.'], 500);
@@ -42,12 +59,18 @@ class EmailVerificationController extends Controller
 
     public function verifyCode(Request $request): JsonResponse
     {
+        $user = auth()->user();
+        $email = $request->email ?? $user?->email;
+
+        if (!$email) {
+            return response()->json(['message' => 'Email is required.'], 400);
+        }
+
         $request->validate([
-            'email' => 'required|email|exists:users,email',
             'code' => 'required|digits:3'
         ]);
 
-        $verification = EmailVerification::where('email', $request->email)
+        $verification = EmailVerification::where('email', $email)
             ->where('code', $request->code)
             ->first();
 
@@ -60,13 +83,14 @@ class EmailVerificationController extends Controller
         }
 
         // Mark email as verified
-        User::where('email', $request->email)->update(['email_verified_at' => now()]);
+        User::where('email', $email)->update(['email_verified_at' => now()]);
 
         // Delete verification code
         $verification->delete();
 
         return response()->json(['message' => 'Email verified successfully.'], 200);
     }
+
 
     public function sendPasswordResetLink(Request $request): JsonResponse
     {
