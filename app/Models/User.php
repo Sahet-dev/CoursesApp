@@ -32,7 +32,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'age',
         'location',
         'avatar',
-        'stripe_id'
+        'stripe_id',
+        'email_verified_at'
 
     ];
 
